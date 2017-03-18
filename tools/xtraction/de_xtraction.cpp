@@ -13,8 +13,8 @@
  *	-arg1: Name of the dataset
  *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4
  *	-arg3: Type of Input
- *		0 = Path to a directory of video files
- *		1 = Path to a specific video file
+ *		0 = Path to a specific video file
+ *		1 = Path to a directory of video files*		
  *	-arg4: Path to the output directory ..\\data\\features
  *	-arg5: Type of Descriptor <INT>
  *		0 = static feature signatures (variant 1)
@@ -41,7 +41,6 @@
  *			0 = use middle frame of each segment
  *			1 = use first frame of each segment
  *			2 = use last frame of each segment
- *		-arg14: Number of frames per segment or second, if keyframe selection type 1,2 (fix number)
  *		***********************************************************
  *		TYPE: 2 = dynamic feature signatures variant 2 using optical-flow
  *		***********************************************************
@@ -56,10 +55,9 @@
  *		-arg11: Minimal weight adjustable clustering - Default: 2 <INT>
  *		-arg12: Minimal distance adjustable clustering - Default: 0.01 <FLOAT>
  *		-arg13: Frame selection
- *			0 = use middle frame of each segment
- *			1 = use fix number of frames per segment
- *			2 = use fix number per second
- *			3 = use all frames
+ *			0 = use fix number of frames per segment
+ *			1 = use fix number per second
+ *			2 = use all frames
  *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)
  *		***********************************************************
  *		TYPE: 3 = motion histogram variant 1
@@ -113,17 +111,15 @@ Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter);
 
 int main(int argc, char **argv)
 {
-	boolean default = false;
 	if (argc < 3)
 	{
 		LOG_ERROR("xtraction: too few arguments!");
-		default = true;
 	}
 	else
 	{
 		dataset = argv[1];
-		videopath = argv[2];
-		videopathIsDirectory = std::atoi(argv[3]);
+		videopathIsDirectory = std::atoi(argv[2]);
+		videopath = argv[3];
 		outputpath = argv[4];
 		descriptortype = std::atoi(argv[5]);
 
@@ -221,6 +217,9 @@ int main(int argc, char **argv)
 	if (videopathIsDirectory)
 	{
 		clipsdir = new Directory(videopath);
+		cpluslogger::Logger::get()->logfile(log.getFile());
+		cpluslogger::Logger::get()->filelogging(true);
+		cpluslogger::Logger::get()->perfmonitoring(true);
 		processVideoDirectory();
 
 	}
@@ -228,9 +227,6 @@ int main(int argc, char **argv)
 	{
 		videoFile = new File(videopath);
 		clipsdir = new Directory(videoFile->getFile().substr(0, videoFile->getFile().find_last_of("/\\")));
-		cpluslogger::Logger::get()->logfile(log.getFile());
-		cpluslogger::Logger::get()->filelogging(true);
-		cpluslogger::Logger::get()->perfmonitoring(true);
 		processVideoFile();
 	}
 
@@ -288,7 +284,7 @@ void processVideoDirectory()
 
 			VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
 			//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
-			pendingFutures.push_back(std::async(std::launch::deferred, &xtract, videoclip, paramter));
+			pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
 			//xtract(videoclip, paramter);
 
 		}

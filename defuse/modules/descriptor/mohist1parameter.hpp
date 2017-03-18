@@ -31,7 +31,7 @@ namespace defuse {
 		std::string getFilename() override
 		{
 			std::stringstream st;
-			st << "MoHist_";
+			st << "MoHist1_";
 			st << samplex << "x" << sampley;
 			st << "_" << frames;
 			return st.str();

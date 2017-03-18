@@ -26,7 +26,7 @@ namespace defuse {
 		std::string getFilename() override
 		{
 			std::stringstream st;
-			st << "FSF_";
+			st << "DFS2_";
 			st << staticparamter.getFilename();
 			st << "_" << frames;
 			return st.str();

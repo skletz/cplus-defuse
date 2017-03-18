@@ -48,9 +48,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="defuse_info.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="modules\descriptor\featsig\src\grayscale_bitmap.cpp">
       <Filter>PCTSignatures</Filter>
     </ClCompile>
@@ -111,6 +108,7 @@
     <ClCompile Include="videobase.cpp">
       <Filter>Quelldateien\util</Filter>
     </ClCompile>
+    <ClCompile Include="defuse_info.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="modules\descriptor\featsig\include\signatures.h">

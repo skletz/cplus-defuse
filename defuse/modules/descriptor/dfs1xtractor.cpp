@@ -77,7 +77,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	}
 
 	std::vector<cv::Mat> sampledsignatures;
-	if (mFrameSelection == 0)
+	if (mFrameSelection == 0) //use fix number of frame per segment
 	{
 		int interval = numframes / float(numberOfFramesPerShot + 1);
 
@@ -101,7 +101,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 		}
 
 	}
-	else
+	else if (mFrameSelection == 2) //use fix number of frames per second
 	{
 		int half = numframes / float(2);
 
@@ -145,6 +145,14 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 				sampledsignatures.push_back(signatures3);
 		}
 	}
+	else if (mFrameSelection == 2) { //use all frames
+	
+	}else
+	{
+		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames")
+	}
+		
+
 
 	cv::Mat tSignatures;
 	mTPCTSignatures->computeTemporalSignature(sampledsignatures, tSignatures);

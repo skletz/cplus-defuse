@@ -11,7 +11,7 @@ namespace defuse {
 	{
 	public:
 		int samplepoints = 40000;			//The number of sample points
-		bool distribution = 0;	//The distribution of sample points	0 = random, 2 = regular
+		int distribution = 0;	//The distribution of sample points	0 = random, 2 = regular
 		int initialCentroids = 40;			//The number of first centroids used for clustering
 		std::string samplepointsfile = "";
 
@@ -40,6 +40,7 @@ namespace defuse {
 			st << "; Iterations: " << iterations;
 			st << "; Minimal Weight: " << minimalWeight;
 			st << "; Minimal Distance: " << minimalDistance;
+			st << "; Keyframe Selection: " << keyframeSelection;
 
 			return st.str();
 		}
@@ -47,7 +48,7 @@ namespace defuse {
 		std::string getFilename() override
 		{
 			std::stringstream st;
-			st << "SFS_";
+			st << "SFS1_";
 			st << samplepoints;
 			st << "_";
 			if (distribution == 0)
@@ -63,6 +64,7 @@ namespace defuse {
 			st << "_" << iterations;
 			st << "_" << minimalWeight;
 			st << "_" << minimalDistance;
+			st << "_" << keyframeSelection;
 
 			return st.str();
 		}

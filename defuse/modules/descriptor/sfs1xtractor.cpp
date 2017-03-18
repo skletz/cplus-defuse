@@ -63,16 +63,24 @@ void defuse::SFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 {
 	unsigned int numframes = _video.get(CV_CAP_PROP_FRAME_COUNT);
 
-	int framenr = numframes / float(2);
+	int framenr = numframes;
 
-	if (mKeyFrame == 0) //1
+	if (mKeyFrame == 0) //use middle frame
 	{
+		framenr = numframes / float(2);
 		_video.set(CV_CAP_PROP_POS_FRAMES, framenr);
 	}
-	else //2
+	else if(mKeyFrame == 1) //use first frame
 	{
-		framenr = framenr / float(mKeyFrame / double(2));
+		framenr = 1;
 		_video.set(CV_CAP_PROP_POS_FRAMES, framenr);
+	}else if (mKeyFrame == 2) //use last frame
+	{
+		_video.set(CV_CAP_PROP_POS_FRAMES, framenr);
+	}else
+	{
+		LOG_FATAL("Keyframe selection > 3 not implemented use; middle, first or last frame");
+		return;
 	}
 
 	cv::Mat image, signatures;

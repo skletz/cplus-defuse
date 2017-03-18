@@ -15,8 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="de_xtraction.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
+    <ClCompile Include="de_xtraction.cpp" />
   </ItemGroup>
 </Project>

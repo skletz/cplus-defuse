@@ -249,3 +249,4 @@ VisualGDBCache
 CodeDB
 *.sln
 *.props
+*.vcxproj.filters
