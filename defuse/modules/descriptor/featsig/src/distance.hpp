@@ -1,3 +1,15 @@
+/*
+* PCT Signatures is an implementation of feature signatures. 
+* It was implemented with the focus to contribute to the 
+* OpenCV's extra modules. This module is a preliminary version 
+* which was received in 2015. In more detail, this module 
+* implements PCT (position-color-texture) signature extractor 
+* and SQFD (Signature Quadratic Form Distance).
+*
+* @author Gregor Kovalcik, Martin Krulis, Jakub Lokoc
+* @repository https://github.com/GregorKovalcik/opencv_contrib
+* @version 1.0 19/10/15
+*/
 #ifndef PCT_SIGNATURES_DISTANCE_HPP
 #define PCT_SIGNATURES_DISTANCE_HPP
 

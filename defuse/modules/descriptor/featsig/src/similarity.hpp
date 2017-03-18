@@ -1,3 +1,13 @@
+/*
+* PCT Signatures is an implementation of feature signatures.
+* It was implemented with the focus to contribute to the
+* OpenCV's extra modules library. This module is a preliminary
+* version which was received in 2015.
+*
+* @author Gregor Kovalcik, Martin Krulis, Jakub Lokoc
+* @repository https://github.com/GregorKovalcik/opencv_contrib
+* @version 1.0 19/10/15
+*/
 #ifndef PCT_SIGNATURES_SIMILARITY_HPP
 #define PCT_SIGNATURES_SIMILARITY_HPP
 
