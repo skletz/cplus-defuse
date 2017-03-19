@@ -13,7 +13,7 @@ namespace defuse {
 
 		int mVideoID;
 
-		unsigned int mStartFrameNumber;
+		int mStartFrameNumber;
 
 		int mClazz;
 

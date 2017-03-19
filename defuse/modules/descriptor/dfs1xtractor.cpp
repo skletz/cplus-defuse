@@ -22,7 +22,7 @@ defuse::DFS1Xtractor::DFS1Xtractor(Parameter* _parameter)
 	{
 		status = samplePoints->deserialize(sampleFile.getFile());
 
-		int desirelizedSize = samplePoints->getPoints().size();
+		int desirelizedSize = static_cast<int>(samplePoints->getPoints().size());
 		if (samples != desirelizedSize)
 		{
 			LOG_FATAL("Fatal error: Sample count: " << samples << " do not match with desirelized samplepoints: " << desirelizedSize);
@@ -55,7 +55,7 @@ defuse::Features* defuse::DFS1Xtractor::xtract(VideoBase* _videobase)
 	size_t end = cv::getTickCount();
 
 	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
-	unsigned int framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
+	double framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
 	LOG_PERFMON(PINTERIM, "Execution Time (One Signature per Video): " << "\tFrame Count\t" << framecount << "\tElapsed Time\t" << elapsedTime);
 
 	FeatureSignatures* featuresignatures = new FeatureSignatures(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
@@ -67,20 +67,23 @@ defuse::Features* defuse::DFS1Xtractor::xtract(VideoBase* _videobase)
 
 void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const
 {
-	unsigned int numframes = _video.get(CV_CAP_PROP_FRAME_COUNT);
+	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
 
-	int numberOfFramesPerShot = mMaxFrames;
+	//otherwise, the interval is to large
+	int numberOfFramesPerShot = mMaxFrames - 1;
 
+	//the shot has fewer frames than shuld be used
 	if (mMaxFrames < numframes)
 	{
 		numberOfFramesPerShot = numframes - 1;
 	}
 
 	std::vector<cv::Mat> sampledsignatures;
-	if (mFrameSelection == 0) //use fix number of frame per segment
-	{
-		int interval = numframes / float(numberOfFramesPerShot + 1);
 
+	//use fix number of frames per segment
+	if (mFrameSelection == 0) 
+	{
+		int interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
 
 		for (int j = 0; j < numframes; j = j + interval)
 		{
@@ -91,6 +94,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 
 			mPCTSignatures->computeSignature(image, signatures);
 
+			//use all frames that exists
 			if (interval == 0)
 			{
 				j++;
@@ -101,61 +105,23 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 		}
 
 	}
-	else if (mFrameSelection == 2) //use fix number of frames per second
+	//use fix number of frames per second
+	else if (mFrameSelection == 1) 
 	{
-		int half = numframes / float(2);
-
-		int interval1 = half / float(numberOfFramesPerShot / double(2));
-
-		for (int j = interval1; j < half; j = j + interval1)
-		{
-			cv::Mat image1, signatures1;
-
-			_video.set(CV_CAP_PROP_POS_FRAMES, j);
-			_video.grab();
-			_video.retrieve(image1);
-
-			mPCTSignatures->computeSignature(image1, signatures1);
-
-			if (!signatures1.empty())
-				sampledsignatures.push_back(signatures1);
-
-			sampledsignatures.push_back(signatures1);
-		}
-
-		cv::Mat image2, signatures2;
-		_video.set(CV_CAP_PROP_POS_FRAMES, half);
-		_video.grab();
-		_video.retrieve(image2);
-		mPCTSignatures->computeSignature(image2, signatures2);
-
-		if (!signatures2.empty())
-			sampledsignatures.push_back(signatures2);
-
-		for (int j = half + interval1; j < numframes; j = j + interval1)
-		{
-			cv::Mat image3, signatures3;
-
-			_video.set(CV_CAP_PROP_POS_FRAMES, j);
-			_video.grab();
-			_video.retrieve(image3);
-
-			mPCTSignatures->computeSignature(image3, signatures3);
-			if (!signatures3.empty())
-				sampledsignatures.push_back(signatures3);
-		}
+		//TODO Implement fix number per segment
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0")
 	}
-	else if (mFrameSelection == 2) { //use all frames
-	
+	//use all frames
+	else if (mFrameSelection == 2)
+	{ 
+		//@TODO Implement all frames
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0")
 	}else
 	{
 		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames")
 	}
 		
-
-
 	cv::Mat tSignatures;
 	mTPCTSignatures->computeTemporalSignature(sampledsignatures, tSignatures);
-
 	tSignatures.copyTo(_signatures);
 }

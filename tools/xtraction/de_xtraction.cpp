@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 			static_cast<SFS1Parameter *>(paramter)->samplepointsfile = argv[9];
 			static_cast<SFS1Parameter *>(paramter)->iterations = std::atoi(argv[10]);
 			static_cast<SFS1Parameter *>(paramter)->minimalWeight = std::atoi(argv[11]);
-			static_cast<SFS1Parameter *>(paramter)->minimalDistance = std::atof(argv[12]);
+			static_cast<SFS1Parameter *>(paramter)->minimalDistance = std::stof(argv[12]);
 			static_cast<SFS1Parameter *>(paramter)->keyframeSelection = std::atoi(argv[13]);
 
 		}
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 			static_cast<DFS1Parameter *>(paramter)->staticparamter.samplepointsfile = argv[9];
 			static_cast<DFS1Parameter *>(paramter)->staticparamter.iterations = std::atoi(argv[10]);
 			static_cast<DFS1Parameter *>(paramter)->staticparamter.minimalWeight = std::atoi(argv[11]);
-			static_cast<DFS1Parameter *>(paramter)->staticparamter.minimalDistance = std::atof(argv[12]);
+			static_cast<DFS1Parameter *>(paramter)->staticparamter.minimalDistance = std::stof(argv[12]);
 
 			static_cast<DFS1Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS1Parameter *>(paramter)->frames = std::atoi(argv[14]);
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 			static_cast<DFS2Parameter *>(paramter)->staticparamter.samplepointsfile = argv[9];
 			static_cast<DFS2Parameter *>(paramter)->staticparamter.iterations = std::atoi(argv[10]);
 			static_cast<DFS2Parameter *>(paramter)->staticparamter.minimalWeight = std::atoi(argv[11]);
-			static_cast<DFS2Parameter *>(paramter)->staticparamter.minimalDistance = std::atof(argv[12]);
+			static_cast<DFS2Parameter *>(paramter)->staticparamter.minimalDistance = std::stof(argv[12]);
 
 			static_cast<DFS2Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS2Parameter *>(paramter)->frames = std::atoi(argv[14]);
@@ -255,7 +255,7 @@ void processVideoDirectory()
 
 		for (int iClipFile = 0; iClipFile < clippathes.size(); iClipFile++)
 		{
-			numClips += clippathes.size();
+			numClips += static_cast<int>(clippathes.size());
 
 			File* file = new File(clippathes.at(iClipFile));
 			std::string filename = file->getFilename();

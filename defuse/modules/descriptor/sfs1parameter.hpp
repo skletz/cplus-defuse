@@ -17,7 +17,7 @@ namespace defuse {
 
 		int iterations = 5;			//The number of maximal iterations
 		int minimalWeight = 2;		//Minimum cluster size
-		float minimalDistance = 0.01;	//Minimum distance between two centroids
+		float minimalDistance = 0.01f;	//Minimum distance between two centroids
 
 		int keyframeSelection = 0; //The keyframeSelection position 0 = middle, > 0 select
 
