@@ -10,9 +10,9 @@ namespace cv
 			{
 			private:
 				const std::vector<cv::Point2f> &mInitPoints;
-				std::size_t mSampleCount;
-				std::size_t mGrayscaleBits;
-				std::size_t mWindowRadius;
+				int mSampleCount;
+				int mGrayscaleBits;
+				int mWindowRadius;
 				std::vector<double> mWeights;
 				std::vector<double> mTranslations;
 
@@ -21,9 +21,9 @@ namespace cv
 
 				PCTSampler_Impl(
 					const std::vector<cv::Point2f>	&initPoints,
-					std::size_t						sampleCount = 500,
-					std::size_t						grayscaleBits = 4,
-					std::size_t						windowRadius = 5)
+					int						sampleCount = 500,
+					int						grayscaleBits = 4,
+					int						windowRadius = 5)
 					: mInitPoints(initPoints),
 					mSampleCount(sampleCount),
 					mGrayscaleBits(grayscaleBits),
@@ -31,7 +31,7 @@ namespace cv
 				{
 					if (mSampleCount > initPoints.size())
 					{
-						mSampleCount = initPoints.size();
+						mSampleCount = static_cast<int>(initPoints.size());
 					}
 
 					// Initialize weights and translation vectors to neutral items.
@@ -47,9 +47,9 @@ namespace cv
 
 				/**** Acessors ****/
 
-				std::size_t getSampleCount() const		{ return mSampleCount; }
-				std::size_t getGrayscaleBits() const	{ return mGrayscaleBits; }
-				std::size_t getWindowRadius() const		{ return mWindowRadius; }
+				int getSampleCount() const		{ return mSampleCount; }
+				int getGrayscaleBits() const	{ return mGrayscaleBits; }
+				int getWindowRadius() const		{ return mWindowRadius; }
 
 				double getWeightX() const				{ return mWeights[X_IDX]; }
 				double getWeightY() const				{ return mWeights[Y_IDX]; }
@@ -60,9 +60,9 @@ namespace cv
 				double getWeightEntropy() const			{ return mWeights[ENTROPY_IDX]; }
 
 				
-				void setSampleCount(std::size_t sampleCount)		{ mSampleCount = sampleCount; }
-				void setGrayscaleBits(std::size_t grayscaleBits)	{ mGrayscaleBits = grayscaleBits; }
-				void setWindowRadius(std::size_t windowRadius)		{ mWindowRadius = windowRadius; }
+				void setSampleCount(int sampleCount)		{ mSampleCount = sampleCount; }
+				void setGrayscaleBits(int grayscaleBits)	{ mGrayscaleBits = grayscaleBits; }
+				void setWindowRadius(int windowRadius)		{ mWindowRadius = windowRadius; }
 
 				void setWeightX(double weight)			{ mWeights[X_IDX] = weight; }
 				void setWeightY(double weight)			{ mWeights[Y_IDX] = weight; }
@@ -73,7 +73,7 @@ namespace cv
 				void setWeightEntropy(double weight)	{ mWeights[ENTROPY_IDX] = weight; }
 
 				
-				void setWeight(std::size_t idx, double value)
+				void setWeight(int idx, double value)
 				{
 					mWeights[idx] = value;
 				}
@@ -87,7 +87,7 @@ namespace cv
 					}
 					else
 					{
-						for (std::size_t i = 0; i < mWeights.size(); ++i)
+						for (int i = 0; i < mWeights.size(); ++i)
 						{
 							mWeights[i] = weights[i];
 						}
@@ -95,7 +95,7 @@ namespace cv
 				}
 
 
-				void setTranslation(std::size_t idx, double value)
+				void setTranslation(int idx, double value)
 				{
 					mTranslations[idx] = value;
 				}
@@ -109,7 +109,7 @@ namespace cv
 					}
 					else
 					{
-						for (std::size_t i = 0; i < mTranslations.size(); ++i)
+						for (int i = 0; i < mTranslations.size(); ++i)
 						{
 							mTranslations[i] = translations[i];
 						}
@@ -139,10 +139,10 @@ namespace cv
 					//grayscaleBitmap.convertToMat(gs, true);
 
 
-					for (std::size_t iSample = 0; iSample < mSampleCount; iSample++)
+					for (int iSample = 0; iSample < mSampleCount; iSample++)
 					{
-						std::size_t x = (std::size_t)(mInitPoints[iSample].x * (image.cols - 1) + 0.5);
-						std::size_t y = (std::size_t)(mInitPoints[iSample].y * (image.rows - 1) + 0.5);
+						int x = (int)(mInitPoints[iSample].x * (image.cols - 1) + 0.5);
+						int y = (int)(mInitPoints[iSample].y * (image.rows - 1) + 0.5);
 
 						samples.at<float>(iSample, X_IDX) = (float)((double)x / (double)image.cols * mWeights[X_IDX] + mTranslations[X_IDX]);	// x, y normalized
 						samples.at<float>(iSample, Y_IDX) = (float)((double)y / (double)image.rows * mWeights[Y_IDX] + mTranslations[Y_IDX]);
@@ -173,9 +173,9 @@ namespace cv
 
 			Ptr<PCTSampler> PCTSampler::create(
 				const std::vector<cv::Point2f>	&initPoints,
-				std::size_t						sampleCount,
-				std::size_t						grayscaleBits,
-				std::size_t						windowRadius)
+				int						sampleCount,
+				int						grayscaleBits,
+				int						windowRadius)
 			{
 				return makePtr<PCTSampler_Impl>(initPoints, sampleCount, grayscaleBits, windowRadius);
 			}

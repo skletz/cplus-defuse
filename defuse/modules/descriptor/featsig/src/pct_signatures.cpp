@@ -24,9 +24,9 @@ namespace cv
 
 				
 				/**** sampler ****/
-				std::size_t getSampleCount() const				{ return mSampler->getSampleCount(); }
-				std::size_t getGrayscaleBits() const			{ return mSampler->getGrayscaleBits(); }
-				std::size_t getWindowRadius() const				{ return mSampler->getWindowRadius(); }
+				int getSampleCount() const				{ return mSampler->getSampleCount(); }
+				int getGrayscaleBits() const			{ return mSampler->getGrayscaleBits(); }
+				int getWindowRadius() const				{ return mSampler->getWindowRadius(); }
 				double getWeightX() const						{ return mSampler->getWeightX(); }
 				double getWeightY() const						{ return mSampler->getWeightY(); }
 				double getWeightL() const						{ return mSampler->getWeightL(); }
@@ -35,9 +35,9 @@ namespace cv
 				double getWeightConstrast() const				{ return mSampler->getWeightConstrast(); }
 				double getWeightEntropy() const					{ return mSampler->getWeightEntropy(); }
 
-				void setSampleCount(std::size_t sampleCount)	{ mSampler->setSampleCount(sampleCount); }
-				void setGrayscaleBits(std::size_t grayscaleBits){ mSampler->setGrayscaleBits(grayscaleBits); }
-				void setWindowRadius(std::size_t windowRadius)	{ mSampler->setWindowRadius(windowRadius); }
+				void setSampleCount(int sampleCount)	{ mSampler->setSampleCount(sampleCount); }
+				void setGrayscaleBits(int grayscaleBits){ mSampler->setGrayscaleBits(grayscaleBits); }
+				void setWindowRadius(int windowRadius)	{ mSampler->setWindowRadius(windowRadius); }
 				void setWeightX(double weight)					{ mSampler->setWeightX(weight); }
 				void setWeightY(double weight)					{ mSampler->setWeightY(weight); }
 				void setWeightL(double weight)					{ mSampler->setWeightL(weight); }
@@ -46,25 +46,25 @@ namespace cv
 				void setWeightContrast(double weight)			{ mSampler->setWeightContrast(weight); }
 				void setWeightEntropy(double weight)			{ mSampler->setWeightEntropy(weight); }
 
-				void setWeight(std::size_t idx, double value)					{ mSampler->setWeight(idx, value); }
+				void setWeight(int idx, double value)					{ mSampler->setWeight(idx, value); }
 				void setWeights(const std::vector<double> &weights)				{ mSampler->setWeights(weights); }
-				void setTranslation(std::size_t idx, double value)				{ mSampler->setTranslation(idx, value); }
+				void setTranslation(int idx, double value)				{ mSampler->setTranslation(idx, value); }
 				void setTranslations(const std::vector<double> &translations)	{ mSampler->setTranslations(translations); }
 
 
 				/**** clusterizer ****/
-				std::size_t	getIterationCount() const				{ return mClusterizer->getIterationCount(); }
-				std::size_t	getInitSeedCount() const				{ return mClusterizer->getInitSeedCount(); }
-				std::size_t	getMaxClustersCount() const				{ return mClusterizer->getMaxClustersCount(); }
-				std::size_t	getClusterMinSize() const				{ return mClusterizer->getClusterMinSize(); }
+				int	getIterationCount() const				{ return mClusterizer->getIterationCount(); }
+				int	getInitSeedCount() const				{ return mClusterizer->getInitSeedCount(); }
+				int	getMaxClustersCount() const				{ return mClusterizer->getMaxClustersCount(); }
+				int	getClusterMinSize() const				{ return mClusterizer->getClusterMinSize(); }
 				float getJoiningDistance() const					{ return mClusterizer->getJoiningDistance(); }
 				float getDropThreshold() const						{ return mClusterizer->getDropThreshold(); }
 				float getLpNorm() const								{ return mClusterizer->getLpNorm(); }
 
-				void setIterationCount(std::size_t iterations)		{ mClusterizer->setIterationCount(iterations); }
-				void setInitSeedCount(std::size_t initSeeds)		{ mClusterizer->setInitSeedCount(initSeeds); }
-				void setMaxClustersCount(std::size_t maxClusters)	{ mClusterizer->setMaxClustersCount(maxClusters); }
-				void setClusterMinSize(std::size_t clusterMinSize)	{ mClusterizer->setClusterMinSize(clusterMinSize); }
+				void setIterationCount(int iterations)		{ mClusterizer->setIterationCount(iterations); }
+				void setInitSeedCount(int initSeeds)		{ mClusterizer->setInitSeedCount(initSeeds); }
+				void setMaxClustersCount(int maxClusters)	{ mClusterizer->setMaxClustersCount(maxClusters); }
+				void setClusterMinSize(int clusterMinSize)	{ mClusterizer->setClusterMinSize(clusterMinSize); }
 				void setJoiningDistance(float joiningDistance)		{ mClusterizer->setJoiningDistance(joiningDistance); }
 				void setDropThreshold(float dropThreshold)			{ mClusterizer->setDropThreshold(dropThreshold); }
 				void setLpNorm(float LpNorm)						{ mClusterizer->setLpNorm(LpNorm); }
@@ -157,7 +157,7 @@ namespace cv
 
 			void PCTSignatures_Impl::computeSignatures(const std::vector<Mat> &images, std::vector<Mat> &signatures) const
 			{
-				parallel_for_(Range(0, images.size()), Parallel_computeSignatures(*this, images, signatures));
+				parallel_for_(Range(0, static_cast<int>(images.size())), Parallel_computeSignatures(*this, images, signatures));
 			}
 
 
@@ -180,7 +180,7 @@ namespace cv
 			const std::vector<Point2f> initPoints,
 			const int initSeedCount)
 		{
-			return create(initPoints, initPoints.size(), initSeedCount);
+			return create(initPoints, static_cast<int>(initPoints.size()), initSeedCount);
 		}
 
 		Ptr<PCTSignatures> PCTSignatures::create(
@@ -237,8 +237,8 @@ namespace cv
 				Vec3b rgbColor = rgbPixel.at<Vec3b>(0, 0);				// end
 
 				// precompute variables
-				Point center(signature.at<float>(i, X_IDX) * source.cols, signature.at<float>(i, Y_IDX) * source.rows);
-				int radius(maxRadius * signature.at<float>(i, WEIGHT_IDX));
+				Point center(static_cast<int>(signature.at<float>(i, X_IDX) * static_cast<float>(source.cols)), static_cast<int>(signature.at<float>(i, Y_IDX) * static_cast<float>(source.rows)));
+				int radius(static_cast<int>(static_cast<float>(maxRadius) * signature.at<float>(i, WEIGHT_IDX)));
 				Vec3b borderColor(0, 0, 0);
 				int borderThickness(1);
 
@@ -283,7 +283,7 @@ namespace cv
 		void PCTSignatures::computeQuadraticFormDistances(const Mat &sourceSignature, const std::vector<Mat> &imageSignatures, std::vector<float> &distances,
 			const pct_signatures::Similarity &similarity)
 		{
-			parallel_for_(Range(0, imageSignatures.size()), Parallel_computeSQFDs(sourceSignature, imageSignatures, distances, similarity));
+			parallel_for_(Range(0, static_cast<int>(imageSignatures.size())), Parallel_computeSQFDs(sourceSignature, imageSignatures, distances, similarity));
 		}
 
 		float PCTSignatures::computePartialSQFD(const Mat &signature0, const Mat &signature1, const Similarity& similarity)
@@ -310,18 +310,18 @@ namespace cv
 			case PCTSignatures::PointDistribution::RANDOM:
 				for (int i = 0; i < count; i++)
 				{
-					initPoints[i] = (Point2f(random.uniform((float)0.0, (float)1.0), random.uniform((float)0.0, (float)1.0)));
+					initPoints[i] = (Point2f(random.uniform(static_cast<float>(0.0), static_cast<float>(1.0)), random.uniform(static_cast<float>(0.0), static_cast<float>(1.0))));
 				}
 				break;
 			//ADDED option for regular choosen keypoints
 			case PCTSignatures::PointDistribution::REGULAR:
 			{
-				float result = sqrt(count);
+				float result = static_cast<float>(sqrt(count));
 				for (int i = 0; i < (int)result; i++)
 				{
 					for (int j = 0; j < (int)result; j++)
 					{
-						initPoints[i*result + j] = Point2f((float)(i / result), (float)(j / result));
+						initPoints[i*result + j] = Point2f(static_cast<float>(i / result), static_cast<float>(j / result));
 					}
 					
 				}

@@ -27,8 +27,8 @@ namespace cv
 			class Similarity
 			{
 			public:
-				virtual float operator()(const Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const = 0;
+				virtual float operator()(const Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const = 0;
 			};
 
 
@@ -40,8 +40,8 @@ namespace cv
 			public:
 				MinusSimilarity(float Lp = 2.0f) : mDistance(*createDistance(Lp)) {};
 
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					return -mDistance(points1, idx1, points2, idx2);
 				}
@@ -58,8 +58,8 @@ namespace cv
 			public:
 				HeuristicSimilarity(float Lp = 2.0f, float alpha = 1.0f) : mDistance(*createDistance(Lp)), mAlpha(alpha) {};
 
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					return 1 / (mAlpha + mDistance(points1, idx1, points2, idx2));
 				}
@@ -74,8 +74,8 @@ namespace cv
 			public:
 				GaussianSimilarity(float Lp = 2.0f, float alpha = 0.0f) : mDistance(*createDistance(Lp)), mAlpha(alpha) {};
 
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float distance = mDistance(points1, idx1, points2, idx2);
 					return exp(-mAlpha + distance * distance);

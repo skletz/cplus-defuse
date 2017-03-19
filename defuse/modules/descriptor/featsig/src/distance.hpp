@@ -37,19 +37,19 @@ namespace cv
 				* \param idx2 Index into the second set of points.
 				* \return Distance between two selected points (in R^cv::xfeatures2d::pct_signatures::SIGNATURE_DIMENSION).
 				*/
-				virtual float operator()(const Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const = 0;
+				virtual float operator()(const Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const = 0;
 			};
 
 
 			class DistanceL0_25 : public Distance
 			{
 			public:
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += std::sqrt(std::sqrt(std::abs(difference)));
@@ -63,11 +63,11 @@ namespace cv
 			class DistanceL0_5 : public Distance
 			{
 			public:
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += std::sqrt(std::abs(difference));
@@ -80,11 +80,11 @@ namespace cv
 			class DistanceL1 : public Distance
 			{
 			public:
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += std::abs(difference);
@@ -97,11 +97,11 @@ namespace cv
 			class DistanceL2 : public Distance
 			{
 			public:
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += difference * difference;
@@ -114,11 +114,11 @@ namespace cv
 			class DistanceL5 : public Distance
 			{
 			public:
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += std::abs(difference) * difference * difference * difference * difference;
@@ -136,11 +136,11 @@ namespace cv
 			public:
 				DistanceLp(float p) : mP(p) {}
 
-				virtual float operator()(const cv::Mat &points1, std::size_t idx1,
-					const cv::Mat &points2, std::size_t idx2) const
+				virtual float operator()(const cv::Mat &points1, int idx1,
+					const cv::Mat &points2, int idx2) const
 				{
 					float result = (float)0.0;
-					for (std::size_t d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
+					for (int d = 0; d < SIGNATURE_DIMENSION - 1; ++d)
 					{
 						float difference = points1.at<float>(idx1, d) - points2.at<float>(idx2, d);
 						result += std::pow(std::abs(difference), mP);

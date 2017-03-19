@@ -44,7 +44,7 @@ namespace cv
 				{
 					for (std::size_t x = 0; x < mWidth; x++)
 					{
-						std::uint32_t grayVal = ((std::uint32_t)grayscaleBitmap.at<std::uint16_t>((int)y, (int)x)) >> (16 - mBitsPerPixel);
+						std::uint32_t grayVal = static_cast<std::uint32_t>(grayscaleBitmap.at<std::uint16_t>(static_cast<int>(y), static_cast<int>(x))) >> (16 - mBitsPerPixel);
 						setPixel(x, y, grayVal);
 					}
 				}

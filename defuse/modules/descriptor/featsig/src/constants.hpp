@@ -37,8 +37,8 @@ namespace cv
 			const float A_COLOR_RANGE = 127;
 			const float B_COLOR_RANGE = 127;
 
-			const std::size_t SAMPLER_CONTRAST_NORMALIZER = 25.0;
-			const std::size_t SAMPLER_ENTROPY_NORMALIZER = 4.0;
+			const float SAMPLER_CONTRAST_NORMALIZER = 25.0f;
+			const float SAMPLER_ENTROPY_NORMALIZER = 4.0f;
 
 
 		}

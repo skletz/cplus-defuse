@@ -92,9 +92,9 @@ namespace cv
 
 
 			/**** sampler ****/
-			CV_WRAP virtual std::size_t getSampleCount() const = 0;
-			CV_WRAP virtual std::size_t getGrayscaleBits() const = 0;
-			CV_WRAP virtual std::size_t getWindowRadius() const = 0;
+			CV_WRAP virtual int getSampleCount() const = 0;
+			CV_WRAP virtual int getGrayscaleBits() const = 0;
+			CV_WRAP virtual int getWindowRadius() const = 0;
 			CV_WRAP virtual double getWeightX() const = 0;
 			CV_WRAP virtual double getWeightY() const = 0;
 			CV_WRAP virtual double getWeightL() const = 0;
@@ -103,9 +103,9 @@ namespace cv
 			CV_WRAP virtual double getWeightConstrast() const = 0;
 			CV_WRAP virtual double getWeightEntropy() const = 0;
 
-			CV_WRAP virtual void setSampleCount(std::size_t sampleCount) = 0;
-			CV_WRAP virtual void setGrayscaleBits(std::size_t grayscaleBits) = 0;
-			CV_WRAP virtual void setWindowRadius(std::size_t radius) = 0;
+			CV_WRAP virtual void setSampleCount(int sampleCount) = 0;
+			CV_WRAP virtual void setGrayscaleBits(int grayscaleBits) = 0;
+			CV_WRAP virtual void setWindowRadius(int radius) = 0;
 			CV_WRAP virtual void setWeightX(double weight) = 0;
 			CV_WRAP virtual void setWeightY(double weight) = 0;
 			CV_WRAP virtual void setWeightL(double weight) = 0;
@@ -114,25 +114,25 @@ namespace cv
 			CV_WRAP virtual void setWeightContrast(double weight) = 0;
 			CV_WRAP virtual void setWeightEntropy(double weight) = 0;
 
-			CV_WRAP virtual void setWeight(std::size_t idx, double value) = 0;
+			CV_WRAP virtual void setWeight(int idx, double value) = 0;
 			CV_WRAP virtual void setWeights(const std::vector<double> &weights) = 0;
-			CV_WRAP virtual void setTranslation(std::size_t idx, double value) = 0;
+			CV_WRAP virtual void setTranslation(int idx, double value) = 0;
 			CV_WRAP virtual void setTranslations(const std::vector<double> &translations) = 0;
 
 
 			/**** clusterizer ****/
-			CV_WRAP virtual std::size_t	getInitSeedCount() const = 0;
-			CV_WRAP virtual std::size_t	getIterationCount() const = 0;
-			CV_WRAP virtual std::size_t	getMaxClustersCount() const = 0;
-			CV_WRAP virtual std::size_t	getClusterMinSize() const = 0;
+			CV_WRAP virtual int	getInitSeedCount() const = 0;
+			CV_WRAP virtual int	getIterationCount() const = 0;
+			CV_WRAP virtual int	getMaxClustersCount() const = 0;
+			CV_WRAP virtual int	getClusterMinSize() const = 0;
 			CV_WRAP virtual float getJoiningDistance() const = 0;
 			CV_WRAP virtual float getDropThreshold() const = 0;
 			CV_WRAP virtual float getLpNorm() const = 0;
 
-			CV_WRAP virtual void setInitSeedCount(std::size_t initSeedCount) = 0;
-			CV_WRAP virtual void setIterationCount(std::size_t iterationCount) = 0;
-			CV_WRAP virtual void setMaxClustersCount(std::size_t maxClustersCount) = 0;
-			CV_WRAP virtual void setClusterMinSize(std::size_t clusterMinSize) = 0;
+			CV_WRAP virtual void setInitSeedCount(int initSeedCount) = 0;
+			CV_WRAP virtual void setIterationCount(int iterationCount) = 0;
+			CV_WRAP virtual void setMaxClustersCount(int maxClustersCount) = 0;
+			CV_WRAP virtual void setClusterMinSize(int clusterMinSize) = 0;
 			CV_WRAP virtual void setJoiningDistance(float joiningDistance) = 0;
 			CV_WRAP virtual void setDropThreshold(float dropThreshold) = 0;
 			CV_WRAP virtual void setLpNorm(float LpNorm) = 0;
