@@ -15,9 +15,43 @@
 
 defuse::MoHist1Xtractor::MoHist1Xtractor(Parameter* _parameter)
 {
-	mSampleX = dynamic_cast<MoHist1Parameter *>(_parameter)->samplex;
-	mSampleY = dynamic_cast<MoHist1Parameter *>(_parameter)->sampley;
-	mFrames = dynamic_cast<MoHist1Parameter *>(_parameter)->frames;
+	int samples = dynamic_cast<MoHist1Parameter *>(_parameter)->samplepoints;
+
+	Directory samplepointdir(dynamic_cast<MoHist1Parameter *>(_parameter)->samplepointsfile);
+	SamplePoints* samplePoints = new SamplePoints(samples);
+	File sampleFile(samplepointdir.getPath(), samplePoints->getSamplePointFileName());
+
+	bool status;
+	if (!cplusutil::FileIO::isValidPathToFile(sampleFile.getFile()))
+	{
+		status = samplePoints->serialize(sampleFile.getFile());
+		LOG_INFO("Samplepoint File: " << sampleFile.getFilename() << " does not exists. A new one will be created.");
+	}
+	else
+	{
+		status = samplePoints->deserialize(sampleFile.getFile());
+		int desirelizedSize = samplePoints->getPoints().size();
+		if (samples != desirelizedSize)
+		{
+			LOG_FATAL("Fatal error: Sample count: " << samples << " do not match with desirelized samplepoints: " << desirelizedSize);
+		}
+	}
+
+	mSamplepoints = samplePoints;
+	mDistribution = dynamic_cast<MoHist1Parameter *>(_parameter)->distribution;
+	mMaxFrames = dynamic_cast<MoHist1Parameter *>(_parameter)->frames;
+	mFrameSelection = dynamic_cast<MoHist1Parameter *>(_parameter)->frameSelection;
+
+	if(dynamic_cast<MoHist1Parameter *>(_parameter)->samplex != -1 && dynamic_cast<MoHist1Parameter *>(_parameter)->sampley != -1)
+	{
+		mSampleX = dynamic_cast<MoHist1Parameter *>(_parameter)->samplex;
+		mSampleY = dynamic_cast<MoHist1Parameter *>(_parameter)->sampley;
+		mFixSampling = true;
+	}else
+	{
+		mFixSampling = false;
+	}
+
 }
 
 defuse::Features* defuse::MoHist1Xtractor::xtract(VideoBase* _videobase)
@@ -48,105 +82,142 @@ defuse::Features* defuse::MoHist1Xtractor::xtract(VideoBase* _videobase)
 
 void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, cv::OutputArray _histogram)
 {
-	//bool slow(false);
-
-	bool display = false;
 	float filter = 5;
 
 	cv::Mat outputhistogram;
+	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
+	int numberOfFramesPerShot = mMaxFrames;
 
-	int SAMPLEX = mSampleX, SAMPLEY = mSampleY;
-
-	std::vector<cv::Point2f> prevCorners, corners;
-
-	unsigned int numframes = _video.get(CV_CAP_PROP_FRAME_COUNT);
-
-	int samplingrate = 1; //each frame
-	if (mFrames != 0)
+	//the shot has fewer frames than should be used
+	if (mMaxFrames > numframes)
 	{
-		samplingrate = numframes / mFrames; //mFrames per Second
+		//grapping starts from 0
+		numberOfFramesPerShot = numframes - 1;
 	}
+
+	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;
+	int widht = _video.get(CV_CAP_PROP_FRAME_WIDTH);
+	int height = _video.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+
+	initPoints = mSamplepoints->getPoints();
+	//De-Normalize
+	for (int i = 0; i < initPoints.size(); i++)
+	{
+		cv::Point p(0, 0);
+		p.x = initPoints.at(i).x * widht;
+		p.y = initPoints.at(i).y * height;
+		initPoints.at(i) = p;
+	}
+
+	currPoints = std::vector<cv::Point2f>(initPoints);
 
 	cv::Mat frame, prevGrayFrame, grayFrame;
-	for (unsigned int j = 0; j < numframes; j = j + samplingrate)
+
+	//std::vector<cv::Point2f> prevCorners, corners;
+
+	//unsigned int numframes = _video.get(CV_CAP_PROP_FRAME_COUNT);
+
+	//int samplingrate = 1; //each frame
+	//if (mMaxFrames != 0)
+	//{
+	//	samplingrate = numframes / mMaxFrames; //mFrames per Second
+	//}
+
+	//cv::Mat frame, prevGrayFrame, grayFrame;
+
+	int interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+
+	if (mFrameSelection == 0)
 	{
-		_video >> frame;
+		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
 
-		corners.clear();
-
-		cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
-
-		for (int y = 0; y < frame.rows; y += SAMPLEY)
+		for (int iFrame = 0; iFrame < numframes - 1; iFrame = iFrame + interval)
 		{
-			for (int x = 0; x < frame.cols; x += SAMPLEX) {
+			//Capture the current frame
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+			_video.grab();
+			_video.retrieve(frame);
 
-				corners.push_back(cv::Point2f(x, y));
-			}
-		}
+			if (frame.empty()) continue;
 
-		std::vector<cv::Point2f> cornersCopy = std::vector<cv::Point2f>(corners);
+			//convert the frame to grayscale
+			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-		if (j > 0)
-		{
+			//however, we use dense sampling
+			//for (int y = 0; y < frame.rows; y += SAMPLEY)
+			//	for (int x = 0; x < frame.cols; x += SAMPLEX) {
+			//		corners.push_back(Point2f(x, y));
+			//	}
+			//vector<Point2f> cornersCopy = vector<Point2f>(corners);
 
-			std::vector<uchar> status;
-			std::vector<float> error;
+			currPoints = std::vector<cv::Point2f>(initPoints);
 
-			int width = frame.cols;
-			int height = frame.rows;
-
-
-			//Calculate movements between previous and actual frame
-			cv::calcOpticalFlowPyrLK(prevGrayFrame, grayFrame, prevCorners, corners, status, error);
-
-			cv::Mat motionHist;
-			extractMotionHistogram(status, prevCorners, corners, width / SAMPLEX, height / SAMPLEY, motionHist);
-
-			if (j == 1)
-				motionHist.copyTo(outputhistogram);
-			else
-				outputhistogram = outputhistogram + motionHist;
-
-			if (display)
+			if (iFrame > 0)
 			{
-				//visualize STARTs
-				cv::Mat frameCopy = frame.clone();
-				for (uint i = 0; i < status.size(); i++) {
-					if (status[i] != 0) {
+				//Indicates wheter the flow for the corresponding features has been found
+				std::vector<uchar> statusVector;
+				statusVector.resize(currPoints.size());
+				//Indicates the error for the corresponding feature
+				std::vector<float> errorVector;
+				errorVector.resize(currPoints.size());
 
-						cv::Point p(ceil(prevCorners[i].x), ceil(prevCorners[i].y));
-						cv::Point q(ceil(corners[i].x), ceil(corners[i].y));
-						//arrowedLine(frameCopy, p0, p1, cv::Scalar(255, 255, 255, 0), 1, CV_AA, 0,0.5);
+				int width = frame.cols;
+				int height = frame.rows;
 
 
-						if (cv::norm(p - q) < int(height / 10.0) && error[i] < filter)
-						{
-							drawLine(frameCopy, p, q, 3);
+				//Calculate movements between previous and actual frame
+				cv::calcOpticalFlowPyrLK(prevGrayFrame, grayFrame, prevPoints, currPoints, statusVector, errorVector);
+
+				cv::Mat motionHist;
+				extractMotionHistogram(statusVector, prevPoints, currPoints, width, height, motionHist);
+
+				if (iFrame == interval)
+					motionHist.copyTo(outputhistogram);
+				else
+					outputhistogram = outputhistogram + motionHist;
+
+				if (display)
+				{
+					//visualize STARTs
+					cv::Mat frameCopy = frame.clone();
+					for (uint i = 0; i < statusVector.size(); i++) {
+						if (statusVector[i] != 0) {
+
+							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
+							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
+
+							if (cv::norm(p - q) < int(height / 10.0) && errorVector[i] < filter)
+							{
+								drawLine(frameCopy, p, q, 3);
+							}
 						}
-
 					}
+
+					cv::imshow("FrameCopy", frameCopy);
+					int wait = cv::waitKey(1);
+					//visualization ENDs				
 				}
 
-				cv::imshow("FrameCopy", frameCopy);
-				//visualization ENDs				
+				prevPoints.clear();
 			}
 
-			prevCorners.clear();
+			prevGrayFrame = grayFrame.clone();
+			prevPoints = std::vector<cv::Point2f>(currPoints);
 		}
 
-		prevGrayFrame = grayFrame.clone();
-		prevCorners = std::vector<cv::Point2f>(cornersCopy);
-
-		int wait = cv::waitKey(1);
-
+		if (display)
+		{
+			while (cv::waitKey(1) != 27);
+			cv::destroyAllWindows();
+		}
 	}
-
 	outputhistogram = outputhistogram / float(numframes);
 
 	outputhistogram.copyTo(_histogram);
 }
 
-void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist)
+void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist) const
 {
 	//float *motionDir = new float[13];
 	//float *motionLen = new float[13]; //averaged by MAX(width/height)
@@ -164,29 +235,29 @@ void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, 
 	//}
 
 	//first: perform average filter
-	std::vector<cv::Point2f> cornerCopy = std::vector<cv::Point2f>(corner);
-	for (uint y = 0; y < height; y++) {
-		for (uint x = 0; x < width; x++) {
+	//std::vector<cv::Point2f> cornerCopy = std::vector<cv::Point2f>(corner);
+	//for (uint y = 0; y < height; y++) {
+	//	for (uint x = 0; x < width; x++) {
 
-			int count = 0;
-			float avgX = 0, avgY = 0;
-			for (uint yy = MAX(y - 2, 0); yy <= MIN(y + 2, height - 1); yy++) {
-				for (uint xx = MAX(x - 2, 0); xx <= MIN(x + 2, width - 1); xx++) {
-					int k = (yy * width) + xx;
-					avgX += cornerCopy[k].x;
-					avgY += cornerCopy[k].y;
-					count++;
-				}
-			}
+	//		int count = 0;
+	//		float avgX = 0, avgY = 0;
+	//		for (uint yy = MAX(y - 2, 0); yy <= MIN(y + 2, height - 1); yy++) {
+	//			for (uint xx = MAX(x - 2, 0); xx <= MIN(x + 2, width - 1); xx++) {
+	//				int k = (yy * width) + xx;
+	//				avgX += cornerCopy[k].x;
+	//				avgY += cornerCopy[k].y;
+	//				count++;
+	//			}
+	//		}
 
-			avgX /= count;
-			avgY /= count;
+	//		avgX /= count;
+	//		avgY /= count;
 
-			int i = (y * width) + x;
-			corner[i].x = avgX;
-			corner[i].y = avgY;
-		}
-	}
+	//		int i = (y * width) + x;
+	//		corner[i].x = avgX;
+	//		corner[i].y = avgY;
+	//	}
+	//}
 
 	for (i = 0; i < status.size(); i++) {
 		if (status[i] != 0) {

@@ -11,7 +11,7 @@ namespace defuse {
 	{
 	public:
 		int samplepoints = 40000;			//The number of sample points
-		int distribution = 0;	//The distribution of sample points	0 = random, 2 = regular
+		int distribution = 0;	//The distribution of sample points 0 = random, 1 = regular, 2 = gaussian
 		int initialCentroids = 40;			//The number of first centroids used for clustering
 		std::string samplepointsfile = "";
 

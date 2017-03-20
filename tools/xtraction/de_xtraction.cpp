@@ -80,14 +80,19 @@
  *		***********************************************************
  *		TYPE: 3 = motion histogram variant 1
  *		***********************************************************
- *		-arg6: Number of samplex
- *		-arg7: Number of sampley
-  *		-arg8: Frame selection
+ *		-arg6: Number of samplepoints
+ *		-arg7: Distribution
+ *			0 = RANDOM
+ *			1 = REGULAR
+ *			2 = GAUSSIAN
+  *		-arg8: Path to a directory of samplepoint files, if distribution is RANDOM ..\\data\\samplepoints			
+ *		-arg9: Frame selection
  *			0 = use fix number of frames per segment
  *			1 = use fix number per second
  *			2 = use all frames
- *		-arg9: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
- *		
+ *		-arg10: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
+ *		-arg11: samplex
+ *		-arg12: sampley
  * @author skletz
  * @version 2.0 13/03/17
  * 
@@ -190,7 +195,7 @@ int main(int argc, char **argv)
 
 			static_cast<DFS2Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS2Parameter *>(paramter)->frames = std::atoi(argv[14]);
-			display = std::atoi(argv[14]);
+			display = std::atoi(argv[15]);
 		}
 		else if (descriptortype == 3)
 		{
@@ -198,12 +203,15 @@ int main(int argc, char **argv)
 			descriptorshort = "MoHist1";
 
 			paramter = new MoHist1Parameter();
-			static_cast<MoHist1Parameter *>(paramter)->samplex = std::atoi(argv[6]);
-			static_cast<MoHist1Parameter *>(paramter)->sampley = std::atoi(argv[7]);
-			
-			static_cast<MoHist1Parameter *>(paramter)->frameSelection = std::atoi(argv[8]);
-			static_cast<MoHist1Parameter *>(paramter)->frames = std::atoi(argv[9]);
-			display = std::atoi(argv[10]);
+			static_cast<MoHist1Parameter *>(paramter)->samplepoints = std::atoi(argv[6]);
+			static_cast<MoHist1Parameter *>(paramter)->distribution = std::atoi(argv[7]);
+			static_cast<MoHist1Parameter *>(paramter)->samplepointsfile = argv[8];
+
+			static_cast<MoHist1Parameter *>(paramter)->frameSelection = std::atoi(argv[9]);
+			static_cast<MoHist1Parameter *>(paramter)->frames = std::atoi(argv[10]);
+			static_cast<MoHist1Parameter *>(paramter)->samplex = std::atoi(argv[11]);
+			static_cast<MoHist1Parameter *>(paramter)->sampley = std::atoi(argv[12]);
+			display = std::atoi(argv[13]);
 		}
 
 		//generate filename depending on the descriptor
@@ -306,8 +314,11 @@ void processVideoDirectory()
 
 			VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
 			//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
-			//pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
-			xtract(videoclip, paramter);
+
+			if(!display)
+				pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+			else
+				xtract(videoclip, paramter);
 
 		}
 
@@ -355,7 +366,8 @@ void processVideoDirectory()
 
 	LOG_PERFMON(PINTERIM, "Number of all Segments\t" << numClips);
 
-	getchar();
+	if(display)
+		getchar();
 }
 
 void processVideoFile()

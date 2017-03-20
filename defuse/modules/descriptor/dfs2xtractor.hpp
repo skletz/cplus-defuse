@@ -28,10 +28,6 @@ namespace defuse {
 
 		SamplePoints* mSamplepoints;
 
-		//if samplepoints should not be used
-		int SAMPLE_X;
-		int SAMPLE_Y;
-
 		int mMaxCluster;
 
 		int mMaxFrames;

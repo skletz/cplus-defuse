@@ -23,8 +23,17 @@ namespace defuse {
 
 		int mSampleX;
 		int mSampleY;
+		bool mFixSampling;
 
-		int mFrames;
+		SamplePoints* mSamplepoints;
+
+		int mDistribution;
+
+		int mMaxFrames;
+
+		int mFrameSelection;
+
+		int mVariant;
 
 		MoHist1Xtractor(Parameter* _parameter);
 
@@ -32,7 +41,7 @@ namespace defuse {
 
 		void computeMotionHistogram(cv::VideoCapture& _video, cv::OutputArray _histogram);
 
-		void extractMotionHistogram(std::vector<uchar> status, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist);
+		void extractMotionHistogram(std::vector<uchar> status, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist) const;
 
 		void drawLine(cv::Mat& image, cv::Point p, cv::Point q, int scale);
 

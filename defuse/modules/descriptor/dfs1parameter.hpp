@@ -28,6 +28,7 @@ namespace defuse {
 			std::stringstream st;
 			st << "DFS1_";
 			st << staticparamter.getFilename();
+			st << "_" << frameSelection;
 			st << "_" << frames;
 			return st.str();
 		}
