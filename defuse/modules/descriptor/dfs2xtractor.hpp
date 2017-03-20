@@ -20,7 +20,7 @@ namespace defuse {
 	class DFS2Xtractor : public Xtractor
 	{
 	public:
-		enum  class IDX { X = 0, Y, T, L, A, B, MD, MI, WEIGHT, DIMS };
+		enum  class IDX { X = 0, Y, L, A, B, C, E, MD, WEIGHT, DIMS };
 
 		cv::Ptr<tpct::TPCTSignatures> mTPCTSignatures;
 
@@ -28,9 +28,25 @@ namespace defuse {
 
 		SamplePoints* mSamplepoints;
 
+		//if samplepoints should not be used
+		int SAMPLE_X;
+		int SAMPLE_Y;
+
 		int mMaxCluster;
 
 		int mMaxFrames;
+
+		int mFrameSelection;
+
+		int mVariant;
+
+
+		//Contrast, Entropy - Grayscale Bitmap
+		//TODO make grayscale bits and window radius changable via parameter settings
+		int mGrayscaleBits = 5;
+		int mWindowRadius = 4;
+		std::vector<double> mWeights;
+		std::vector<double> mTranslations;
 
 		DFS2Xtractor(Parameter* _parameter);
 
@@ -38,14 +54,26 @@ namespace defuse {
 
 		void computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const;
 
-		void joinCloseClusters(cv::Mat clusters);
-		void dropLightPoints(cv::Mat& clusters);
-		std::size_t findClosestCluster(cv::Mat &clusters, cv::Mat &points, std::size_t pointIdx);
-		void normalizeWeights(cv::Mat &clusters);
-		void singleClusterFallback(const cv::Mat &points, cv::Mat &clusters);
-		void cropClusters(cv::Mat &clusters);
+		void getSamples(cv::Mat& frame, std::vector<cv::Point2f> initPoints, cv::Mat& samples) const;
+		void getMotionDirection(std::vector<uchar>& statusVector, std::vector<float>& errorVector, std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& currPoints, cv::Mat& out) const;
+		void getTemporalSamples(cv::Mat& samples, cv::Mat& signatures) const;
 
-		float computeL2(cv::Mat& _f1, int idx1, cv::Mat& _f2, int idx2);
+
+		void joinCloseClusters(cv::Mat clusters) const;
+		void dropLightPoints(cv::Mat& clusters) const;
+		int findClosestCluster(cv::Mat &clusters, cv::Mat &points, int pointIdx) const;
+		void normalizeWeights(cv::Mat &clusters) const;
+		void singleClusterFallback(const cv::Mat &points, cv::Mat &clusters) const;
+		void cropClusters(cv::Mat &clusters) const;
+
+		void draw2DSampleSignature(const cv::InputArray _source, const cv::InputArray _signature, cv::OutputArray& _result) const;
+		double square(int a) const;
+		void drawLine(cv::Mat& image, cv::Point p, cv::Point q, int scale) const;
+
+		void draw2DFSSignature(const cv::InputArray _source, const cv::InputArray _signature, cv::OutputArray& _result) const;
+		void drawSignatureMotionDirection(const cv::InputArray& _tempSig, cv::OutputArray _result, int _width, int _height) const;
+
+		float computeL2(cv::Mat& _f1, int idx1, cv::Mat& _f2, int idx2) const;
 	};
 }
 #endif

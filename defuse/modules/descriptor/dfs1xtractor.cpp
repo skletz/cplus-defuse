@@ -68,27 +68,27 @@ defuse::Features* defuse::DFS1Xtractor::xtract(VideoBase* _videobase)
 void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const
 {
 	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
-
-	//otherwise, the interval is to large
-	int numberOfFramesPerShot = mMaxFrames - 1;
+	int numberOfFramesPerShot = mMaxFrames;
 
 	//the shot has fewer frames than shuld be used
-	if (mMaxFrames < numframes)
+	if (mMaxFrames > numframes)
 	{
+		//starts from 0
 		numberOfFramesPerShot = numframes - 1;
 	}
 
 	std::vector<cv::Mat> sampledsignatures;
 
+	int interval = 0;
 	//use fix number of frames per segment
 	if (mFrameSelection == 0) 
 	{
-		int interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
 
-		for (int j = 0; j < numframes; j = j + interval)
+		for (int iFrame = 0; iFrame < numframes-1; iFrame = iFrame + interval)
 		{
 			cv::Mat image, signatures;
-			_video.set(CV_CAP_PROP_POS_FRAMES, j);
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
 			_video.grab();
 			_video.retrieve(image);
 
@@ -97,7 +97,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 			//use all frames that exists
 			if (interval == 0)
 			{
-				j++;
+				iFrame++;
 			}
 
 			if (!signatures.empty())
@@ -109,19 +109,29 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	else if (mFrameSelection == 1) 
 	{
 		//TODO Implement fix number per segment
-		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0")
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
+		return;
 	}
 	//use all frames
 	else if (mFrameSelection == 2)
 	{ 
 		//@TODO Implement all frames
-		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0")
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
+		return;
 	}else
 	{
-		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames")
+		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames. Aborted!")
+		return;
 	}
 		
 	cv::Mat tSignatures;
 	mTPCTSignatures->computeTemporalSignature(sampledsignatures, tSignatures);
+
+	if(sampledsignatures.size() > mMaxFrames)
+	{
+		LOG_FATAL("Bug: More frames extracted than should be used. Aborted!")
+		return;
+	}
+
 	tSignatures.copyTo(_signatures);
 }

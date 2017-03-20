@@ -69,7 +69,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\defuse_x64.props" />
+    <Import Project="..\..\defuse_ocv31_x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -121,6 +121,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\defuse\defuse.vcxproj">
       <Project>{7a073147-48a8-44de-9997-9d049fe510fd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\libs\cpluslogger\cpluslogger.vcxproj">
+      <Project>{8da23bf9-79ea-47f0-92b8-6538241ef7e8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\libs\cplusutil\cplusutil.vcxproj">
+      <Project>{006d52f0-0ecc-43bf-b5da-e2b9a38d9727}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

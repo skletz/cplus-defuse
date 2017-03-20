@@ -33,9 +33,21 @@ defuse::DFS2Xtractor::DFS2Xtractor(Parameter* _parameter)
 	mSamplepoints = samplePoints;
 	mMaxCluster = dynamic_cast<DFS2Parameter *>(_parameter)->staticparamter.initialCentroids;
 	mMaxFrames = dynamic_cast<DFS2Parameter *>(_parameter)->frames;
+
+	mFrameSelection = dynamic_cast<DFS2Parameter *>(_parameter)->frameSelection;
+
 	mTPCTSignatures = new tpct::TPCTSignatures();
 
 	mPCTSignatures = pct::PCTSignatures::create(mSamplepoints->getPoints(), mSamplepoints->getSampleCnt(), mMaxCluster);
+	//mPCTSignatures = pct::PCTSignatures::create(samples, mSamplepoints->getSampleCnt(), cv::xfeatures2d::PCTSignatures::PointDistribution::REGULAR);
+
+	for (int i = 0; i < as_integer(IDX::DIMS); i++)
+	{
+		mWeights.push_back(1.0);
+		mTranslations.push_back(0.0);
+	}
+
+	mVariant = 0;
 }
 
 defuse::Features* defuse::DFS2Xtractor::xtract(VideoBase* _videobase)
@@ -47,243 +59,521 @@ defuse::Features* defuse::DFS2Xtractor::xtract(VideoBase* _videobase)
 		LOG_FATAL("Fatal error: Video File does not exists." << _videobase->mFile->getFile());
 	}
 
-	unsigned int framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
+	size_t start = cv::getTickCount();
+	cv::Mat signatures;
+	computeSignatures(video, signatures);
+	size_t end = cv::getTickCount();
 
-	int SAMPLEX = 8, SAMPLEY = 8;
+	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
+	double framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
+	LOG_PERFMON(PINTERIM, "Execution Time (One Signature per Video): " << "\tFrame Count\t" << framecount << "\tElapsed Time\t" << elapsedTime);
 
-	const float L_COLOR_RANGE = 100;
-	const float A_COLOR_RANGE = 127;
-	const float B_COLOR_RANGE = 127;
+	FeatureSignatures* featuresignatures = new FeatureSignatures(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
+	featuresignatures->mVectors = signatures;
+
+	video.release();
+	return featuresignatures;
+}
 
 
-	std::vector<cv::Point2f> initPoints;
+//defuse::Features* defuse::DFS2Xtractor::xtract(VideoBase* _videobase)
+//{
+//	cv::VideoCapture video(_videobase->mFile->getFile());
+//
+//	if (!video.isOpened())
+//	{
+//		LOG_FATAL("Fatal error: Video File does not exists." << _videobase->mFile->getFile());
+//	}
+//
+//	unsigned int framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
+//
+//	int SAMPLEX = 8, SAMPLEY = 8;
+//
+//	const float L_COLOR_RANGE = 100;
+//	const float A_COLOR_RANGE = 127;
+//	const float B_COLOR_RANGE = 127;
+//
+//
+//	std::vector<cv::Point2f> initPoints;
+//	std::vector<cv::Point2f> corners;
+//	std::vector<cv::Point2f> prevCorners;
+//
+//	//every mMaxFrames'th frame is used
+//	cv::Mat gray, prevGray, image, frame;
+//
+//
+//	cv::Mat tsamples, backupSamples;
+//	std::vector<cv::Mat> temporalsamples;
+//	for (int iFrame = 0; iFrame < framecount; iFrame = iFrame + mMaxFrames)
+//	{
+//		cv::Mat samples;
+//		samples.create(mSamplepoints->getPoints().size(), as_integer(IDX::DIMS), CV_32F);
+//		video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+//		video.grab();
+//		video.retrieve(frame);
+//
+//		if (frame.empty())
+//			continue;
+//
+//		float maxWH = MAX(frame.cols, frame.rows);
+//
+//		int samplecountPerFrame = mSamplepoints->getPoints().size();
+//		initPoints.clear();
+//		initPoints.resize(samplecountPerFrame);
+//
+//		float result = std::sqrt(samplecountPerFrame);
+//		for (int i = 0; i < int(result); i++)
+//		{
+//			for (int j = 0; j < int(result); j++)
+//			{
+//				initPoints[i*result + j] = cv::Point2f(float(i / result), float(j / result));
+//			}
+//		}
+//
+//		corners.clear();
+//		for (std::size_t iSample = 0; iSample < initPoints.size(); iSample++)
+//		{
+//			std::size_t x = std::size_t(initPoints[iSample].x * (frame.cols - 1) + 0.5);
+//			std::size_t y = std::size_t(initPoints[iSample].y * (frame.rows - 1) + 0.5);
+//
+//			corners.push_back(cv::Point(x, y));
+//
+//			samples.at<float>(iSample, as_integer(IDX::X)) = float(double(x) / double(frame.cols));	// x, y normalized
+//			samples.at<float>(iSample, as_integer(IDX::Y)) = float(double(y) / double(frame.rows));
+//
+//			float t = float(double(iFrame) / double(framecount));;
+//			//samples.at<float>(iSample, as_integer(IDX::T)) = t; //t normalized
+//
+//			cv::Mat rgbPixel(frame, cv::Rect(x, y, 1, 1));			// get Lab pixel color
+//			cv::Mat labPixel;										// placeholder -> TODO: optimize
+//			rgbPixel.convertTo(rgbPixel, CV_32FC3, 1.0 / 255);		//scale it down
+//			cv::cvtColor(rgbPixel, labPixel, cv::COLOR_BGR2Lab);
+//			cv::Vec3f labColor = labPixel.at<cv::Vec3f>(0, 0);		// end
+//
+//			samples.at<float>(iSample, as_integer(IDX::L)) = float(std::floor(labColor[0] + 0.5) / float(L_COLOR_RANGE));	// Lab color normalized
+//			samples.at<float>(iSample, as_integer(IDX::A)) = float(std::floor(labColor[1] + 0.5 + A_COLOR_RANGE) / float((A_COLOR_RANGE * 2) + 1));
+//			samples.at<float>(iSample, as_integer(IDX::B)) = float(std::floor(labColor[2] + 0.5 + B_COLOR_RANGE) / float((B_COLOR_RANGE * 2) + 1));
+//
+//			samples.at<float>(iSample, as_integer(IDX::MD)) = 0;
+//			//samples.at<float>(iSample, as_integer(IDX::MI)) = 0;
+//		}
+//
+//		frame.copyTo(image);
+//		cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+//
+//		std::vector<cv::Point2f> cornersCopy = std::vector<cv::Point2f>(corners);
+//		if (iFrame > 0)
+//		{
+//			std::vector<uchar> status;
+//			std::vector<float> error;
+//
+//			//try{
+//			cv::calcOpticalFlowPyrLK(prevGray, gray, prevCorners, corners, status, error);
+//			//}
+//			//catch (std::exception& e)
+//			//{
+//			//	LOG_ERROR("An exception occurred during calcOpticalFlowPyrLK: " << e.what());
+//			//	LOG_ERROR("Optical Flow ended with framenumber " << iFrame << " of" << framecount);
+//			//	LOG_ERROR("Optical Flow ended with minute " << (iFrame / 25 / 60) << " of" << (framecount / 25 / 60));
+//			//	break;
+//			//}
+//
+//			for (int iStatus = 0; iStatus < status.size(); iStatus++)
+//			{
+//				if (status[iStatus] == 0)
+//				{
+//					continue;
+//				}
+//
+//				cv::Point2f pA = prevCorners[iStatus];
+//				cv::Point2f pB = corners[iStatus];
+//
+//				float mvX = pA.x - pB.x;
+//				float mvY = pA.y - pB.y;
+//
+//				float powDist = pow(mvX, 2.0) + pow(mvY, 2.0);
+//				float len = 0;
+//				if (powDist > 0)
+//					len = float(sqrt(powDist));
+//
+//				int direction;
+//
+//				mvX = -mvX;
+//				/* IMPORTANT NOTE: as Y is already vice-versa-scale,
+//				we cannot invert it (e.g. mvX=10, mvY=10 means we
+//				have prediction 45 degree left up (and not right up
+//				as in usual mathematics coordinates!) */
+//
+//				float angle = 0;
+//				if ((mvX < 0.000001 && mvY < 0.000001) || len < 0.000001)
+//				{
+//					direction = 0;
+//				}
+//				else
+//				{
+//					if (mvX == 0)
+//					{
+//						if (mvY >= 0)
+//						{
+//							direction = 4;
+//						}
+//						else
+//						{
+//							direction = 10;
+//						}
+//
+//					}
+//					else
+//					{
+//						//TODO: CHECK CODE FOR MVY == 0 ??? (no difference for +/- mvX??)
+//
+//
+//						angle = (float)(atan(mvY / mvX) * 180 / M_PI); //angle in degree
+//
+//																	   /* quadrants:
+//																	   *  2 | 1
+//																	   *  --+--
+//																	   *  3 | 4
+//																	   */
+//
+//						direction = 0;
+//						if (mvX >= 0 && mvY >= 0) //1st quandrant
+//						{
+//							if (angle >= 0 && angle < 15)
+//								direction = 1;
+//							else if (angle >= 15 && angle < 45)
+//								direction = 2;
+//							else if (angle >= 45 && angle < 75)
+//								direction = 3;
+//							else
+//								direction = 4;
+//						}
+//						else if (mvX < 0 && mvY >= 0) //2nd quandrant
+//						{
+//							if (angle <= 0 && angle > -15)
+//								direction = 7;
+//							else if (angle <= -15 && angle > -45)
+//								direction = 6;
+//							else if (angle <= -45 && angle > -75)
+//								direction = 5;
+//							else
+//								direction = 4;
+//						}
+//						else if (mvX < 0 && mvY < 0) //3rd quandrant
+//						{
+//							if (angle >= 0 && angle < 15)
+//								direction = 7;
+//							else if (angle >= 15 && angle < 45)
+//								direction = 8;
+//							else if (angle >= 45 && angle < 75)
+//								direction = 9;
+//							else
+//								direction = 10;
+//						}
+//						else //4th quadrant
+//						{
+//							if (angle <= 0 && angle > -15)
+//								direction = 1;
+//							else if (angle <= -15 && angle > -45)
+//								direction = 12;
+//							else if (angle <= -45 && angle > -75)
+//								direction = 11;
+//							else
+//								direction = 10;
+//						}
+//					}
+//				}
+//
+//				samples.at<float>(iStatus, as_integer(IDX::MD)) = direction / double(13);
+//				//samples.at<float>(iStatus, as_integer(IDX::MI)) = len;
+//
+//				if (samples.at<float>(iStatus, as_integer(IDX::MD)) < 0 || samples.at<float>(iStatus, as_integer(IDX::MD)) > 1)
+//				{
+//					LOG_FATAL("X not normelized" << samples.at<float>(iStatus, as_integer(IDX::X)));
+//				}
+//
+//			} //end status
+//		}
+//
+//		try
+//		{
+//			if (iFrame == 0)
+//			{
+//				backupSamples.release();
+//				samples.copyTo(backupSamples);
+//			}
+//			else
+//			{
+//				cv::vconcat(samples, backupSamples, backupSamples);
+//				tsamples.release();
+//				backupSamples.copyTo(tsamples);
+//			}
+//
+//		}
+//		catch (std::exception& e) {
+//			LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
+//			LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << framecount);
+//			LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (framecount / 25 / 60));
+//			break;
+//		}
+//
+//		//temporalsamples.push_back(samples);
+//		prevGray = gray.clone();
+//		prevCorners = std::vector<cv::Point2f>(cornersCopy);
+//
+//	}
+//
+//	LOG_INFO("Temporal sampling finished; start to cluster");
+//
+//	//tsamples.release();
+//	//cv::vconcat(temporalsamples, tsamples);
+//
+//	// Prepare initial centroids.
+//	cv::Mat clusters;
+//	// make seeds from the first samples 
+//	tsamples(cv::Rect(0, 0, tsamples.cols, mMaxCluster)).copyTo(clusters);
+//	// set initial weight to 1
+//	clusters(cv::Rect(as_integer(IDX::WEIGHT), 0, 1, clusters.rows)) = 1;
+//
+//	//prepare for iterating
+//
+//	joinCloseClusters(clusters);
+//	dropLightPoints(clusters);
+//
+//
+//	for (std::size_t iteration = 0; iteration < mPCTSignatures->getIterationCount(); iteration++)
+//	{
+//		// Prepare space for new centroid values.
+//		cv::Mat tmpCentroids(clusters.size(), clusters.type());
+//		tmpCentroids = 0;
+//
+//		// Clear weights for new iteration.
+//		clusters(cv::Rect(as_integer(IDX::WEIGHT), 0, 1, clusters.rows)) = 0;
+//
+//		// Compute affiliation of points and sum new coordinates for centroids.
+//		for (std::size_t iSample = 0; iSample < tsamples.rows; iSample++)
+//		{
+//			std::size_t iClosest = findClosestCluster(clusters, tsamples, iSample);
+//			for (std::size_t iDimension = 0; iDimension < as_integer(IDX::DIMS) - 1; iDimension++)
+//			{
+//				tmpCentroids.at<float>(iClosest, iDimension) += tsamples.at<float>(iSample, iDimension);
+//			}
+//			clusters.at<float>(iClosest, as_integer(IDX::WEIGHT))++;
+//		}
+//
+//		// Compute average from tmp coordinates and throw away too small clusters.
+//		std::size_t lastIdx = 0;
+//		for (std::size_t i = 0; (int)i < tmpCentroids.rows; ++i)
+//		{
+//			// Skip clusters that are too small (large-enough clusters are packed right away)
+//			if (clusters.at<float>(i, as_integer(IDX::WEIGHT)) >(iteration + 1) * mPCTSignatures->getClusterMinSize())
+//			{
+//				for (std::size_t d = 0; d < as_integer(IDX::DIMS) - 1; d++)
+//				{
+//					clusters.at<float>(lastIdx, d) = tmpCentroids.at<float>(i, d) / clusters.at<float>(i, as_integer(IDX::WEIGHT));
+//				}
+//				// weights must be compacted as well
+//				clusters.at<float>(lastIdx, as_integer(IDX::WEIGHT)) = clusters.at<float>(i, as_integer(IDX::WEIGHT));
+//				lastIdx++;
+//			}
+//		}
+//
+//		// Crop the arrays if some centroids were dropped.
+//		clusters.resize(lastIdx);
+//		if (clusters.rows == 0)
+//		{
+//			break;
+//		}
+//
+//		// Finally join clusters with too close centroids.
+//		joinCloseClusters(clusters);
+//		dropLightPoints(clusters);
+//
+//		//if (iteration % 2 == 0)
+//		//std::cout << "\t\t=>Interation Nr: " << iteration << " of " << ITERATION_COUNT << std::endl;
+//	}
+//
+//	// The result must not be empty!
+//	if (clusters.rows == 0)
+//	{
+//		singleClusterFallback(tsamples, clusters);
+//	}
+//
+//	cropClusters(clusters);
+//
+//	normalizeWeights(clusters);
+//
+//
+//	cv::Mat signatures;
+//	signatures.create(clusters.rows, as_integer(IDX::DIMS), clusters.type());
+//	clusters.copyTo(signatures);
+//
+//	LOG_INFO("Temporal clustering finished.");
+//
+//	FeatureSignatures* fs = new FeatureSignatures(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
+//	fs->mVectors = signatures;
+//	video.release();
+//	return fs;
+//}
+
+
+void defuse::DFS2Xtractor::getSamples(cv::Mat& frame, std::vector<cv::Point2f> points, cv::Mat& out) const
+{
+	cv::Mat samples;
+	out.copyTo(samples);
+
+	cv::xfeatures2d::pct_signatures::GrayscaleBitmap grayscaleBitmap(frame, mGrayscaleBits);
 	std::vector<cv::Point2f> corners;
-	std::vector<cv::Point2f> prevCorners;
-
-	//every mMaxFrames'th frame is used
-	cv::Mat gray, prevGray, image, frame;
-
-
-	cv::Mat tsamples, backupSamples;
-	std::vector<cv::Mat> temporalsamples;
-	for (int iFrame = 0; iFrame < framecount; iFrame = iFrame + mMaxFrames)
+	for (int iSample = 0; iSample < points.size(); iSample++)
 	{
-		cv::Mat samples;
-		samples.create(mSamplepoints->getPoints().size(), as_integer(IDX::DIMS), CV_32F);
-		video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
-		video.grab();
-		video.retrieve(frame);
+		float x = std::size_t(points[iSample].x);
+		float y = std::size_t(points[iSample].y);
 
-		if (frame.empty())
+		//currPoints.push_back(cv::Point(x, y));
+
+		if (x >= frame.cols)
 			continue;
 
-		float maxWH = MAX(frame.cols, frame.rows);
+		if (y >= frame.rows)
+			continue;
 
-		int samplecountPerFrame = mSamplepoints->getPoints().size();
-		initPoints.clear();
-		initPoints.resize(samplecountPerFrame);
+		samples.at<float>(iSample, as_integer(IDX::X)) = float(double(x) / double(frame.cols));	// x, y normalized
+		samples.at<float>(iSample, as_integer(IDX::Y)) = float(double(y) / double(frame.rows));
 
-		float result = std::sqrt(samplecountPerFrame);
-		for (int i = 0; i < int(result); i++)
+		cv::Mat rgbPixel(frame, cv::Rect(x, y, 1, 1));			// get Lab pixel color
+		cv::Mat labPixel;										// placeholder -> TODO: optimize
+		rgbPixel.convertTo(rgbPixel, CV_32FC3, 1.0 / 255);		//scale it down
+		cv::cvtColor(rgbPixel, labPixel, cv::COLOR_BGR2Lab);
+		cv::Vec3f labColor = labPixel.at<cv::Vec3f>(0, 0);		// end
+
+		samples.at<float>(iSample, as_integer(IDX::L)) = float(std::floor(labColor[0] + 0.5) / float(cv::xfeatures2d::pct_signatures::L_COLOR_RANGE));	// Lab color normalized
+		samples.at<float>(iSample, as_integer(IDX::A)) = float(std::floor(labColor[1] + 0.5 + cv::xfeatures2d::pct_signatures::A_COLOR_RANGE) / float((cv::xfeatures2d::pct_signatures::A_COLOR_RANGE * 2) + 1));
+		samples.at<float>(iSample, as_integer(IDX::B)) = float(std::floor(labColor[2] + 0.5 + cv::xfeatures2d::pct_signatures::B_COLOR_RANGE) / float((cv::xfeatures2d::pct_signatures::B_COLOR_RANGE * 2) + 1));
+
+		double contrast = 0.0, entropy = 0.0;
+		grayscaleBitmap.getContrastEntropy(x, y, contrast, entropy, mWindowRadius);
+		samples.at<float>(iSample, as_integer(IDX::C))
+			= static_cast<float>(contrast / cv::xfeatures2d::pct_signatures::SAMPLER_CONTRAST_NORMALIZER * mWeights[as_integer(IDX::C)] + mTranslations[as_integer(IDX::C)]);			// contrast
+		samples.at<float>(iSample, as_integer(IDX::E))
+			= static_cast<float>(entropy / cv::xfeatures2d::pct_signatures::SAMPLER_ENTROPY_NORMALIZER * mWeights[as_integer(IDX::E)] + mTranslations[as_integer(IDX::E)]);
+
+		samples.at<float>(iSample, as_integer(IDX::MD)) = 0;
+		samples.copyTo(out);
+	}
+
+}
+
+
+void defuse::DFS2Xtractor::getMotionDirection(std::vector<uchar>& statusVector, std::vector<float>& errorVector, std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& currPoints, cv::Mat& out) const
+{
+	cv::Mat samples;
+	out.copyTo(samples);
+
+	for (int iStatus = 0; iStatus < statusVector.size(); iStatus++)
+	{
+		if (statusVector[iStatus] == 0)
 		{
-			for (int j = 0; j < int(result); j++)
-			{
-				initPoints[i*result + j] = cv::Point2f(float(i / result), float(j / result));
-			}
+			continue;
 		}
 
-		corners.clear();
-		for (std::size_t iSample = 0; iSample < initPoints.size(); iSample++)
+		cv::Point2f pA = prevPoints[iStatus];
+		cv::Point2f pB = currPoints[iStatus];
+
+		float mvX = pA.x - pB.x;
+		float mvY = pA.y - pB.y;
+
+		float powDist = pow(mvX, 2.0) + pow(mvY, 2.0);
+		float len = 0;
+		if (powDist > 0)
+			len = float(sqrt(powDist));
+
+		int direction;
+
+		mvX = -mvX;
+		/* IMPORTANT NOTE: as Y is already vice-versa-scale,
+		we cannot invert it (e.g. mvX=10, mvY=10 means we
+		have prediction 45 degree left up (and not right up
+		as in usual mathematics coordinates!) */
+
+		float angle = 0;
+		if ((mvX < 0.000001 && mvY < 0.000001) || len < 0.000001)
 		{
-			std::size_t x = std::size_t(initPoints[iSample].x * (frame.cols - 1) + 0.5);
-			std::size_t y = std::size_t(initPoints[iSample].y * (frame.rows - 1) + 0.5);
-
-			corners.push_back(cv::Point(x, y));
-
-			samples.at<float>(iSample, as_integer(IDX::X)) = float(double(x) / double(frame.cols));	// x, y normalized
-			samples.at<float>(iSample, as_integer(IDX::Y)) = float(double(y) / double(frame.rows));
-
-			float t = float(double(iFrame) / double(framecount));;
-			samples.at<float>(iSample, as_integer(IDX::T)) = t; //t normalized
-
-			cv::Mat rgbPixel(frame, cv::Rect(x, y, 1, 1));			// get Lab pixel color
-			cv::Mat labPixel;										// placeholder -> TODO: optimize
-			rgbPixel.convertTo(rgbPixel, CV_32FC3, 1.0 / 255);		//scale it down
-			cv::cvtColor(rgbPixel, labPixel, cv::COLOR_BGR2Lab);
-			cv::Vec3f labColor = labPixel.at<cv::Vec3f>(0, 0);		// end
-
-			samples.at<float>(iSample, as_integer(IDX::L)) = float(std::floor(labColor[0] + 0.5) / float(L_COLOR_RANGE));	// Lab color normalized
-			samples.at<float>(iSample, as_integer(IDX::A)) = float(std::floor(labColor[1] + 0.5 + A_COLOR_RANGE) / float((A_COLOR_RANGE * 2) + 1));
-			samples.at<float>(iSample, as_integer(IDX::B)) = float(std::floor(labColor[2] + 0.5 + B_COLOR_RANGE) / float((B_COLOR_RANGE * 2) + 1));
-
-			samples.at<float>(iSample, as_integer(IDX::MD)) = 0;
-			samples.at<float>(iSample, as_integer(IDX::MI)) = 0;
+			direction = 0;
 		}
-
-		frame.copyTo(image);
-		cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-
-		std::vector<cv::Point2f> cornersCopy = std::vector<cv::Point2f>(corners);
-		if (iFrame > 0)
+		else
 		{
-			std::vector<uchar> status;
-			std::vector<float> error;
-
-			//try{
-			cv::calcOpticalFlowPyrLK(prevGray, gray, prevCorners, corners, status, error);
-			//}
-			//catch (std::exception& e)
-			//{
-			//	LOG_ERROR("An exception occurred during calcOpticalFlowPyrLK: " << e.what());
-			//	LOG_ERROR("Optical Flow ended with framenumber " << iFrame << " of" << framecount);
-			//	LOG_ERROR("Optical Flow ended with minute " << (iFrame / 25 / 60) << " of" << (framecount / 25 / 60));
-			//	break;
-			//}
-
-			for (int iStatus = 0; iStatus < status.size(); iStatus++)
+			if (mvX == 0)
 			{
-				if (status[iStatus] == 0)
-				{
-					continue;
-				}
-
-				cv::Point2f pA = prevCorners[iStatus];
-				cv::Point2f pB = corners[iStatus];
-
-				float mvX = pA.x - pB.x;
-				float mvY = pA.y - pB.y;
-
-				float powDist = pow(mvX, 2.0) + pow(mvY, 2.0);
-				float len = 0;
-				if (powDist > 0)
-					len = float(sqrt(powDist));
-
-				int direction;
-
-				mvX = -mvX;
-				/* IMPORTANT NOTE: as Y is already vice-versa-scale,
-				we cannot invert it (e.g. mvX=10, mvY=10 means we
-				have prediction 45 degree left up (and not right up
-				as in usual mathematics coordinates!) */
-
-				float angle = 0;
-				if ((mvX < 0.000001 && mvY < 0.000001) || len < 0.000001)
-				{
-					direction = 0;
-				}
+				if (mvY >= 0)
+					direction = 4;
 				else
-				{
-					if (mvX == 0)
-					{
-						if (mvY >= 0)
-						{
-							direction = 4;
-						}
-						else
-						{
-							direction = 10;
-						}
-
-					}
-					else
-					{
-						//TODO: CHECK CODE FOR MVY == 0 ??? (no difference for +/- mvX??)
-
-
-						angle = (float)(atan(mvY / mvX) * 180 / M_PI); //angle in degree
-
-																	   /* quadrants:
-																	   *  2 | 1
-																	   *  --+--
-																	   *  3 | 4
-																	   */
-
-						direction = 0;
-						if (mvX >= 0 && mvY >= 0) //1st quandrant
-						{
-							if (angle >= 0 && angle < 15)
-								direction = 1;
-							else if (angle >= 15 && angle < 45)
-								direction = 2;
-							else if (angle >= 45 && angle < 75)
-								direction = 3;
-							else
-								direction = 4;
-						}
-						else if (mvX < 0 && mvY >= 0) //2nd quandrant
-						{
-							if (angle <= 0 && angle > -15)
-								direction = 7;
-							else if (angle <= -15 && angle > -45)
-								direction = 6;
-							else if (angle <= -45 && angle > -75)
-								direction = 5;
-							else
-								direction = 4;
-						}
-						else if (mvX < 0 && mvY < 0) //3rd quandrant
-						{
-							if (angle >= 0 && angle < 15)
-								direction = 7;
-							else if (angle >= 15 && angle < 45)
-								direction = 8;
-							else if (angle >= 45 && angle < 75)
-								direction = 9;
-							else
-								direction = 10;
-						}
-						else //4th quadrant
-						{
-							if (angle <= 0 && angle > -15)
-								direction = 1;
-							else if (angle <= -15 && angle > -45)
-								direction = 12;
-							else if (angle <= -45 && angle > -75)
-								direction = 11;
-							else
-								direction = 10;
-						}
-					}
-				}
-
-				samples.at<float>(iStatus, as_integer(IDX::MD)) = direction / double(13);
-				samples.at<float>(iStatus, as_integer(IDX::MI)) = len;
-
-				if (samples.at<float>(iStatus, as_integer(IDX::MD)) < 0 || samples.at<float>(iStatus, as_integer(IDX::MD)) > 1)
-				{
-					LOG_FATAL("X not normelized" << samples.at<float>(iStatus, as_integer(IDX::X)));
-				}
-
-			} //end status
-		}
-
-		try
-		{
-			if (iFrame == 0)
-			{
-				backupSamples.release();
-				samples.copyTo(backupSamples);
+					direction = 10;
 			}
 			else
 			{
-				cv::vconcat(samples, backupSamples, backupSamples);
-				tsamples.release();
-				backupSamples.copyTo(tsamples);
+				//TODO: CHECK CODE FOR MVY == 0 ??? (no difference for +/- mvX??)
+				angle = (float)(atan(mvY / mvX) * 180 / M_PI); //angle in degree
+
+															   /* quadrants:
+															   *  2 | 1
+															   *  --+--
+															   *  3 | 4
+															   */
+				direction = 0;
+				if (mvX >= 0 && mvY >= 0) //1st quandrant
+				{
+					if (angle >= 0 && angle < 15)
+						direction = 1;
+					else if (angle >= 15 && angle < 45)
+						direction = 2;
+					else if (angle >= 45 && angle < 75)
+						direction = 3;
+					else
+						direction = 4;
+				}
+				else if (mvX < 0 && mvY >= 0) //2nd quandrant
+				{
+					if (angle <= 0 && angle > -15)
+						direction = 7;
+					else if (angle <= -15 && angle > -45)
+						direction = 6;
+					else if (angle <= -45 && angle > -75)
+						direction = 5;
+					else
+						direction = 4;
+				}
+				else if (mvX < 0 && mvY < 0) //3rd quandrant
+				{
+					if (angle >= 0 && angle < 15)
+						direction = 7;
+					else if (angle >= 15 && angle < 45)
+						direction = 8;
+					else if (angle >= 45 && angle < 75)
+						direction = 9;
+					else
+						direction = 10;
+				}
+				else //4th quadrant
+				{
+					if (angle <= 0 && angle > -15)
+						direction = 1;
+					else if (angle <= -15 && angle > -45)
+						direction = 12;
+					else if (angle <= -45 && angle > -75)
+						direction = 11;
+					else
+						direction = 10;
+				}
 			}
-
-		}
-		catch (std::exception& e) {
-			LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
-			LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << framecount);
-			LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (framecount / 25 / 60));
-			break;
 		}
 
-		//temporalsamples.push_back(samples);
-		prevGray = gray.clone();
-		prevCorners = std::vector<cv::Point2f>(cornersCopy);
+		samples.at<float>(iStatus, as_integer(IDX::MD)) = direction / double(13);
+		samples.copyTo(out);
+	} //end status
+}
 
-	}
+void defuse::DFS2Xtractor::getTemporalSamples(cv::Mat& tsamples, cv::Mat& signatures) const
+{
 
 	LOG_INFO("Temporal sampling finished; start to cluster");
 
@@ -365,24 +655,559 @@ defuse::Features* defuse::DFS2Xtractor::xtract(VideoBase* _videobase)
 
 	normalizeWeights(clusters);
 
-
-	cv::Mat signatures;
 	signatures.create(clusters.rows, as_integer(IDX::DIMS), clusters.type());
 	clusters.copyTo(signatures);
 
 	LOG_INFO("Temporal clustering finished.");
-
-	FeatureSignatures* fs = new FeatureSignatures(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
-	fs->mVectors = signatures;
-	video.release();
-	return fs;
 }
 
 void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const
 {
+	cv::Mat signatures;
+	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
+	int numberOfFramesPerShot = mMaxFrames;
+
+	//the shot has fewer frames than should be used
+	if (mMaxFrames > numframes)
+	{
+		//grapping starts from 0
+		numberOfFramesPerShot = numframes - 1;
+	}
+
+	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;
+	int widht = _video.get(CV_CAP_PROP_FRAME_WIDTH);
+	int height = _video.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+	initPoints = mSamplepoints->getPoints();
+	//De-Normalize
+	for (int i = 0; i < initPoints.size(); i++)
+	{
+		cv::Point p(0, 0);
+		p.x = initPoints.at(i).x * widht;
+		p.y = initPoints.at(i).y * height;
+		initPoints.at(i) = p;
+	}
+	
+	currPoints = std::vector<cv::Point2f>(initPoints);
+
+	cv::Mat frame, prevGrayFrame, grayFrame;
+
+	cv::Mat tsamples, backupSamples;
+	std::vector<cv::Mat> temporalsamples;
+	int interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+
+	//use fix number of frames per segment
+	if (mFrameSelection == 0)
+	{
+		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+
+		for (int iFrame = 0; iFrame < numframes - 1; iFrame = iFrame + interval)
+		{
+			//Vectors of samplepoints
+			cv::Mat samples;
+			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
+
+			//Capture the current frame
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+			_video.grab();
+			_video.retrieve(frame);
+
+			if (frame.empty()) continue;
+
+			//convert the frame to grayscale
+			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+			if(mVariant == 1)
+			{
+				if (prevPoints.size() != currPoints.size())
+					prevPoints = currPoints;
+			}else
+			{
+				currPoints = std::vector<cv::Point2f>(initPoints);
+			}
+
+
+			getSamples(frame, currPoints, samples);
+
+
+
+			if (iFrame > 0)
+			{
+				//Indicates wheter the flow for the corresponding features has been found
+				std::vector<uchar> statusVector;
+				statusVector.resize(currPoints.size());
+				//Indicates the error for the corresponding feature
+				std::vector<float> errorVector;
+				errorVector.resize(currPoints.size());
+
+				//cv::TermCriteria termcrit(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01);
+				//Calculate movements between previous and actual frame
+				//cv::calcOpticalFlowPyrLK( //Default Settings of FlowPyrLK
+				//	prevGrayFrame, grayFrame, prevPoints,
+				//	currPoints, statusVector, errorVector,
+				//	cv::Size(21, 21), 3, termcrit, 0, 0.0001
+				//);
+				cv::calcOpticalFlowPyrLK(
+					prevGrayFrame, grayFrame, prevPoints, 
+					currPoints, statusVector, errorVector
+				);
+				//
+				getMotionDirection(statusVector, errorVector, prevPoints, currPoints, samples);
+
+				if (display)
+				{
+					//visualize STARTs
+					cv::Mat frameCopy = frame.clone();
+					for (uint i = 0; i < statusVector.size(); i++) {
+						if (statusVector[i] != 0) {
+
+							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
+							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
+							//arrowedLine(frameCopy, p0, p1, cv::Scalar(255, 255, 255, 0), 1, CV_AA, 0,0.5);
+
+							float filter = 5;
+							if (cv::norm(p - q) < int(height / 10.0) && errorVector[i] < filter)
+							{
+								drawLine(frameCopy, p, q, 3);
+							}
+
+						}
+					}
+
+					//cv::imshow("FrameCopy", frameCopy);
+					cv::Mat sampleImg;
+					draw2DSampleSignature(frame, samples, sampleImg);
+
+					cv::Mat resFrame, resSampleImg;
+
+					cv::resize(frameCopy, resFrame, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Video Stream", resFrame);
+					cv::moveWindow("Video Stream", 0, 0);
+
+					cv::resize(sampleImg, resSampleImg, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Feature Signatures", resSampleImg);
+					cv::moveWindow("Feature Signatures", resFrame.cols + 10, 0);
+
+					int keyPressed;
+					keyPressed = cv::waitKey(5);
+
+					//visualization ENDs				
+				}
+
+				prevPoints.clear();
+			}
+
+			//temporalsamples.push_back(samples);
+
+			try
+			{
+				if (iFrame == 0)
+				{
+					backupSamples.release();
+					samples.copyTo(backupSamples);
+				}
+				else
+				{
+					cv::vconcat(samples, backupSamples, backupSamples);
+					tsamples.release();
+					backupSamples.copyTo(tsamples);
+				}
+
+			}
+			catch (std::exception& e) {
+				LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
+				LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << numframes);
+				LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (numframes / 25 / 60));
+				break;
+			}
+
+			prevGrayFrame = grayFrame.clone();
+			prevPoints = std::vector<cv::Point2f>(currPoints);
+			
+		}
+
+		getTemporalSamples(tsamples, signatures);
+
+		if (display)
+		{
+			cv::Mat signatureImg, resSignatureImg;
+			draw2DFSSignature(frame, signatures, signatureImg);
+			drawSignatureMotionDirection(signatures, signatureImg, frame.cols, frame.rows);
+
+			cv::resize(signatureImg, resSignatureImg, cv::Size(frame.cols / 2, frame.rows / 2));
+			cv::imshow("Flow-based Feature Signatures", resSignatureImg);
+			cv::moveWindow("Flow-based Feature Signatures", (resSignatureImg.cols * 2) + 10, 0);
+
+			while (cv::waitKey(1) != 27);
+
+			cv::destroyAllWindows();
+		}
+		
+
+	}
+	else if (mFrameSelection == 1)//use fix number of frames per second
+	{
+		//TODO Implement fix number per segment
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
+			return;
+	}
+	//use all frames
+	else if (mFrameSelection == 2)
+	{
+		//@TODO Implement all frames
+		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
+			return;
+	}
+	else
+	{
+		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames. Aborted!")
+			return;
+	}
+
+	if (temporalsamples.size() > mMaxFrames)
+	{
+		LOG_FATAL("Bug: More frames extracted than should be used. Aborted!")
+		return;
+	}
+
+	signatures.copyTo(_signatures);
 }
 
-void defuse::DFS2Xtractor::joinCloseClusters(cv::Mat clusters)
+//void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const
+//{
+//	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
+//	int numberOfFramesPerShot = mMaxFrames;
+//
+//	//the shot has fewer frames than should be used
+//	if (mMaxFrames > numframes)
+//	{
+//		//grapping starts from 0
+//		numberOfFramesPerShot = numframes - 1;
+//	}
+//
+//	std::vector<cv::Point2f> initPoints;
+//	std::vector<cv::Point2f> corners;
+//	std::vector<cv::Point2f> prevCorners;
+//
+//	cv::Mat gray, prevGray, image, frame;
+//
+//	cv::Mat tsamples, backupSamples;
+//	std::vector<cv::Mat> temporalsamples;
+//	int interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+//	for (int iFrame = 0; iFrame < numframes-1; iFrame = iFrame + interval)
+//	{
+//		cv::Mat samples;
+//		samples.create(mSamplepoints->getPoints().size(), as_integer(IDX::DIMS), CV_32F);
+//		_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+//		_video.grab();
+//		_video.retrieve(frame);
+//
+//		if (frame.empty())
+//			continue;
+//
+//		//Motion Direction
+//		float maxWH = MAX(frame.cols, frame.rows);
+//
+//		int samplecountPerFrame = mSamplepoints->getPoints().size();
+//		initPoints.clear();
+//		initPoints.resize(samplecountPerFrame);
+//
+//		float result = std::sqrt(samplecountPerFrame);
+//		for (int i = 0; i < int(result); i++)
+//		{
+//			for (int j = 0; j < int(result); j++)
+//			{
+//				initPoints[i*result + j] = cv::Point2f(float(i / result), float(j / result));
+//			}
+//		}
+//
+//		corners.clear();
+//		//cv::xfeatures2d::pct_signatures::GrayscaleBitmap grayscaleBitmap(frame, mGrayscaleBits);
+//		for (int iSample = 0; iSample < initPoints.size(); iSample++)
+//		{
+//			int x = int(initPoints[iSample].x * (frame.cols - 1) + 0.5);
+//			int y = int(initPoints[iSample].y * (frame.rows - 1) + 0.5);
+//
+//			corners.push_back(cv::Point(x, y));
+//
+//			samples.at<float>(iSample, as_integer(IDX::X)) = float(double(x) / double(frame.cols));	// x, y normalized
+//			samples.at<float>(iSample, as_integer(IDX::Y)) = float(double(y) / double(frame.rows));
+//
+//			float t = float(double(iFrame) / double(numframes));;
+//
+//			cv::Mat rgbPixel(frame, cv::Rect(x, y, 1, 1));			// get Lab pixel color
+//			cv::Mat labPixel;										// placeholder -> TODO: optimize
+//			rgbPixel.convertTo(rgbPixel, CV_32FC3, 1.0 / 255);		//scale it down
+//			cv::cvtColor(rgbPixel, labPixel, cv::COLOR_BGR2Lab);
+//			cv::Vec3f labColor = labPixel.at<cv::Vec3f>(0, 0);		// end
+//
+//			samples.at<float>(iSample, as_integer(IDX::L)) = float(std::floor(labColor[0] + 0.5) / float(cv::xfeatures2d::pct_signatures::L_COLOR_RANGE));	// Lab color normalized
+//			samples.at<float>(iSample, as_integer(IDX::A)) = float(std::floor(labColor[1] + 0.5 + cv::xfeatures2d::pct_signatures::A_COLOR_RANGE) / float((cv::xfeatures2d::pct_signatures::A_COLOR_RANGE * 2) + 1));
+//			samples.at<float>(iSample, as_integer(IDX::B)) = float(std::floor(labColor[2] + 0.5 + cv::xfeatures2d::pct_signatures::B_COLOR_RANGE) / float((cv::xfeatures2d::pct_signatures::B_COLOR_RANGE * 2) + 1));
+//
+//			//double contrast = 0.0, entropy = 0.0;
+//			//grayscaleBitmap.getContrastEntropy(x, y, contrast, entropy, mWindowRadius);
+//			//samples.at<float>(iSample, as_integer(IDX::C))
+//			//	= static_cast<float>(contrast / cv::xfeatures2d::pct_signatures::SAMPLER_CONTRAST_NORMALIZER * mWeights[as_integer(IDX::C)] + mTranslations[as_integer(IDX::C)]);			// contrast
+//			//samples.at<float>(iSample, as_integer(IDX::E))
+//			//	= static_cast<float>(entropy / cv::xfeatures2d::pct_signatures::SAMPLER_ENTROPY_NORMALIZER * mWeights[as_integer(IDX::E)] + mTranslations[as_integer(IDX::E)]);
+//
+//			samples.at<float>(iSample, as_integer(IDX::MD)) = 0;
+//		}
+//
+//		frame.copyTo(image);
+//		cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+//
+//		std::vector<cv::Point2f> cornersCopy = std::vector<cv::Point2f>(corners);
+//		if (iFrame > 0)
+//		{
+//			std::vector<uchar> status;
+//			std::vector<float> error;
+//
+//			//try{
+//			cv::calcOpticalFlowPyrLK(prevGray, gray, prevCorners, corners, status, error);
+//			//}
+//			//catch (std::exception& e)
+//			//{
+//			//	LOG_ERROR("An exception occurred during calcOpticalFlowPyrLK: " << e.what());
+//			//	LOG_ERROR("Optical Flow ended with framenumber " << iFrame << " of" << framecount);
+//			//	LOG_ERROR("Optical Flow ended with minute " << (iFrame / 25 / 60) << " of" << (framecount / 25 / 60));
+//			//	break;
+//			//}
+//
+//			for (int iStatus = 0; iStatus < status.size(); iStatus++)
+//			{
+//				if (status[iStatus] == 0)
+//				{
+//					continue;
+//				}
+//
+//				cv::Point2f pA = prevCorners[iStatus];
+//				cv::Point2f pB = corners[iStatus];
+//
+//				float mvX = pA.x - pB.x;
+//				float mvY = pA.y - pB.y;
+//
+//				float powDist = pow(mvX, 2.0) + pow(mvY, 2.0);
+//				float len = 0;
+//				if (powDist > 0)
+//					len = float(sqrt(powDist));
+//
+//				int direction;
+//
+//				mvX = -mvX;
+//				/* IMPORTANT NOTE: as Y is already vice-versa-scale,
+//				we cannot invert it (e.g. mvX=10, mvY=10 means we
+//				have prediction 45 degree left up (and not right up
+//				as in usual mathematics coordinates!) */
+//
+//				float angle = 0;
+//				if ((mvX < 0.000001 && mvY < 0.000001) || len < 0.000001)
+//				{
+//					direction = 0;
+//				}
+//				else
+//				{
+//					if (mvX == 0)
+//					{
+//						if (mvY >= 0)
+//						{
+//							direction = 4;
+//						}
+//						else
+//						{
+//							direction = 10;
+//						}
+//
+//					}
+//					else
+//					{
+//						//TODO: CHECK CODE FOR MVY == 0 ??? (no difference for +/- mvX??)
+//
+//
+//						angle = (float)(atan(mvY / mvX) * 180 / M_PI); //angle in degree
+//
+//																	   /* quadrants:
+//																	   *  2 | 1
+//																	   *  --+--
+//																	   *  3 | 4
+//																	   */
+//
+//						direction = 0;
+//						if (mvX >= 0 && mvY >= 0) //1st quandrant
+//						{
+//							if (angle >= 0 && angle < 15)
+//								direction = 1;
+//							else if (angle >= 15 && angle < 45)
+//								direction = 2;
+//							else if (angle >= 45 && angle < 75)
+//								direction = 3;
+//							else
+//								direction = 4;
+//						}
+//						else if (mvX < 0 && mvY >= 0) //2nd quandrant
+//						{
+//							if (angle <= 0 && angle > -15)
+//								direction = 7;
+//							else if (angle <= -15 && angle > -45)
+//								direction = 6;
+//							else if (angle <= -45 && angle > -75)
+//								direction = 5;
+//							else
+//								direction = 4;
+//						}
+//						else if (mvX < 0 && mvY < 0) //3rd quandrant
+//						{
+//							if (angle >= 0 && angle < 15)
+//								direction = 7;
+//							else if (angle >= 15 && angle < 45)
+//								direction = 8;
+//							else if (angle >= 45 && angle < 75)
+//								direction = 9;
+//							else
+//								direction = 10;
+//						}
+//						else //4th quadrant
+//						{
+//							if (angle <= 0 && angle > -15)
+//								direction = 1;
+//							else if (angle <= -15 && angle > -45)
+//								direction = 12;
+//							else if (angle <= -45 && angle > -75)
+//								direction = 11;
+//							else
+//								direction = 10;
+//						}
+//					}
+//				}
+//
+//				samples.at<float>(iStatus, as_integer(IDX::MD)) = direction / double(13);
+//
+//				if (samples.at<float>(iStatus, as_integer(IDX::MD)) < 0 || samples.at<float>(iStatus, as_integer(IDX::MD)) > 1)
+//				{
+//					LOG_FATAL("X not normelized" << samples.at<float>(iStatus, as_integer(IDX::X)));
+//				}
+//
+//			} //end status
+//		}
+//
+//		try
+//		{
+//			if (iFrame == 0)
+//			{
+//				backupSamples.release();
+//				samples.copyTo(backupSamples);
+//			}
+//			else
+//			{
+//				cv::vconcat(samples, backupSamples, backupSamples);
+//				tsamples.release();
+//				backupSamples.copyTo(tsamples);
+//			}
+//
+//		}
+//		catch (std::exception& e) {
+//			LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
+//			LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << numframes);
+//			LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (numframes / 25 / 60));
+//			break;
+//		}
+//
+//		//temporalsamples.push_back(samples);
+//		prevGray = gray.clone();
+//		prevCorners = std::vector<cv::Point2f>(cornersCopy);
+//
+//	}
+//
+//	LOG_INFO("Temporal sampling finished; start to cluster");
+//
+//	//tsamples.release();
+//	//cv::vconcat(temporalsamples, tsamples);
+//
+//	// Prepare initial centroids.
+//	cv::Mat clusters;
+//	// make seeds from the first samples 
+//	tsamples(cv::Rect(0, 0, tsamples.cols, mMaxCluster)).copyTo(clusters);
+//	// set initial weight to 1
+//	clusters(cv::Rect(as_integer(IDX::WEIGHT), 0, 1, clusters.rows)) = 1;
+//
+//	//prepare for iterating
+//
+//	joinCloseClusters(clusters);
+//	dropLightPoints(clusters);
+//
+//
+//	for (int iteration = 0; iteration < mPCTSignatures->getIterationCount(); iteration++)
+//	{
+//		// Prepare space for new centroid values.
+//		cv::Mat tmpCentroids(clusters.size(), clusters.type());
+//		tmpCentroids = 0;
+//
+//		// Clear weights for new iteration.
+//		clusters(cv::Rect(as_integer(IDX::WEIGHT), 0, 1, clusters.rows)) = 0;
+//
+//		// Compute affiliation of points and sum new coordinates for centroids.
+//		for (int iSample = 0; iSample < tsamples.rows; iSample++)
+//		{
+//			int iClosest = findClosestCluster(clusters, tsamples, iSample);
+//			for (int iDimension = 0; iDimension < as_integer(IDX::DIMS) - 1; iDimension++)
+//			{
+//				tmpCentroids.at<float>(iClosest, iDimension) += tsamples.at<float>(iSample, iDimension);
+//			}
+//			clusters.at<float>(iClosest, as_integer(IDX::WEIGHT))++;
+//		}
+//
+//		// Compute average from tmp coordinates and throw away too small clusters.
+//		int lastIdx = 0;
+//		for (int i = 0; (int)i < tmpCentroids.rows; ++i)
+//		{
+//			// Skip clusters that are too small (large-enough clusters are packed right away)
+//			if (clusters.at<float>(i, as_integer(IDX::WEIGHT)) >(iteration + 1) * mPCTSignatures->getClusterMinSize())
+//			{
+//				for (int d = 0; d < as_integer(IDX::DIMS) - 1; d++)
+//				{
+//					clusters.at<float>(lastIdx, d) = tmpCentroids.at<float>(i, d) / clusters.at<float>(i, as_integer(IDX::WEIGHT));
+//				}
+//				// weights must be compacted as well
+//				clusters.at<float>(lastIdx, as_integer(IDX::WEIGHT)) = clusters.at<float>(i, as_integer(IDX::WEIGHT));
+//				lastIdx++;
+//			}
+//		}
+//
+//		// Crop the arrays if some centroids were dropped.
+//		clusters.resize(lastIdx);
+//		if (clusters.rows == 0)
+//		{
+//			break;
+//		}
+//
+//		// Finally join clusters with too close centroids.
+//		joinCloseClusters(clusters);
+//		dropLightPoints(clusters);
+//
+//		//if (iteration % 2 == 0)
+//		//std::cout << "\t\t=>Interation Nr: " << iteration << " of " << ITERATION_COUNT << std::endl;
+//	}
+//
+//	// The result must not be empty!
+//	if (clusters.rows == 0)
+//	{
+//		singleClusterFallback(tsamples, clusters);
+//	}
+//
+//	cropClusters(clusters);
+//
+//	normalizeWeights(clusters);
+//
+//
+//	cv::Mat signatures;
+//	signatures.create(clusters.rows, as_integer(IDX::DIMS), clusters.type());
+//	clusters.copyTo(_signatures);
+//
+//
+//}
+
+void defuse::DFS2Xtractor::joinCloseClusters(cv::Mat clusters) const
 {
 	for (int i = 0; i < clusters.rows - 1; i++)
 	{
@@ -402,9 +1227,9 @@ void defuse::DFS2Xtractor::joinCloseClusters(cv::Mat clusters)
 	}
 }
 
-void defuse::DFS2Xtractor::dropLightPoints(cv::Mat& clusters)
+void defuse::DFS2Xtractor::dropLightPoints(cv::Mat& clusters) const
 {
-	std::size_t frontIdx = 0;
+	int frontIdx = 0;
 
 	// Skip leading continuous part of weighted-enough points.
 	while (frontIdx < clusters.rows && clusters.at<float>(frontIdx, as_integer(IDX::WEIGHT)) > mPCTSignatures->getDropThreshold())
@@ -413,7 +1238,7 @@ void defuse::DFS2Xtractor::dropLightPoints(cv::Mat& clusters)
 	}
 
 	// Mark first emptied position and advance front index.
-	std::size_t tailIdx = frontIdx++;
+	int tailIdx = frontIdx++;
 
 	while (frontIdx < clusters.rows)
 	{
@@ -428,11 +1253,11 @@ void defuse::DFS2Xtractor::dropLightPoints(cv::Mat& clusters)
 	clusters.resize(tailIdx);
 }
 
-std::size_t defuse::DFS2Xtractor::findClosestCluster(cv::Mat& clusters, cv::Mat& points, std::size_t pointIdx)
+int defuse::DFS2Xtractor::findClosestCluster(cv::Mat& clusters, cv::Mat& points, int pointIdx) const
 {
-	std::size_t iClosest = 0;
+	int iClosest = 0;
 	float minDistance = computeL2(clusters, 0, points, pointIdx);
-	for (std::size_t iCluster = 1; iCluster < clusters.rows; iCluster++)
+	for (int iCluster = 1; iCluster < clusters.rows; iCluster++)
 	{
 		float distance = computeL2(clusters, iCluster, points, pointIdx);
 		if (distance < minDistance)
@@ -444,7 +1269,8 @@ std::size_t defuse::DFS2Xtractor::findClosestCluster(cv::Mat& clusters, cv::Mat&
 	return iClosest;
 }
 
-void defuse::DFS2Xtractor::normalizeWeights(cv::Mat& clusters)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void defuse::DFS2Xtractor::normalizeWeights(cv::Mat& clusters) const
 {
 	// get max weight
 	float maxWeight = clusters.at<float>(0, as_integer(IDX::WEIGHT));
@@ -464,7 +1290,8 @@ void defuse::DFS2Xtractor::normalizeWeights(cv::Mat& clusters)
 	}
 }
 
-void defuse::DFS2Xtractor::singleClusterFallback(const cv::Mat& points, cv::Mat& clusters)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void defuse::DFS2Xtractor::singleClusterFallback(const cv::Mat& points, cv::Mat& clusters) const
 {
 	if (clusters.rows != 0)
 	{
@@ -476,25 +1303,25 @@ void defuse::DFS2Xtractor::singleClusterFallback(const cv::Mat& points, cv::Mat&
 	clusters.at<float>(0, as_integer(IDX::WEIGHT)) = static_cast<float>(points.rows);
 
 	// Sum all points.
-	for (std::size_t i = 0; i < points.rows; ++i)
+	for (int i = 0; i < points.rows; ++i)
 	{
-		for (std::size_t d = 0; d < as_integer(IDX::DIMS) - 1; d++)
+		for (int d = 0; d < as_integer(IDX::DIMS) - 1; d++)
 		{
 			clusters.at<float>(0, d) += points.at<float>(i, d);
 		}
 	}
 
 	// Divide centroid by number of points -> compute average in each dimension.
-	for (std::size_t i = 0; i < points.rows; ++i)
+	for (int i = 0; i < points.rows; ++i)
 	{
-		for (std::size_t d = 0; d < as_integer(IDX::DIMS) - 1; d++)
+		for (int d = 0; d < as_integer(IDX::DIMS) - 1; d++)
 		{
 			clusters.at<float>(0, d) = clusters.at<float>(0, d) / clusters.at<float>(0, as_integer(IDX::WEIGHT));
 		}
 	}
 }
 
-void defuse::DFS2Xtractor::cropClusters(cv::Mat& clusters)
+void defuse::DFS2Xtractor::cropClusters(cv::Mat& clusters) const
 {
 	if (clusters.rows > mPCTSignatures->getMaxClustersCount())
 	{
@@ -512,7 +1339,7 @@ void defuse::DFS2Xtractor::cropClusters(cv::Mat& clusters)
 	}
 }
 
-float defuse::DFS2Xtractor::computeL2(cv::Mat& _f1, int idx1, cv::Mat& _f2, int idx2)
+float defuse::DFS2Xtractor::computeL2(cv::Mat& _f1, int idx1, cv::Mat& _f2, int idx2) const
 {
 	double result = 0.0;
 
@@ -525,4 +1352,259 @@ float defuse::DFS2Xtractor::computeL2(cv::Mat& _f1, int idx1, cv::Mat& _f2, int 
 
 	result = std::sqrt(result);
 	return result;
+}
+
+void defuse::DFS2Xtractor::draw2DSampleSignature(const cv::InputArray _source, const cv::InputArray _signature, cv::OutputArray& _result) const
+{
+
+	// check source
+	if (_source.empty())
+	{
+		return;
+	}
+	cv::Mat source = _source.getMat();
+
+	// create result
+	_result.create(source.size(), source.type());
+	cv::Mat result = _result.getMat();
+
+	cv::cvtColor(result, result, CV_BGR2BGRA);
+	result.setTo(cv::Scalar(255, 255, 255, 0));
+
+	// check signature
+	if (_signature.empty())
+	{
+		return;
+	}
+	cv::Mat signature = _signature.getMat();
+
+
+
+	// compute max radius = one eigth of the length of the shorter dimension
+	int maxRadius = ((source.rows < source.cols) ? source.rows : source.cols) / 8;
+
+
+	// draw signature
+	for (int i = 0; i < signature.rows; i++)
+	{
+		cv::Vec3f labColor(
+			signature.at<float>(i, as_integer(IDX::L)) * cv::xfeatures2d::pct_signatures::L_COLOR_RANGE, // get Lab pixel color
+			signature.at<float>(i, as_integer(IDX::A)) * (cv::xfeatures2d::pct_signatures::A_COLOR_RANGE * 2) - cv::xfeatures2d::pct_signatures::A_COLOR_RANGE,		// placeholder -> TODO: optimize
+			signature.at<float>(i, as_integer(IDX::B)) * (cv::xfeatures2d::pct_signatures::B_COLOR_RANGE * 2) - cv::xfeatures2d::pct_signatures::B_COLOR_RANGE);
+		cv::Mat labPixel(1, 1, CV_32FC3);
+		labPixel.at<cv::Vec3f>(0, 0) = labColor;
+		cv::Mat rgbPixel;
+		cvtColor(labPixel, rgbPixel, cv::COLOR_Lab2BGR);
+		rgbPixel.convertTo(rgbPixel, CV_8UC4, 255);
+		rgbPixel.convertTo(rgbPixel, cv::COLOR_BGR2BGRA);
+		cv::Vec4b rgbColor = rgbPixel.at<cv::Vec4b>(0, 0);	// end
+		rgbColor[3] = 255;
+
+		// precompute variables
+		cv::Point center(signature.at<float>(i, as_integer(IDX::X)) * source.cols, signature.at<float>(i, as_integer(IDX::Y)) * source.rows);
+		int radius(maxRadius*0.05);
+
+		cv::Vec3b borderColor(0, 0, 0);
+		int borderThickness(0);
+
+		// draw filled circle
+		circle(result, center, radius, rgbColor, -1);
+		// draw circle outline
+		//circle(result, center, radius, borderColor, borderThickness);
+	}
+
+	result.copyTo(_result);
+}
+
+double defuse::DFS2Xtractor::square(int a) const
+{
+	return a * a;
+}
+
+void defuse::DFS2Xtractor::drawLine(cv::Mat& image, cv::Point p, cv::Point q, int scale) const
+{
+	//cv::Scalar lineColor = cv::Scalar(200, 255, 170, 255);
+	//cv::Scalar lineColor = cv::Scalar(230, 4, 34, 255);
+	cv::Scalar lineColor = cv::Scalar(255, 255, 255, 255);
+	int lineThickness = 1;
+
+	double angle;
+	angle = atan2(double(p.y) - q.y, double(p.x) - q.x);
+	double hypotenuse;
+	hypotenuse = sqrt(square(p.y - q.y) + square(p.x - q.x));
+
+	q.x = int(p.x - scale * hypotenuse * cos(angle));
+	q.y = int(p.y - scale* hypotenuse * sin(angle));
+
+	line(image, p, q, lineColor, lineThickness);
+
+	p.x = int(q.x + scale * 3 * cos(angle + M_PI / 4));
+	p.y = int(q.y + scale * 3 * sin(angle + M_PI / 4));
+	line(image, p, q, lineColor, lineThickness);
+	p.x = int(q.x + scale * 3 * cos(angle - M_PI / 4));
+	p.y = int(q.y + scale * 3 * sin(angle - M_PI / 4));
+	line(image, p, q, lineColor, lineThickness);
+}
+
+void defuse::DFS2Xtractor::draw2DFSSignature(cv::InputArray _source, cv::InputArray _signature, cv::OutputArray _result) const
+{
+
+	// check source
+	if (_source.empty())
+	{
+		return;
+	}
+	cv::Mat source = _source.getMat();
+
+	// create result
+	_result.create(source.size(), source.type());
+	cv::Mat result = _result.getMat();
+	//TODO original copies the source to signatures
+	//source.copyTo(result);
+	//
+	cv::cvtColor(result, result, CV_BGR2BGRA);
+	result.setTo(cv::Scalar(255, 255, 255, 0));
+
+	// check signature
+	if (_signature.empty())
+	{
+		return;
+	}
+	cv::Mat signature = _signature.getMat();
+
+
+	//if (signature.type() != CV_32F || signature.cols != indices.dim)
+	//{
+	//	CV_Error_(CV_StsBadArg, ("Invalid signature format. Type must be CV_32F and signature.cols must be %d.", indices.dim));
+	//}
+
+	// compute max radius = one eigth of the length of the shorter dimension
+	int maxRadius = ((source.rows < source.cols) ? source.rows : source.cols) / 8;
+
+
+	// draw signature
+	for (int i = 0; i < signature.rows; i++)
+	{
+		cv::Vec3f labColor(
+			signature.at<float>(i, as_integer(IDX::L)) * cv::xfeatures2d::pct_signatures::L_COLOR_RANGE, // get Lab pixel color
+			signature.at<float>(i, as_integer(IDX::A)) * (cv::xfeatures2d::pct_signatures::A_COLOR_RANGE * 2) - cv::xfeatures2d::pct_signatures::A_COLOR_RANGE,		// placeholder -> TODO: optimize
+			signature.at<float>(i, as_integer(IDX::B)) * (cv::xfeatures2d::pct_signatures::B_COLOR_RANGE * 2) - cv::xfeatures2d::pct_signatures::B_COLOR_RANGE);
+		cv::Mat labPixel(1, 1, CV_32FC3);
+		labPixel.at<cv::Vec3f>(0, 0) = labColor;
+		cv::Mat rgbPixel;
+		cvtColor(labPixel, rgbPixel, cv::COLOR_Lab2BGR);
+		rgbPixel.convertTo(rgbPixel, CV_8UC4, 255);
+		rgbPixel.convertTo(rgbPixel, cv::COLOR_BGR2BGRA);
+		cv::Vec4b rgbColor = rgbPixel.at<cv::Vec4b>(0, 0);	// end
+		rgbColor[3] = 255;
+
+		// precompute variables
+		cv::Point center(signature.at<float>(i, as_integer(IDX::X)) * source.cols, signature.at<float>(i, as_integer(IDX::Y)) * source.rows);
+		int radius(maxRadius * signature.at<float>(i, as_integer(IDX::WEIGHT)));
+
+		cv::Vec3b borderColor(0, 0, 0);
+		int borderThickness(0);
+
+		// draw filled circle
+		circle(result, center, radius, rgbColor, -1);
+		// draw circle outline
+		//circle(result, center, radius, borderColor, borderThickness);
+	}
+
+	result.copyTo(_result);
+}
+
+void defuse::DFS2Xtractor::drawSignatureMotionDirection(cv::InputArray _tempSig, cv::OutputArray _result, int _width, int _height) const
+{
+	//white background
+	cv::Mat source(_height, _width, CV_8UC4, cv::Scalar(255, 255, 255, 0));
+	cv::Mat tempSig;
+	_tempSig.copyTo(tempSig);
+
+
+	cv::Mat image;
+	_result.copyTo(image);
+
+	for (int i = 0; i < tempSig.rows; i++)
+	{
+		float x = tempSig.at<float>(i, as_integer(IDX::X));
+		float y = tempSig.at<float>(i, as_integer(IDX::Y));
+
+		int md = tempSig.at<float>(i, as_integer(IDX::MD)) * 13;
+
+		cv::Point p((x * _width), (y * _height));
+
+		cv::Point q;
+		int length = 2;
+
+		int angle = 0;
+
+		if (md == 1)
+		{
+			angle = 0;
+		}
+		else if (md == 2)
+		{
+			angle = 30;
+		}
+		else if (md == 3)
+		{
+			angle = 60;
+		}
+		else if (md == 4)
+		{
+			angle = 90;
+		}
+		else if (md == 5)
+		{
+			angle = 120;
+		}
+		else if (md == 6)
+		{
+			angle = 150;
+		}
+		else if (md == 7)
+		{
+			angle = 180;
+		}
+		else if (md == 8)
+		{
+			angle = 210;
+		}
+		else if (md == 9)
+		{
+			angle = 240;
+		}
+		else if (md == 10)
+		{
+			angle = 270;
+		}
+		else if (md == 11)
+		{
+			angle = 300;
+		}
+		else if (md == 12)
+		{
+			angle = 330;
+		}
+		else
+		{
+			q = p;
+		}
+
+
+		q.x = int(round(p.x + length * cos(angle * CV_PI / 180.0)));
+		q.y = int(round(p.y + (length * -sin(angle * CV_PI / 180.0))));
+
+
+		if (md != 0)
+		{
+			drawLine(image, p, q, 5);
+		}
+
+
+
+	}
+
+	image.copyTo(_result);
 }

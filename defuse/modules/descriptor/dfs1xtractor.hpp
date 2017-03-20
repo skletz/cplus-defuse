@@ -19,7 +19,7 @@ namespace defuse {
 	class DFS1Xtractor : public Xtractor
 	{
 	public:
-		enum class IDX { X = 0, Y, L, A, B, C, E, WEIGHT, DX_IDX, DY_IDX, DIMS };
+		enum class IDX { X1 = 0, Y2, L, A, B, C, E, WEIGHT, X1_IDX, X2_IDX, DIMS };
 
 		cv::Ptr<tpct::TPCTSignatures> mTPCTSignatures;
 

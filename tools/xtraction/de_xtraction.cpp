@@ -41,6 +41,24 @@
  *			0 = use middle frame of each segment
  *			1 = use first frame of each segment
  *			2 = use last frame of each segment
+  *		***********************************************************
+ *		TYPE: 1 = dynamic feature signatures variant 1 using trajectories
+ *		***********************************************************
+ *		-arg6: Number of Samplepoints
+ *		-arg7: Distribution
+ *			0 = RANDOM
+ *			1 = REGULAR
+ *			2 = GAUSSIAN
+ *		-arg8: Number of initial centroids <INT>
+ *		-arg9: Path to a directory of samplepoint files, if distribution is RANDOM ..\\data\\samplepoints
+ *		-arg10: Number of iterations adjustable clustering - Default: 5 <INT>
+ *		-arg11: Minimal weight adjustable clustering - Default: 2 <INT>
+ *		-arg12: Minimal distance adjustable clustering - Default: 0.01 <FLOAT>
+ *		-arg13: Frame selection
+ *			0 = use fix number of frames per segment
+ *			1 = use fix number per second
+ *			2 = use all frames
+ *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)			
  *		***********************************************************
  *		TYPE: 2 = dynamic feature signatures variant 2 using optical-flow
  *		***********************************************************
@@ -65,10 +83,9 @@
  *		-arg6: Number of samplex
  *		-arg7: Number of sampley
   *		-arg8: Frame selection
- *			0 = use middle frame of each segment
- *			1 = use fix number of frames per segment
- *			2 = use fix number per second
- *			3 = use all frames
+ *			0 = use fix number of frames per segment
+ *			1 = use fix number per second
+ *			2 = use all frames
  *		-arg9: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
  *		
  * @author skletz
@@ -109,8 +126,11 @@ Features* xtract(VideoBase* _videobase, Parameter* _parameter);
 bool serialize(Features* _features, File* _file);
 Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter);
 
+static bool display = false;
+
 int main(int argc, char **argv)
 {
+
 	if (argc < 3)
 	{
 		LOG_ERROR("xtraction: too few arguments!");
@@ -133,6 +153,7 @@ int main(int argc, char **argv)
 			static_cast<SFS1Parameter *>(paramter)->minimalWeight = std::atoi(argv[11]);
 			static_cast<SFS1Parameter *>(paramter)->minimalDistance = std::stof(argv[12]);
 			static_cast<SFS1Parameter *>(paramter)->keyframeSelection = std::atoi(argv[13]);
+			display = std::atoi(argv[14]);
 
 		}
 		else if (descriptortype == 1)
@@ -151,6 +172,7 @@ int main(int argc, char **argv)
 
 			static_cast<DFS1Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS1Parameter *>(paramter)->frames = std::atoi(argv[14]);
+			display = std::atoi(argv[15]);
 		}
 		else if (descriptortype == 2)
 		{
@@ -168,6 +190,7 @@ int main(int argc, char **argv)
 
 			static_cast<DFS2Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS2Parameter *>(paramter)->frames = std::atoi(argv[14]);
+			display = std::atoi(argv[14]);
 		}
 		else if (descriptortype == 3)
 		{
@@ -180,8 +203,7 @@ int main(int argc, char **argv)
 			
 			static_cast<MoHist1Parameter *>(paramter)->frameSelection = std::atoi(argv[8]);
 			static_cast<MoHist1Parameter *>(paramter)->frames = std::atoi(argv[9]);
-
-			extractionsettings = static_cast<MoHist1Parameter *>(paramter)->getFilename();
+			display = std::atoi(argv[10]);
 		}
 
 		//generate filename depending on the descriptor
@@ -189,7 +211,7 @@ int main(int argc, char **argv)
 
 	}
 
-
+	
 	//Init output directory
 	outputdir = new Directory(outputpath);
 
@@ -284,8 +306,8 @@ void processVideoDirectory()
 
 			VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
 			//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
-			pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
-			//xtract(videoclip, paramter);
+			//pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+			xtract(videoclip, paramter);
 
 		}
 
@@ -388,6 +410,7 @@ Features* xtract(VideoBase* _videobase, Parameter* _parameter)
 	{
 		LOG_FATAL("Extraction Method not implemented " << descriptortype);
 	}
+	xtractor->display = display;
 
 	Features* features = xtractor->xtract(_videobase);
 

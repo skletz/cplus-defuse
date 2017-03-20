@@ -12,8 +12,8 @@ namespace defuse {
 	{
 	public:
 		SFS1Parameter staticparamter;
-		int frames = 5;		//The number of frames per segment
-		int frameSelection = 1;
+		int frames = 5;		//The number of frames
+		int frameSelection = 0; //per segment
 
 		std::string get() override
 		{

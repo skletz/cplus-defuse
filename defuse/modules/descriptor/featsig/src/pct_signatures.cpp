@@ -317,6 +317,8 @@ namespace cv
 			case PCTSignatures::PointDistribution::REGULAR:
 			{
 				float result = static_cast<float>(sqrt(count));
+				//initPoints.reserve(count);
+
 				for (int i = 0; i < (int)result; i++)
 				{
 					for (int j = 0; j < (int)result; j++)
