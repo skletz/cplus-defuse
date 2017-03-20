@@ -46,6 +46,12 @@
     <Filter Include="Headerdateien\util">
       <UniqueIdentifier>{06310918-845b-4bc6-94f2-74e4c38ab559}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headerdateien\similarity">
+      <UniqueIdentifier>{39cd6f14-95fa-4008-82fa-a460a32ac866}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\similarity">
+      <UniqueIdentifier>{afc30c18-9fb8-4e91-9297-45fdd3a9ff34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="modules\descriptor\featsig\src\grayscale_bitmap.cpp">
@@ -109,6 +115,36 @@
       <Filter>Quelldateien\util</Filter>
     </ClCompile>
     <ClCompile Include="defuse_info.cpp" />
+    <ClCompile Include="modules\similarity\distance.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\evaluatedquery.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\gd1parameter.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\minkowski1.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\resultbase.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\smd1.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\smd1parameter.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\sqfd1.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\sqfd1parameter.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\similarity\mahalanobis.cpp">
+      <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="modules\descriptor\featsig\include\signatures.h">
@@ -194,6 +230,39 @@
     </ClInclude>
     <ClInclude Include="videobase.hpp">
       <Filter>Headerdateien\util</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\distance.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\evaluatedquery.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\gd1parameter.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\minkowski1.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\resultbase.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\smd1.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\smd1parameter.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\sqfd1.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\sqfd1parameter.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\mahalanobis.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\mhdparameter.hpp">
+      <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

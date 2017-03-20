@@ -149,6 +149,16 @@
     <ClCompile Include="modules\descriptor\util\samplepoints.cpp" />
     <ClCompile Include="modules\features.cpp" />
     <ClCompile Include="modules\parameter.cpp" />
+    <ClCompile Include="modules\similarity\distance.cpp" />
+    <ClCompile Include="modules\similarity\evaluatedquery.cpp" />
+    <ClCompile Include="modules\similarity\gd1parameter.cpp" />
+    <ClCompile Include="modules\similarity\mahalanobis.cpp" />
+    <ClCompile Include="modules\similarity\minkowski1.cpp" />
+    <ClCompile Include="modules\similarity\resultbase.cpp" />
+    <ClCompile Include="modules\similarity\smd1.cpp" />
+    <ClCompile Include="modules\similarity\smd1parameter.cpp" />
+    <ClCompile Include="modules\similarity\sqfd1.cpp" />
+    <ClCompile Include="modules\similarity\sqfd1parameter.cpp" />
     <ClCompile Include="modules\xtractor.cpp" />
     <ClCompile Include="videobase.cpp" />
   </ItemGroup>
@@ -179,6 +189,17 @@
     <ClInclude Include="modules\descriptor\util\samplepoints.hpp" />
     <ClInclude Include="modules\features.hpp" />
     <ClInclude Include="modules\parameter.hpp" />
+    <ClInclude Include="modules\similarity\distance.hpp" />
+    <ClInclude Include="modules\similarity\evaluatedquery.hpp" />
+    <ClInclude Include="modules\similarity\gd1parameter.hpp" />
+    <ClInclude Include="modules\similarity\mahalanobis.hpp" />
+    <ClInclude Include="modules\similarity\mhdparameter.hpp" />
+    <ClInclude Include="modules\similarity\minkowski1.hpp" />
+    <ClInclude Include="modules\similarity\resultbase.hpp" />
+    <ClInclude Include="modules\similarity\smd1.hpp" />
+    <ClInclude Include="modules\similarity\smd1parameter.hpp" />
+    <ClInclude Include="modules\similarity\sqfd1.hpp" />
+    <ClInclude Include="modules\similarity\sqfd1parameter.hpp" />
     <ClInclude Include="modules\xtractor.hpp" />
     <ClInclude Include="videobase.hpp" />
   </ItemGroup>

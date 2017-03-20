@@ -16,6 +16,16 @@
 #include "../modules/descriptor/mohist1xtractor.hpp"
 #include "../modules/descriptor/featuresignatures.hpp"
 #include "../modules/descriptor/motionhistogram.hpp"
-
+#include "../modules/similarity/resultbase.hpp"
+#include "../modules/similarity/distance.hpp"
+#include "../modules/similarity/evaluatedquery.hpp"
+#include "../modules/similarity/gd1parameter.hpp"
+#include "../modules/similarity/minkowski1.hpp"
+#include "../modules/similarity/smd1.hpp"
+#include "../modules/similarity/smd1parameter.hpp"
+#include "../modules/similarity/sqfd1.hpp"
+#include "../modules/similarity/sqfd1parameter.hpp"
+#include "../modules/similarity/mahalanobis.hpp"
+#include "../modules/similarity/mhdparameter.hpp"
 #endif
 #endif

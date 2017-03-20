@@ -1,0 +1,60 @@
+%YAML:1.0
+Dataset: data_test
+Model: SFS1
+Distance: "SMD_GD_L2_M0_D0_C0_L0.1"
+VideoID: 119
+StartFrameNr: 23499
+FrameCount: 360
+Clazz: 23
+AP: 1.
+ResultCount: 7
+Data:
+   -
+      VideoID: 119
+      StartFrameNr: 23499
+      FrameCount: 360
+      Clazz: 23
+      Distance: 0.
+      Precision: 1.
+   -
+      VideoID: 119
+      StartFrameNr: 22965
+      FrameCount: 495
+      Clazz: 23
+      Distance: 2.7508690357208252e+00
+      Precision: 1.
+   -
+      VideoID: 103
+      StartFrameNr: 78878
+      FrameCount: 521
+      Clazz: 1
+      Distance: 2.7565073966979980e+00
+      Precision: 6.6666668653488159e-01
+   -
+      VideoID: 106
+      StartFrameNr: 50629
+      FrameCount: 251
+      Clazz: 1
+      Distance: 2.8251769542694092e+00
+      Precision: 5.0000000000000000e-01
+   -
+      VideoID: 112
+      StartFrameNr: 53952
+      FrameCount: 41
+      Clazz: 1
+      Distance: 3.0349822044372559e+00
+      Precision: 4.0000000596046448e-01
+   -
+      VideoID: 138
+      StartFrameNr: 0
+      FrameCount: 700
+      Clazz: 25
+      Distance: 3.1173641681671143e+00
+      Precision: 3.3333334326744080e-01
+   -
+      VideoID: 152
+      StartFrameNr: 60701
+      FrameCount: 686
+      Clazz: 25
+      Distance: 4.3101153373718262e+00
+      Precision: 2.8571429848670959e-01

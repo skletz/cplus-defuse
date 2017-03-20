@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 	//Init output directory
 	outputdir = new Directory(outputpath);
 
-	//Logfile, init with curren timestampt
+	//Logfile, init with current timestamp
 	time_t now = time(0);
 	static char name[20];
 	strftime(name, sizeof(name), "%Y%m%d_%H%M%S", localtime(&now));
