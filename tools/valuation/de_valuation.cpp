@@ -74,6 +74,8 @@
 #include <cplusutil.h>
 #include <defuse.hpp>
 #include <random>
+#include <iomanip>
+#include <boost/format.hpp>
 using namespace defuse;
 
 static int distancemethod = 0;
@@ -101,6 +103,360 @@ static bool ranodmazieTest = false;
 static std::string csvFileMAPPath = "";
 static bool appendValues = false;
 
+//Used for directory as well as logfile name
+std::string modelname = "";
+//Output of the average precision values for statistical evaluation
+std::string apcsvfile = "";
+
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
+	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime);
+
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
+	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime);
+
+bool serialize(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, Directory* _director);
+
+bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, File* _file);
+
+bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model);
+
+Features* deserialize(std::string _file);
+
+void evaluteResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> result, int group);
+
+double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values);
+
+std::mutex m;
+std::unique_lock<std::mutex> f() {
+	std::unique_lock<std::mutex> guard(m);
+	return std::move(guard);
+}
+
+int main(int argc, char **argv)
+{
+	if (argc < 3)
+	{
+		LOG_ERROR("valuation: too few arguments!");
+	}
+	else
+	{
+		dataset = argv[1];
+		featurepath = argv[2];
+		outputpath = argv[3];
+		xtractionmethod = std::atoi(argv[4]);
+		distancemethod = std::atoi(argv[5]);
+		evaluationmethod = std::atoi(argv[6]);
+		csvFileMAPPath = argv[7];
+
+		if (distancemethod == 0)
+		{
+			distancemethodname = "Minkowski Distance";
+			distancemethodnameshort = "MD";
+
+			paramter = new GDParamter();
+			static_cast<GDParamter *>(paramter)->distance = std::atoi(argv[8]);
+
+			ranodmazieTest = std::atoi(argv[9]);
+
+		}
+		else if (distancemethod == 1)
+		{
+			distancemethodname = "Signature Matching Distance";
+			distancemethodnameshort = "SMD";
+
+			paramter = new SMDParamter();
+
+			static_cast<SMDParamter *>(paramter)->grounddistance.distance = std::atoi(argv[8]);
+			static_cast<SMDParamter *>(paramter)->matching = std::atoi(argv[9]);
+			static_cast<SMDParamter *>(paramter)->direction = std::atoi(argv[10]);
+			static_cast<SMDParamter *>(paramter)->cost = std::atoi(argv[11]);
+			static_cast<SMDParamter *>(paramter)->lambda = std::stof(argv[12]);
+
+			ranodmazieTest = std::atoi(argv[13]);
+
+		}
+		else if (distancemethod == 2)
+		{
+			distancemethodname = "Signature Quadratic Form Distance";
+			distancemethodnameshort = "SQFD";
+
+			paramter = new SQFDParamter();
+			static_cast<SQFDParamter *>(paramter)->grounddistance.distance = std::atoi(argv[8]);
+			static_cast<SQFDParamter *>(paramter)->similarity = std::atoi(argv[9]);
+			static_cast<SQFDParamter *>(paramter)->alpha = std::stof(argv[10]);
+
+			ranodmazieTest = std::atoi(argv[11]);
+
+		}else if(distancemethod == 3)
+		{
+			distancemethodname = "Mahalanobis distance";
+			distancemethodnameshort = "MHD";
+		}
+
+		evalsettings = paramter->getFilename();
+	}
+
+
+	//Init output u. feature directory
+	featuredir = new Directory(featurepath);
+	outputdir = new Directory(outputpath);
+	csvMAPValues = new File(csvFileMAPPath);
+
+	//Logfile, init with current timestamp
+	xtractsettings = featuredir->directories.at(featuredir->directories.size() - 2);
+	std::string std2 = featuredir->directories.at(featuredir->directories.size() - 1);
+
+	time_t now = time(0);
+	static char name[20]; //is also the model name
+	strftime(name, sizeof(name), "%Y%m%d_%H%M%S", localtime(&now));
+
+	std::stringstream logfile;
+	logfile << name << "_" << xtractsettings << "_" << std2 << "_" << evalsettings << "_Evaluation" << ".log";
+	Directory workingdir(".");
+	File log(workingdir.getPath(), logfile.str());
+	log.addDirectoryToPath("logs");
+
+	cpluslogger::Logger::get()->logfile(log.getFile());
+	cpluslogger::Logger::get()->filelogging(true);
+	cpluslogger::Logger::get()->perfmonitoring(true);
+
+	LOG_INFO("************************************************");
+	LOG_INFO("DeValuation-v2.0");
+	LOG_INFO("Descriptor Type: " + xtractsettings);
+	LOG_INFO("Distance Measure: " + distancemethodname);
+	LOG_INFO("Evaluation Method: " + evaluationmethod);
+	LOG_INFO("Input Directory Path: " << featurepath);
+	LOG_INFO("Output Directory: " << outputpath);
+	LOG_INFO("Logging: " << log.getFile().c_str());
+	LOG_INFO(paramter->get());
+	LOG_INFO("************************************************\n");
+
+	//size_t start = cv::getTickCount();
+	modelname = name;
+	std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(featuredir->getPath());
+	int numFeatures = 0;
+	LOG_PERFMON(PINTERIM, "Number of Features\t" << files.size());
+
+	std::vector<Features*> model;
+	std::vector<std::pair<int, Features*>> queries;
+	for (int iFile = 0; iFile < files.size(); iFile++)
+	{
+		std::string file = files.at(iFile);
+
+		Features* features = deserialize(file);
+		numFeatures++;
+		if (features == nullptr)
+		{
+			LOG_ERROR("Fatal Error: File " << file << "cannot be deserialized.");
+			LOG_ERROR("Evaluation is aborted!");
+			return EXIT_FAILURE;
+		}
+
+		//Group features by Class Attribute
+		std::pair<int, Features*> pair;
+		pair.first = features->mClazz;
+		pair.second = features;
+		queries.push_back(pair);
+		model.push_back(features);
+	}
+
+	//Group features by Class Attribute
+	std::map<int, std::vector<Features*>> groups;
+
+	for (auto it = queries.begin(); it != queries.end(); ++it) {
+		groups[(*it).first].push_back((*it).second);
+	}
+	LOG_INFO("Number of classes found: " << groups.size());
+
+	//Directory structure
+	std::stringstream dir;
+	dir << xtractsettings << "_" << std2 << "_" << evalsettings;
+	outputdir->addDirectory(dir.str());
+	LOG_DEBUG("Output Directory is initialized: " << dir.str());
+	
+	//Get the descriptor method for the exact position of the WEIGHTS
+	int skipDim = -1;
+	int idxWeight = -1;
+	if (xtractionmethod == 0)
+	{
+		idxWeight = Xtractor::as_integer(SFS1Xtractor::IDX::WEIGHT);
+		skipDim = -1;
+	}
+	else if (xtractionmethod == 1)
+	{
+		idxWeight = Xtractor::as_integer(DFS1Xtractor::IDX::WEIGHT);
+		skipDim = -1;
+	}
+	else if (xtractionmethod == 2)
+	{
+		idxWeight = Xtractor::as_integer(DFS2Xtractor::IDX::WEIGHT);
+		skipDim = -1;
+	}
+	else if (xtractionmethod == 3)
+	{
+		//MoHist has no weights
+		idxWeight = -1;
+		skipDim = -1;
+	}
+	else if (xtractionmethod == 4)
+	{
+		idxWeight = -1;
+		LOG_INFO("Extraction method 4 is not implemented.")
+	}
+
+	//Initialize distance method for the processing of the parameters
+	Distance *distance = nullptr;
+	if (distancemethod == 0)
+	{
+		distance = new Minkowski(paramter);
+	}
+	else if (distancemethod == 1)
+	{
+		distance = new SMD(paramter, idxWeight, skipDim);
+	}
+	else if (distancemethod == 2)
+	{
+		distance = new SQFD(paramter, idxWeight, skipDim);
+	}else if(distancemethod == 3)
+	{
+		//TODO Implement Mahalanobis
+		distance = new Mahalanobis();
+	}
+
+	//Output of the average precision values for statistical evaluation
+	//Distinguish between random ap values and calculated
+	std::stringstream tmp;
+	if (ranodmazieTest) {
+		std::string n = "RANDOM";
+		tmp << name << n << "_" << "Aps";
+		modelname += ("_" + n);
+	}
+	else 
+	{
+		tmp << name << "_" << dir.str() << "_" << "Aps";
+		modelname += ("_" + dir.str());
+	}
+	
+	apcsvfile = tmp.str();
+
+	//Init outputs
+	Directory outputdirParent(outputpath);
+	File* apstats = new File(outputdirParent.getPath(), apcsvfile, ".csv");
+
+	std::vector<std::pair<int, float>> class_values;
+
+	double map = evaluateMeanAveragePrecision(groups, model, distance, apstats, class_values);
+	map = map / float(groups.size());
+
+	size_t end = cv::getTickCount();
+	//double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
+	LOG_PERFMON(PRESULT, "Mean of Mean Average Precision:" << "\tSize\t" << numFeatures << "\tModel\t" << xtractsettings << "\t" << evalsettings << "\t" "\tMAP\t" << map);
+	//LOG_PERFMON(PTIME, "Execution Time of Evaluation (ms): \t" << elapsedTime * 1000.0);
+
+	addValuesMAPToCSV(csvMAPValues, class_values, map, modelname);
+
+	delete distance;
+	delete paramter;
+	delete featuredir;
+	delete outputdir;
+	delete csvMAPValues;
+	delete apstats;
+
+}
+
+double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values)
+{
+	//Output
+	std::vector<std::pair<int, float>> tmp_values;
+
+	double map = 0;
+	//Parallel processing
+	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
+
+	//Only used if randomization is true
+	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
+
+	//evalaute the mean average precision value for each group
+	for (auto it = groups.begin(); it != groups.end(); ++it)
+	{
+		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
+		std::vector<Features*> group = (*it).second;
+		float mapPerGroup = 0;
+
+		for (int iGroup = 0; iGroup < group.size(); iGroup++)
+		{
+			if (iGroup == 0)
+				printexecutiontime = true;
+			else
+				printexecutiontime = false;
+
+			Features element = *group.at(iGroup);
+			if (!ranodmazieTest)
+			{
+				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+				//compare(element, model, distance, printexecutiontime);
+			}
+			else
+			{
+				randomResults.push_back(compareRandom(element, model, distance, printexecutiontime));
+				//mapPerGroup += compareRandom(element, model, distance, printexecutiontime).first->mAPValue;
+			}
+
+		}
+
+		int currentGroup = (*it).first;
+
+		if (ranodmazieTest)
+		{
+
+			for (int iRandomResult = 0; iRandomResult < randomResults.size(); iRandomResult++)
+			{
+				mapPerGroup += randomResults.at(iRandomResult).first->mAPValue;
+				writeAveragePrecisionValue(randomResults.at(iRandomResult), apstats);
+			}
+
+			LOG_INFO("Random Test Finished for group ... " << currentGroup);
+			mapPerGroup = mapPerGroup / float(group.size());
+			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
+
+			tmp_values.push_back(std::make_pair(currentGroup, mapPerGroup));
+
+			randomResults.clear();
+			map = map + mapPerGroup;
+
+		}
+		else
+		{
+			std::unique_lock<std::mutex> guard(f());
+			LOG_INFO("Group\t" << currentGroup << "\tSize:\t" << group.size());
+			guard.unlock();
+			for (int i = 0; i < pendingFutures.size(); i++)
+			{
+				std::pair<EvaluatedQuery*, std::vector<ResultBase*>> results = pendingFutures.at(i).get();
+				mapPerGroup = mapPerGroup + results.first->mAPValue;
+
+				serialize(results, outputdir);
+
+				writeAveragePrecisionValue(results, apstats);
+			}
+			pendingFutures.clear();
+
+			mapPerGroup = mapPerGroup / float(group.size());
+
+			map = map + mapPerGroup;
+
+
+
+			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
+			tmp_values.push_back(std::make_pair(currentGroup, mapPerGroup));
+
+		}
+
+	}
+
+	class_values.swap(tmp_values);
+	return map;
+}
 
 std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
 	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime)
@@ -176,6 +532,8 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
 
 }
 
+
+
 std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime)
 {
@@ -188,21 +546,21 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 		Features* element = _model.at(iElem);
 
 
-		size_t start = cv::getTickCount();
-		//distance = computesSMD(_query, *element);
-		//distance = computesSMDBidirectinal(_query, *element);
+		size_t e1_start = cv::getTickCount();
 		distance = measure->compute(_query, *element);
 
 		if (distance < 0)
 		{
-			LOG_INFO("Error distance is small than zero " << distance);
+			LOG_ERROR("Error distance is small than zero " << distance);
 		}
 
-		size_t end = cv::getTickCount();
-		float elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
+		size_t e1_end = cv::getTickCount();
+		float elapsed_sec = (e1_end - e1_start / cv::getTickFrequency());
 
-		if (iElem == 0 && executiontime)
-			LOG_PERFMON(PTIME, "Distance: \t" << xtractsettings << "\t" << evalsettings << "\t" << "\t" << elapsedTime);
+		std::unique_lock<std::mutex> guard(f());
+		LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec);
+		guard.unlock();
+
 
 		ResultBase* result = new ResultBase();
 		result->mVideoID = element->mVideoID;
@@ -258,9 +616,6 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	apresults.second = results;
 	size_t end = cv::getTickCount();
 	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
-
-	if (executiontime)
-		LOG_PERFMON(PTIME, "Evaluation: \t" << xtractsettings << "\t" << evalsettings << "\t" "\tAverage Precision\t" << "\t" << elapsedTime);
 
 	return apresults;
 }
@@ -402,339 +757,4 @@ Features* deserialize(std::string _file)
 
 	fileStorage.release();
 	return features;
-}
-
-void evaluteResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> result, int group)
-{
-	float mapPerGroup = 0.0;
-	mapPerGroup += result.first->mAPValue;
-
-	LOG_DEBUG("End Calculation ...");
-	size_t endeval = cv::getTickCount();
-
-	LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << group << "\t" << mapPerGroup);
-}
-
-
-int main(int argc, char **argv)
-{
-	if (argc < 3)
-	{
-		LOG_ERROR("valuation: too few arguments!");
-	}
-	else
-	{
-		dataset = argv[1];
-		featurepath = argv[2];
-		outputpath = argv[3];
-		xtractionmethod = std::atoi(argv[4]);
-		distancemethod = std::atoi(argv[5]);
-		evaluationmethod = std::atoi(argv[6]);
-		csvFileMAPPath = argv[7];
-
-		if (distancemethod == 0)
-		{
-			distancemethodname = "Minkowski Distance";
-			distancemethodnameshort = "MD";
-
-			paramter = new GDParamter();
-			static_cast<GDParamter *>(paramter)->distance = std::atoi(argv[8]);
-
-			ranodmazieTest = std::atoi(argv[9]);
-
-		}
-		else if (distancemethod == 1)
-		{
-			distancemethodname = "Signature Matching Distance";
-			distancemethodnameshort = "SMD";
-
-			paramter = new SMDParamter();
-
-			static_cast<SMDParamter *>(paramter)->grounddistance.distance = std::atoi(argv[8]);
-			static_cast<SMDParamter *>(paramter)->matching = std::atoi(argv[9]);
-			static_cast<SMDParamter *>(paramter)->direction = std::atoi(argv[10]);
-			static_cast<SMDParamter *>(paramter)->cost = std::atoi(argv[11]);
-			static_cast<SMDParamter *>(paramter)->lambda = std::stof(argv[12]);
-
-			ranodmazieTest = std::atoi(argv[13]);
-
-		}
-		else if (distancemethod == 2)
-		{
-			distancemethodname = "Signature Quadratic Form Distance";
-			distancemethodnameshort = "SQFD";
-
-			paramter = new SQFDParamter();
-			static_cast<SQFDParamter *>(paramter)->grounddistance.distance = std::atoi(argv[8]);
-			static_cast<SQFDParamter *>(paramter)->similarity = std::atoi(argv[9]);
-			static_cast<SQFDParamter *>(paramter)->alpha = std::stof(argv[10]);
-
-			ranodmazieTest = std::atoi(argv[11]);
-
-		}else if(distancemethod == 3)
-		{
-			distancemethodname = "Mahalanobis distance";
-			distancemethodnameshort = "MHD";
-		}
-
-		evalsettings = paramter->getFilename();
-	}
-
-
-	//Init output u. feature directory
-	featuredir = new Directory(featurepath);
-	outputdir = new Directory(outputpath);
-	csvMAPValues = new File(csvFileMAPPath);
-
-	//Logfile, init with current timestamp
-	xtractsettings = featuredir->directories.at(featuredir->directories.size() - 2);
-	std::string std2 = featuredir->directories.at(featuredir->directories.size() - 1);
-
-	time_t now = time(0);
-	static char name[20];
-	strftime(name, sizeof(name), "%Y%m%d_%H%M%S", localtime(&now));
-
-	std::stringstream logfile;
-	logfile << name << "_" << xtractsettings << "_" << std2 << "_" << evalsettings << "_Evaluation" << ".log";
-	Directory workingdir(".");
-	File log(workingdir.getPath(), logfile.str());
-	log.addDirectoryToPath("logs");
-
-	cpluslogger::Logger::get()->logfile(log.getFile());
-	cpluslogger::Logger::get()->filelogging(true);
-	cpluslogger::Logger::get()->perfmonitoring(true);
-
-	LOG_INFO("************************************************");
-	LOG_INFO("DeValuation-v2.0");
-	LOG_INFO("Descriptor Type: " + xtractsettings);
-	LOG_INFO("Distance Measure: " + distancemethodname);
-	LOG_INFO("Evaluation Method: " + evaluationmethod);
-	LOG_INFO("Input Directory Path: " << featurepath);
-	LOG_INFO("Output Directory: " << outputpath);
-	LOG_INFO("Logging: " << log.getFile().c_str());
-	LOG_INFO(paramter->get());
-	LOG_INFO("************************************************\n");
-
-	size_t start = cv::getTickCount();
-	std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(featuredir->getPath());
-	int numFeatures = 0;
-	LOG_PERFMON(PINTERIM, "Number of Features\t" << files.size());
-
-	std::vector<Features*> model;
-	std::vector<std::pair<int, Features*>> queries;
-	for (int iFile = 0; iFile < files.size(); iFile++)
-	{
-		std::string file = files.at(iFile);
-
-		Features* mohist = deserialize(file);
-		numFeatures++;
-		if (mohist == nullptr)
-		{
-			LOG_ERROR("Fatal Error: File " << file << "cannot deserialized.");
-			LOG_ERROR("Evaluation aborted.");
-			return EXIT_FAILURE;
-		}
-
-		//Group features by Class Attribute
-		std::pair<int, Features*> pair;
-		pair.first = mohist->mClazz;
-		pair.second = mohist;
-		queries.push_back(pair);
-		model.push_back(mohist);
-	}
-
-	//Group features by Class Attribute
-	std::map<int, std::vector<Features*>> groups;
-
-	for (auto it = queries.begin(); it != queries.end(); ++it) {
-		groups[(*it).first].push_back((*it).second);
-	}
-
-
-	std::stringstream dir;
-	dir << xtractsettings << "_" << std2 << "_" << evalsettings;
-
-	outputdir->addDirectory(dir.str());
-	LOG_DEBUG("Output Dir initialization: " << dir.str());
-
-
-	double map = 0;
-	int counter = 0;
-	LOG_INFO("#Classes: " << groups.size());
-	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
-
-	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
-
-	Distance *distance = nullptr;
-	int skipDim = 0;
-	int idxWeight = -1;
-	if (xtractionmethod == 0)
-	{
-		idxWeight = Xtractor::as_integer(SFS1Xtractor::IDX::WEIGHT);
-		skipDim = -1;
-	}
-	else if (xtractionmethod == 1)
-	{
-		idxWeight = Xtractor::as_integer(DFS1Xtractor::IDX::WEIGHT);
-		skipDim = -1;
-	}
-	else if (xtractionmethod == 2)
-	{
-		idxWeight = Xtractor::as_integer(DFS2Xtractor::IDX::WEIGHT);
-		skipDim = -1;
-	}
-	else if (xtractionmethod == 3) //MoHist - No Weight
-	{
-		idxWeight = -1;
-		skipDim = -1;
-	}
-	else if (xtractionmethod == 4)
-	{
-		idxWeight = -1;
-		LOG_INFO("No idx for weights necessary!")
-	}
-
-	if (distancemethod == 0)
-	{
-		distance = new Minkowski(paramter);
-	}
-	else if (distancemethod == 1)
-	{
-		distance = new SMD(paramter, idxWeight, skipDim);
-	}
-	else if (distancemethod == 2)
-	{
-		distance = new SQFD(paramter, idxWeight, skipDim);
-	}else if(distancemethod == 3)
-	{
-		distance = new Mahalanobis();
-	}
-
-	std::string modelname = name;
-
-	//outout average precision values
-	std::stringstream apcsvfile;
-
-	if (ranodmazieTest)
-		apcsvfile << name << "RANDOM" << "_" << "Aps";
-	else
-		apcsvfile << name << "_" << dir.str() << "_" << "Aps";
-
-
-	Directory outputdirParent(outputpath);
-	File* apstats = new File(outputdirParent.getPath(), apcsvfile.str(), ".csv");
-
-
-	if (!ranodmazieTest)
-	{
-		modelname += ("_" + dir.str());
-	}
-	else
-	{
-		std::string n = "RANDOM";
-		modelname += ("_" + n);
-	}
-
-	std::vector<std::pair<int, float>> class_values;
-	//evalaute the mean average precision value for each group
-	for (auto it = groups.begin(); it != groups.end(); ++it)
-	{
-		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
-		std::vector<Features*> group = (*it).second;
-		float mapPerGroup = 0;
-
-		for (int iGroup = 0; iGroup < group.size(); iGroup++)
-		{
-			if (iGroup == 0)
-				printexecutiontime = true;
-			else
-				printexecutiontime = false;
-
-			Features element = *group.at(iGroup);
-			if (!ranodmazieTest)
-			{
-				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
-				//compare(element, model, distance, printexecutiontime);
-			}
-			else
-			{
-				randomResults.push_back(compareRandom(element, model, distance, printexecutiontime));
-				//mapPerGroup += compareRandom(element, model, distance, printexecutiontime).first->mAPValue;
-			}
-
-		}
-
-		int currentGroup = (*it).first;
-
-		if (ranodmazieTest)
-		{
-
-			for (int iRandomResult = 0; iRandomResult < randomResults.size(); iRandomResult++)
-			{
-				mapPerGroup += randomResults.at(iRandomResult).first->mAPValue;
-				writeAveragePrecisionValue(randomResults.at(iRandomResult), apstats);
-			}
-
-			LOG_INFO("Random Test Finished for group ... " << currentGroup);
-			mapPerGroup = mapPerGroup / float(group.size());
-			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
-
-			class_values.push_back(std::make_pair(currentGroup, mapPerGroup));
-
-			randomResults.clear();
-			map = map + mapPerGroup;
-
-		}
-		else
-		{
-			LOG_INFO("Group\t" << currentGroup << "\tSize:\t" << group.size());
-			//size_t starteval = cv::getTickCount();
-			//LOG_DEBUG("Waiting of pending values ...");
-			for (int i = 0; i < pendingFutures.size(); i++)
-			{
-				std::pair<EvaluatedQuery*, std::vector<ResultBase*>> results = pendingFutures.at(i).get();
-				mapPerGroup = mapPerGroup + results.first->mAPValue;
-
-				serialize(results, outputdir);
-
-				writeAveragePrecisionValue(results, apstats);
-			}
-			pendingFutures.clear();
-
-			mapPerGroup = mapPerGroup / float(group.size());
-
-			map = map + mapPerGroup;
-
-			//LOG_DEBUG("End Calculation ...");
-			//size_t endeval = cv::getTickCount();
-			//double elapsedTime = (endeval - starteval) / (cv::getTickFrequency() * 1.0f);
-
-
-			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
-			//LOG_PERFMON(PTIME, "Evaluation Time (ms): \t" << "Group \t" << currentGroup << "\t" << elapsedTime * 1000.0);
-			class_values.push_back(std::make_pair(currentGroup, mapPerGroup));
-
-		}
-
-	}
-
-	map = map / float(groups.size());
-
-	size_t end = cv::getTickCount();
-	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
-	LOG_PERFMON(PRESULT, "Mean Average Precision:" << "\tSize\t" << numFeatures << "\tModel\t" << xtractsettings << "\t" << evalsettings << "\t" "\tMAP\t" << map);
-	LOG_PERFMON(PTIME, "Execution Time of Evaluation (ms): \t" << elapsedTime * 1000.0);
-
-	//addValuesMAPToCSV(csvMAPValues, class_values, map, modelname);
-
-	delete distance;
-	delete paramter;
-
-	delete csvMAPValues;
-
-}
-
-void evaluate()
-{
-	
 }
