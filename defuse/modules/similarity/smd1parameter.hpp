@@ -1,7 +1,7 @@
 #ifndef _DEFUSE_SMD1PARAMETER_HPP_
 #define _DEFUSE_SMD1PARAMETER_HPP_
 #include "../parameter.hpp"
-#include "gd1parameter.hpp"
+#include "minkowski1parameter.hpp"
 #ifdef __cplusplus
 
 
@@ -13,7 +13,7 @@ namespace defuse {
 	{
 	public:
 
-		GDParamter grounddistance; //The distance function 2 = euclidian distance
+		MinkowskiParamter grounddistance; //The distance function 2 = euclidian distance
 		int matching = 0; //The matching strategy 0 = nearest neighbor
 		int direction = 0; //The direction 0 = bidirectionl; 1 = assymmetrisch to Q, 2 = assymmetrisch to DB
 		int cost = 0;	//The cost function

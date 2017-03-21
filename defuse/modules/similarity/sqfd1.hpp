@@ -1,5 +1,7 @@
 #ifndef _DEFUSE_SQFD1_HPP_
 #define _DEFUSE_SQFD1_HPP_
+#include "minkowski1parameter.hpp"
+#include "minkowski1.hpp"
 #ifdef __cplusplus
 
 #include <cplusutil.h>
@@ -10,7 +12,9 @@ namespace defuse {
 
 	class SQFD : public Distance
 	{
-
+	private:
+		Minkowski* mGDDistance;
+		MinkowskiParamter* mGDParam;
 	public:
 		int mGrounddistance;
 		int mSimilarity;
@@ -23,7 +27,10 @@ namespace defuse {
 		SQFD(Parameter* _parameter, int _idxWeight, int _skipDim);
 
 		float compute(Features& _f1, Features& _f2) override;
-		double computePartialSQFD(Features& _f1, Features& _f2);
+		float compute(Features& _f1, int _idx1, Features& _f2, int _idx2) const;
+		float compute(Features& _f1, int _idx1, Features& _f2, int _idx2, int skipDim) const;
+
+		double computePartialSQFD(Features& _f1, Features& _f2) const;
 	};
 }
 #endif

@@ -1,5 +1,7 @@
 #ifndef _DEFUSE_SMD1_HPP_
 #define _DEFUSE_SMD1_HPP_
+#include "minkowski1parameter.hpp"
+#include "minkowski1.hpp"
 #ifdef __cplusplus
 
 #include <cplusutil.h>
@@ -10,6 +12,10 @@ namespace defuse {
 
 	class SMD : public Distance
 	{
+	private:
+		Minkowski* mGDDistance;
+		MinkowskiParamter* mGDParam;
+	
 	public:
 		int mGrounddistance;
 		int mMatching;
@@ -25,20 +31,23 @@ namespace defuse {
 
 		float compute(Features& _f1, Features& _f2) override;
 
-		/*	_f1 Query
-		_f2 DB Element
-		*/
-		float assymmetrischQuery(Features& _f1, Features& _f2);
+		float compute(Features& _f1, int _idx1, Features& _f2, int _idx2) const;
+		float compute(Features& _f1, int _idx1, Features& _f2, int _idx2, int skipDim) const;
 
 		/*	_f1 Query
 		_f2 DB Element
 		*/
-		float assymmetrischDB(Features& _f1, Features& _f2);
+		float assymmetrischQuery(Features& _f1, Features& _f2) const;
+
+		/*	_f1 Query
+		_f2 DB Element
+		*/
+		float assymmetrischDB(Features& _f1, Features& _f2) const;
 
 
-		float bidirectional(Features& _f1, Features& _f2);
+		float bidirectional(Features& _f1, Features& _f2) const;
 
-		int nearestNeighbor(Features& _f1, int idx1, Features& _f2);
+		int nearestNeighbor(Features& _f1, int idx1, Features& _f2) const;
 
 		float weightedDistance(Features& _f1, int idx1, float distance) const;
 	};

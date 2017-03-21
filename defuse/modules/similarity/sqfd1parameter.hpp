@@ -1,7 +1,7 @@
 #ifndef _DEFUSE_SQFD1PARAMETER_HPP_
 #define _DEFUSE_SQFD1PARAMETER_HPP_
 #include "../parameter.hpp"
-#include "gd1parameter.hpp"
+#include "minkowski1parameter.hpp"
 #ifdef __cplusplus
 
 #include <string>
@@ -13,7 +13,7 @@ namespace defuse {
 	{
 	public:
 
-		GDParamter grounddistance; //The distance function 2 = euclidian distance
+		MinkowskiParamter grounddistance; //The distance function 2 = euclidian distance
 		int similarity = 0; //The similarity funciton 0 = Heuristics
 		float alpha = 1.0; //influence of cross distances
 

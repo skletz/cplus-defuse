@@ -152,8 +152,8 @@ int main(int argc, char **argv)
 			distancemethodname = "Minkowski Distance";
 			distancemethodnameshort = "MD";
 
-			paramter = new GDParamter();
-			static_cast<GDParamter *>(paramter)->distance = std::atoi(argv[8]);
+			paramter = new MinkowskiParamter();
+			static_cast<MinkowskiParamter *>(paramter)->distance = std::atoi(argv[8]);
 
 			ranodmazieTest = std::atoi(argv[9]);
 

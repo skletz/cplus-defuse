@@ -10,6 +10,10 @@ defuse::SQFD::SQFD(Parameter* _parameter, int _idxWeight, int _skipDim)
 
 	mIDXWeight = _idxWeight;
 	mSkipDim = _skipDim;
+
+	mGDParam = new MinkowskiParamter();
+	mGDParam->distance = mGrounddistance;
+	mGDDistance = new Minkowski(mGDParam);
 }
 
 float defuse::SQFD::compute(Features& _f1, Features& _f2)
@@ -37,7 +41,38 @@ float defuse::SQFD::compute(Features& _f1, Features& _f2)
 	return sqrt(result);
 }
 
-double defuse::SQFD::computePartialSQFD(Features& _f1, Features& _f2)
+float defuse::SQFD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2) const
+{
+	if (mGrounddistance == 1)
+	{
+		return mGDDistance->computeL1(_f1, _idx1, _f2, _idx2);
+	}
+	else if (mGrounddistance == 2)
+	{
+		return mGDDistance->computeL2(_f1, _idx1, _f2, _idx2);
+	}
+
+	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
+	return -1.0;
+
+}
+
+float defuse::SQFD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2, int skipDim) const
+{
+	if (mGrounddistance == 1)
+	{
+		return mGDDistance->computeL1(_f1, _idx1, _f2, _idx2, skipDim);
+	}
+	else if (mGrounddistance == 2)
+	{
+		return mGDDistance->computeL2(_f1, _idx1, _f2, _idx2, skipDim);
+	}
+
+	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
+	return -1.0;
+}
+
+double defuse::SQFD::computePartialSQFD(Features& _f1, Features& _f2) const
 {
 	float result = 0;
 	for (int i = 0; i < _f1.mVectors.rows; i++)
@@ -48,16 +83,16 @@ double defuse::SQFD::computePartialSQFD(Features& _f1, Features& _f2)
 			if (mGrounddistance == 2)
 			{
 				if (mSkipDim == -1)
-					dist = computeL2(_f1, i, _f2, j);
+					dist = compute(_f1, i, _f2, j);
 				else
-					dist = computeL2(_f1, i, _f2, j, mSkipDim);
+					dist = compute(_f1, i, _f2, j, mSkipDim);
 			}
 			else
 			{
 				if (mSkipDim == -1)
-					dist = computeL2(_f1, i, _f2, j);
+					dist = compute(_f1, i, _f2, j);
 				else
-					dist = computeL2(_f1, i, _f2, j, mSkipDim);
+					dist = compute(_f1, i, _f2, j, mSkipDim);
 			}
 
 

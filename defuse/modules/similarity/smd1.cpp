@@ -1,5 +1,6 @@
 #include "smd1.hpp"
 #include "smd1parameter.hpp"
+#include "minkowski1.hpp"
 
 defuse::SMD::SMD(Parameter* _parameter, int _idxWeight, int _skipDim)
 {
@@ -11,6 +12,11 @@ defuse::SMD::SMD(Parameter* _parameter, int _idxWeight, int _skipDim)
 
 	mIDXWeight = _idxWeight;
 	mSkipDim = _skipDim;
+	
+	mGDParam = new MinkowskiParamter();
+	mGDParam->distance = mGrounddistance;
+	mGDDistance = new Minkowski(mGDParam);
+
 }
 
 float defuse::SMD::compute(Features& _f1, Features& _f2)
@@ -32,7 +38,36 @@ float defuse::SMD::compute(Features& _f1, Features& _f2)
 	return dist;
 }
 
-float defuse::SMD::assymmetrischQuery(Features& _f1, Features& _f2)
+float defuse::SMD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2) const
+{
+	if (mGrounddistance == 1)
+	{
+		return mGDDistance->computeL1(_f1, _idx1, _f2, _idx2);
+	}
+	else if (mGrounddistance == 2)
+	{
+		return mGDDistance->computeL2(_f1, _idx1, _f2, _idx2);
+	}
+
+	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
+	return -1.0;
+}
+
+float defuse::SMD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2, int skipDim) const
+{
+	if(mGrounddistance == 1)
+	{
+		return mGDDistance->computeL1(_f1, _idx1, _f2, _idx2, skipDim);
+	}else if(mGrounddistance == 2)
+	{
+		return mGDDistance->computeL2(_f1, _idx1, _f2, _idx2, skipDim);
+	}
+
+	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
+	return -1.0;
+}
+
+float defuse::SMD::assymmetrischQuery(Features& _f1, Features& _f2) const
 {
 	double result = 0;
 
@@ -45,9 +80,9 @@ float defuse::SMD::assymmetrischQuery(Features& _f1, Features& _f2)
 			float dist = 0.0;
 
 			if (mSkipDim == -1)
-				dist = computeL2(_f1, i, _f2, j);
+				dist = compute(_f1, i, _f2, j);
 			else
-				dist = computeL2(_f1, i, _f2, j, mSkipDim);
+				dist = compute(_f1, i, _f2, j, mSkipDim);
 
 			if (mCost == 0)
 				dist = weightedDistance(_f1, i, dist);
@@ -65,7 +100,7 @@ float defuse::SMD::assymmetrischQuery(Features& _f1, Features& _f2)
 	return result;
 }
 
-float defuse::SMD::assymmetrischDB(Features& _f1, Features& _f2)
+float defuse::SMD::assymmetrischDB(Features& _f1, Features& _f2) const
 {
 	double result = 0;
 
@@ -78,9 +113,9 @@ float defuse::SMD::assymmetrischDB(Features& _f1, Features& _f2)
 			float dist = 0.0;
 
 			if (mSkipDim == -1)
-				dist = computeL2(_f2, i, _f1, j);
+				dist = compute(_f2, i, _f1, j);
 			else
-				dist = computeL2(_f2, i, _f1, j, mSkipDim);
+				dist = compute(_f2, i, _f1, j, mSkipDim);
 
 			if (mCost == 0)
 				dist = weightedDistance(_f2, i, dist);
@@ -98,7 +133,7 @@ float defuse::SMD::assymmetrischDB(Features& _f1, Features& _f2)
 	return result;
 }
 
-float defuse::SMD::bidirectional(Features& _f1, Features& _f2)
+float defuse::SMD::bidirectional(Features& _f1, Features& _f2) const
 {
 	int nrSigF1 = _f1.mVectors.rows;
 	int nrSigF2 = _f2.mVectors.rows;
@@ -112,13 +147,13 @@ float defuse::SMD::bidirectional(Features& _f1, Features& _f2)
 	for (int i = 0; i < nrSigF1; i++)
 	{
 		int closestIdx = nearestNeighbor(_f1, i, _f2);
-		distF1ToF2 = computeL2(_f1, i, _f2, closestIdx);
+		distF1ToF2 = compute(_f1, i, _f2, closestIdx);
 		costF1ToF2 += weightedDistance(_f1, i, distF1ToF2);
 
 		int closestInF1 = nearestNeighbor(_f2, closestIdx, _f1);
 		if (i == closestInF1) //current idx the same than bidirectional match found
 		{
-			float tmpDist = computeL2(_f1, i, _f2, closestIdx);
+			float tmpDist = compute(_f1, i, _f2, closestIdx);
 			costF1BetweenF2 += weightedDistance(_f1, i, tmpDist);
 		}
 	}
@@ -130,7 +165,7 @@ float defuse::SMD::bidirectional(Features& _f1, Features& _f2)
 	{
 		int closestIdx = nearestNeighbor(_f2, i, _f1);
 
-		distF2ToF1 = computeL2(_f2, i, _f1, closestIdx);
+		distF2ToF1 = compute(_f2, i, _f1, closestIdx);
 		costsF2ToF1 += weightedDistance(_f2, i, distF2ToF1);
 
 	}
@@ -144,7 +179,7 @@ float defuse::SMD::bidirectional(Features& _f1, Features& _f2)
 /*
 Returns the idx in f2 of the nearest neighbor from f1 to f2
 */
-int defuse::SMD::nearestNeighbor(Features& _f1, int idx1, Features& _f2)
+int defuse::SMD::nearestNeighbor(Features& _f1, int idx1, Features& _f2) const
 {
 	cv::Mat f2 = _f2.mVectors;
 
@@ -154,7 +189,7 @@ int defuse::SMD::nearestNeighbor(Features& _f1, int idx1, Features& _f2)
 	float minimalDist = std::numeric_limits<float>::max();
 	for (int j = 0; j < f2.rows; j++)
 	{
-		dist = computeL2(_f1, idx1, _f2, j);// *_f1.mVectors.at<float>(idx1, _f1.mVectors.cols - 1);
+		dist = compute(_f1, idx1, _f2, j);// *_f1.mVectors.at<float>(idx1, _f1.mVectors.cols - 1);
 
 		if ((dist < minimalDist))
 		{

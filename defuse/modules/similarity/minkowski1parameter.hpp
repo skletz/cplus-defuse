@@ -9,7 +9,7 @@
 namespace defuse {
 
 	//Paramters for Ground Distance
-	class GDParamter : public Parameter
+	class MinkowskiParamter : public Parameter
 	{
 	public:
 
