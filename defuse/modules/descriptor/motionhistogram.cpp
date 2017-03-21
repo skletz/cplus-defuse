@@ -1,7 +1,7 @@
 #include "motionhistogram.hpp"
 
-defuse::MotionHistogram::MotionHistogram(int _videoID, int _clazz, unsigned _startFrameNr, unsigned _frameCount)
-	:mVideoID(_videoID), mClazz(_clazz), mStartFrameNr(_startFrameNr), mFrameCount(_frameCount)
+defuse::MotionHistogram::MotionHistogram(std::string _mVideoFileName, int _videoID, int _clazz, unsigned _startFrameNr, unsigned _frameCount)
+	:mVideoFileName(_mVideoFileName), mVideoID(_videoID), mClazz(_clazz), mStartFrameNr(_startFrameNr), mFrameCount(_frameCount)
 {
 	mVectors = cv::Mat();
 }
@@ -9,6 +9,7 @@ defuse::MotionHistogram::MotionHistogram(int _videoID, int _clazz, unsigned _sta
 void defuse::MotionHistogram::write(cv::FileStorage& fs) const
 {
 	fs << "{"
+		<< "VideoFileName" << mVideoFileName
 		<< "VideoID" << static_cast<int>(mVideoID)
 		<< "StartFrameNr" << static_cast<int>(mStartFrameNr)
 		<< "FrameCount" << static_cast<int>(mFrameCount)
@@ -19,6 +20,7 @@ void defuse::MotionHistogram::write(cv::FileStorage& fs) const
 
 void defuse::MotionHistogram::read(const cv::FileNode& node)
 {
+	mVideoFileName = static_cast<std::string>(node["VideoFileName"]);
 	mVideoID = static_cast<int>(node["VideoID"]);
 	mStartFrameNr = static_cast<int>(node["StartFrameNr"]);
 	mFrameCount = static_cast<int>(node["FrameCount"]);

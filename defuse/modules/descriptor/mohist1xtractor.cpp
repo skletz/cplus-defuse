@@ -71,9 +71,9 @@ defuse::Features* defuse::MoHist1Xtractor::xtract(VideoBase* _videobase)
 
 	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
 	unsigned int framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
-	LOG_PERFMON(PINTERIM, "Execution Time (One MotionHistogram): " << "\tFrame Count\t" << framecount << "\tElapsed Time\t" << elapsedTime);
+	//LOG_PERFMON(PINTERIM, "Execution Time (One MotionHistogram): " << "\tFrame Count\t" << framecount << "\tElapsed Time\t" << elapsedTime);
 
-	MotionHistogram* motionhistogram = new MotionHistogram(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
+	MotionHistogram* motionhistogram = new MotionHistogram(_videobase->mVideoFileName, _videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
 	motionhistogram->mVectors = histogram;
 
 	//video.release();

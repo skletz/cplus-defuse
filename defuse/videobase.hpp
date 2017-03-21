@@ -11,6 +11,8 @@ namespace defuse {
 	public:
 		File* mFile = nullptr;
 
+		std::string mVideoFileName;
+
 		int mVideoID;
 
 		int mStartFrameNumber;
@@ -21,6 +23,7 @@ namespace defuse {
 		VideoBase(File* _file, int _videoID, int _startFrameNumber, int _clazz)
 			: mFile(_file)
 		{
+			mVideoFileName = _file->getFilename();
 			mVideoID = _videoID;
 			mStartFrameNumber = _startFrameNumber;
 			mClazz = _clazz;

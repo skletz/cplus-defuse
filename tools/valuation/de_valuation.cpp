@@ -17,8 +17,7 @@
 *		0 = static feature signatures (variant 1)
 *		1 = dynamic feature signatures (variant 1) //trajectories
 *		2 = dynamic feature signatures (variant 2) //optical-flow
-*		3 = motion histogram (variant 1) //direction only
-*		3 = motion histogram (variant 2) //direction incl. length
+*		3 = motion histogram (variant 1)
 *		4 = cnn (fc7 layer)
 *	-arg5: Type of Distance <INT>
 *		0 = minkowski distance

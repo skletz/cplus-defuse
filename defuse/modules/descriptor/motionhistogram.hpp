@@ -31,6 +31,8 @@ namespace defuse {
 
 		enum IDX { ZERO, R, RU_L, RU, U, LU, LU_, L, LD, LD_, D, RD, RD_ };
 
+		std::string mVideoFileName;
+
 		int mVideoID;
 
 		int mClazz; //Need for evaluations, is the same clazz like in segments
@@ -41,7 +43,7 @@ namespace defuse {
 
 		cv::Mat mVectors;
 
-		MotionHistogram(int _videoID, int _clazz, unsigned int _startFrameNr, unsigned int _frameCount);
+		MotionHistogram(std::string _mVideoFileName, int _videoID, int _clazz, unsigned int _startFrameNr, unsigned int _frameCount);
 
 		MotionHistogram() {};
 

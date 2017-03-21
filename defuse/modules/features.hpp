@@ -12,6 +12,9 @@ namespace defuse {
 	class Features
 	{
 	public:
+
+		std::string mVideoFileName;
+
 		int mVideoID;
 
 		int mClazz;
@@ -31,7 +34,7 @@ namespace defuse {
 		Features() {};
 		~Features() {};
 
-		Features(int _videoID, int _clazz, int _startFrameNr, int _frameCount);
+		Features(std::string mVideoFileName, int _videoID, int _clazz, int _startFrameNr, int _frameCount);
 	};
 
 

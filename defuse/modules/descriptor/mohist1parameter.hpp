@@ -41,6 +41,7 @@ namespace defuse {
 			st << "_" << distribution;
 			st << "_" << frameSelection;
 			st << "_" << frames;
+			//TODO when used, add also samplex and sampley
 			return st.str();
 		}
 	};

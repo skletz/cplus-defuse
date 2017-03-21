@@ -58,7 +58,7 @@ defuse::Features* defuse::DFS1Xtractor::xtract(VideoBase* _videobase)
 	double framecount = video.get(CV_CAP_PROP_FRAME_COUNT);
 	LOG_PERFMON(PINTERIM, "Execution Time (One Signature per Video): " << "\tFrame Count\t" << framecount << "\tElapsed Time\t" << elapsedTime);
 
-	FeatureSignatures* featuresignatures = new FeatureSignatures(_videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
+	FeatureSignatures* featuresignatures = new FeatureSignatures(_videobase->mVideoFileName, _videobase->mVideoID, _videobase->mClazz, _videobase->mStartFrameNumber, framecount);
 	featuresignatures->mVectors = signatures;
 
 	video.release();

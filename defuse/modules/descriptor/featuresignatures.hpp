@@ -26,6 +26,8 @@ namespace defuse {
 
 		enum IDX_BASE { X, Y, L, A, B, CONTRAST, ENTROPY, WEIGHT };
 
+		std::string mVideoFileName;
+
 		int mVideoID;
 
 		int mClazz; //Need for evaluations, is the same clazz like in segments
@@ -36,7 +38,7 @@ namespace defuse {
 
 		cv::Mat mVectors;
 
-		FeatureSignatures(int _videoID, int _clazz, unsigned int _startFrameNr, unsigned int _frameCount);
+		FeatureSignatures(std::string mVideoFileName, int _videoID, int _clazz, unsigned int _startFrameNr, unsigned int _frameCount);
 
 		FeatureSignatures() {};
 

@@ -11,17 +11,16 @@
  * Purpose: Extract a specific descriptor from a set of videos or fram a specific video file
  * Input/Output:
  *	-arg1: Name of the dataset
- *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4
- *	-arg3: Type of Input
+ *	-arg2: Type of Input
  *		0 = Path to a specific video file
  *		1 = Path to a directory of video files*		
- *	-arg4: Path to the output directory ..\\data\\features
+ *	-arg3: Path to the output directory ..\\data\\features
+  *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4	
  *	-arg5: Type of Descriptor <INT>
  *		0 = static feature signatures (variant 1)
  *		1 = dynamic feature signatures (variant 1) //trajectories
  *		2 = dynamic feature signatures (variant 2) //optical-flow
- *		3 = motion histogram (variant 1) //direction only
- *		3 = motion histogram (variant 2) //direction incl. length
+ *		3 = motion histogram (variant 1)
  *		4 = cnn (fc7 layer)
  *	-args > 5 depends on the type of the choosen descriptor 
  *		***********************************************************
@@ -272,57 +271,114 @@ int main(int argc, char **argv)
 
 void processVideoDirectory()
 {
-	std::vector<std::string> dirs = cplusutil::FileIO::getFileListFromDirectory(clipsdir->getPath());
+	std::vector<std::string> entries = cplusutil::FileIO::getFileListFromDirectory(clipsdir->getPath());
 	int numClips = 0;
-	LOG_PERFMON(PINTERIM, "Number of Categories\t" << dirs.size());
-	for (int iDir = 0; iDir < dirs.size(); iDir++)
+	LOG_PERFMON(PINTERIM, "Number of Categories\t" << entries.size());
+	for (int iEntry = 0; iEntry < entries.size(); iEntry++)
 	{
-		std::string dir = dirs.at(iDir);
+		std::string entry = entries.at(iEntry);
 
-		std::vector<std::string> clippathes = cplusutil::FileIO::getFileListFromDirectory(dir);
+		std::vector<std::string> clippathes = cplusutil::FileIO::getFileListFromDirectory(entry);
 
 		std::vector<std::future<Features*>> pendingFutures;
 
 		for (int iClipFile = 0; iClipFile < clippathes.size(); iClipFile++)
 		{
 			numClips += static_cast<int>(clippathes.size());
-
-			File* file = new File(clippathes.at(iClipFile));
-			std::string filename = file->getFilename();
-			std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
-			Directory parentdirectory(parentpath);
-
-			std::vector<std::string> parts;
-			cplusutil::String::split(filename, '_', parts);
-
-			std::vector<std::string> videoparts;
-			cplusutil::String::split(parts.at(0), '.', videoparts);
-
-			int videoID = cplusutil::String::extractIntFromString(videoparts.at(0));
-
-			unsigned int startFrameNr;
+			boost::filesystem::path isClipFileDir{ clippathes.at(iClipFile) };
+			if(boost::filesystem::is_directory(isClipFileDir))
 			{
-				std::istringstream reader(parts.at(1));
-				reader >> startFrameNr;
+				std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(isClipFileDir.string());
+
+				for(int iFile = 0; iFile < files.size(); iFile++)
+				{
+					File* file = new File(files.at(iFile));
+					std::string filename = file->getFilename();
+					std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
+					Directory parentdirectory(parentpath);
+
+					std::vector<std::string> parts;
+					cplusutil::String::split(filename, '_', parts);
+
+					std::vector<std::string> videoparts;
+					cplusutil::String::split(parts.at(0), '.', videoparts);
+
+					int videoID = cplusutil::String::extractIntFromString(videoparts.at(0));
+
+					int startFrameNr;
+					{
+							
+							std::vector<std::string> p;
+							cplusutil::String::split(parts.at(parts.size()-1), '-', p);
+							if(p.size() > 1)
+							{
+								std::string st = p.at(0) + "";
+								st += p.at(1);
+								std::istringstream reader(st);
+								reader >> startFrameNr;
+							}else
+							{
+								std::istringstream reader(parts.at(parts.size()-1)); //the last one is the framenumber
+								reader >> startFrameNr;
+
+							}	
+					}
+
+					int clazz;
+					{
+							std::istringstream reader(parentdirectory.mDirName);
+							reader >> clazz;
+					}
+
+					VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
+					//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
+
+					if(!display)
+						pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+					else
+						xtract(videoclip, paramter);
+				}					
 			}
-
-			int clazz;
-			{
-				std::istringstream reader(parentdirectory.mDirName);
-				reader >> clazz;
-			}
-
-			VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
-			//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
-
-			if(!display)
-				pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
 			else
-				xtract(videoclip, paramter);
+			{
+				File* file = new File(clippathes.at(iClipFile));
+				std::string filename = file->getFilename();
+				std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
+				Directory parentdirectory(parentpath);
 
+				std::vector<std::string> parts;
+				cplusutil::String::split(filename, '_', parts);
+
+				std::vector<std::string> videoparts;
+				cplusutil::String::split(parts.at(0), '.', videoparts);
+
+				int videoID = cplusutil::String::extractIntFromString(videoparts.at(0));
+
+				unsigned int startFrameNr;
+				{
+					std::istringstream reader(parts.at(1));
+					reader >> startFrameNr;
+				}
+
+				int clazz;
+				{
+					std::istringstream reader(parentdirectory.mDirName);
+					reader >> clazz;
+				}
+
+				VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
+				//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
+
+				if(!display)
+					pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+				else
+					xtract(videoclip, paramter);
+			}
 		}
 
-		LOG_DEBUG("Directoy\t" << dirs.at(iDir) << "\tSize:\t" << clippathes.size());
+
+
+		LOG_DEBUG("Directoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
 		size_t start = cv::getTickCount();
 		LOG_DEBUG("Waiting of pending values ...");
 		for (int i = 0; i < pendingFutures.size(); i++)
@@ -332,11 +388,11 @@ void processVideoDirectory()
 			std::stringstream stream;
 			if (descriptortype < 3)
 			{
-				stream << static_cast<FeatureSignatures *>(features)->mVideoID << "_" << static_cast<FeatureSignatures *>(features)->mStartFrameNr;
+				stream << static_cast<FeatureSignatures *>(features)->mVideoID << "_" << static_cast<FeatureSignatures *>(features)->mStartFrameNr << "_" << static_cast<FeatureSignatures *>(features)->mVideoFileName;
 			}
 			else if (descriptortype == 3)
 			{
-				stream << static_cast<MotionHistogram *>(features)->mVideoID << "_" << static_cast<MotionHistogram *>(features)->mStartFrameNr;
+				stream << static_cast<MotionHistogram *>(features)->mVideoID << "_" << static_cast<MotionHistogram *>(features)->mStartFrameNr << static_cast<MotionHistogram *>(features)->mVideoFileName;
 			}
 			else
 			{
@@ -357,11 +413,11 @@ void processVideoDirectory()
 
 
 
-		LOG_DEBUG("End Calculation ..." << "\tDirectoy\t" << dirs.at(iDir) << "\tSize:\t" << clippathes.size());
+		LOG_DEBUG("End Calculation ..." << "\tDirectoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
 		size_t end = cv::getTickCount();
 		double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
 
-		LOG_PERFMON(PINTERIM, "Execution Time (FeatureSignatures of Segmetns of Category + Serialization): ""\tCategory\t" << dirs.at(iDir) << "\tSegment Count\t" << pendingFutures.size() << "\tElapsed Time\t" << elapsedTime);
+		//LOG_PERFMON(PINTERIM, "Execution Time (FeatureSignatures of Segmetns of Category + Serialization): ""\tCategory\t" << entries.at(iEntry) << "\tSegment Count\t" << pendingFutures.size() << "\tElapsed Time\t" << elapsedTime);
 	}
 
 	LOG_PERFMON(PINTERIM, "Number of all Segments\t" << numClips);
