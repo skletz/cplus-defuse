@@ -8,5 +8,11 @@ defuse::Minkowski::Minkowski(Parameter* _parameter)
 
 float defuse::Minkowski::compute(Features& _f1, Features& _f2)
 {
-	return 0.0;
+	cv::Mat f1 = _f1.mVectors;
+	cv::Mat f2 = _f2.mVectors;
+
+	//float result = cv::norm(f1 - f2, cv::NORM_L2);
+
+	//return result;
+	return 0.0f;
 }

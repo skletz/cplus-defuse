@@ -187,7 +187,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
 							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
 
-							if (cv::norm(p - q) < int(height / 10.0) && errorVector[i] < filter)
+							if (cv::norm(p - q) < int(height / 3.0) && errorVector[i] < filter)
 							{
 								drawLine(frameCopy, p, q, 3);
 							}
@@ -199,11 +199,11 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 					//visualization ENDs				
 				}
 
-				prevPoints.clear();
+				//prevPoints.clear();
 			}
 
 			prevGrayFrame = grayFrame.clone();
-			prevPoints = std::vector<cv::Point2f>(currPoints);
+			prevPoints = std::vector<cv::Point2f>(initPoints);
 		}
 
 		if (display)

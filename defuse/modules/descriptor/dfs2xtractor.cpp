@@ -822,7 +822,7 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 			}
 
 			prevGrayFrame = grayFrame.clone();
-			prevPoints = std::vector<cv::Point2f>(currPoints);
+			prevPoints = std::vector<cv::Point2f>(initPoints);
 			
 		}
 
