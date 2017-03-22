@@ -190,6 +190,8 @@ int main(int argc, char **argv)
 		{
 			distancemethodname = "Mahalanobis distance";
 			distancemethodnameshort = "MHD";
+
+			ranodmazieTest = std::atoi(argv[8]);
 		}
 
 		evalsettings = paramter->getFilename();
@@ -318,7 +320,6 @@ int main(int argc, char **argv)
 		distance = new SQFD(paramter, idxWeight, skipDim);
 	}else if(distancemethod == 3)
 	{
-		//TODO Implement Mahalanobis
 		distance = new Mahalanobis();
 	}
 
@@ -392,8 +393,8 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 			Features element = *group.at(iGroup);
 			if (!ranodmazieTest)
 			{
-				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
-				//compare(element, model, distance, printexecutiontime);
+				//pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+				compare(element, model, distance, printexecutiontime);
 			}
 			else
 			{
