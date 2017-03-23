@@ -52,6 +52,9 @@ defuse::MoHist1Xtractor::MoHist1Xtractor(Parameter* _parameter)
 		mFixSampling = false;
 	}
 
+	maxLenght = 3.0;
+	mFilterLength = 5;
+
 }
 
 defuse::Features* defuse::MoHist1Xtractor::xtract(VideoBase* _videobase)
@@ -82,8 +85,6 @@ defuse::Features* defuse::MoHist1Xtractor::xtract(VideoBase* _videobase)
 
 void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, cv::OutputArray _histogram)
 {
-	float filter = 5;
-
 	cv::Mat outputhistogram;
 	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
 	int numberOfFramesPerShot = mMaxFrames;
@@ -96,7 +97,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 	}
 
 	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;
-	int widht = _video.get(CV_CAP_PROP_FRAME_WIDTH);
+	int width = _video.get(CV_CAP_PROP_FRAME_WIDTH);
 	int height = _video.get(CV_CAP_PROP_FRAME_HEIGHT);
 
 
@@ -105,7 +106,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 	for (int i = 0; i < initPoints.size(); i++)
 	{
 		cv::Point p(0, 0);
-		p.x = initPoints.at(i).x * widht;
+		p.x = initPoints.at(i).x * width;
 		p.y = initPoints.at(i).y * height;
 		initPoints.at(i) = p;
 	}
@@ -162,15 +163,15 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 				std::vector<float> errorVector;
 				errorVector.resize(currPoints.size());
 
-				int width = frame.cols;
-				int height = frame.rows;
+				//int width = frame.cols;
+				//int height = frame.rows;
 
 
 				//Calculate movements between previous and actual frame
 				cv::calcOpticalFlowPyrLK(prevGrayFrame, grayFrame, prevPoints, currPoints, statusVector, errorVector);
 
 				cv::Mat motionHist;
-				extractMotionHistogram(statusVector, prevPoints, currPoints, width, height, motionHist);
+				extractMotionHistogram(statusVector, errorVector, prevPoints, currPoints, width, height, motionHist);
 
 				if (iFrame == interval)
 					motionHist.copyTo(outputhistogram);
@@ -181,13 +182,14 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 				{
 					//visualize STARTs
 					cv::Mat frameCopy = frame.clone();
-					for (uint i = 0; i < statusVector.size(); i++) {
+					for (uint i = 0; i < statusVector.size(); i++) 
+					{
 						if (statusVector[i] != 0) {
 
 							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
 							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
-
-							if (cv::norm(p - q) < int(height / 3.0) && errorVector[i] < filter)
+							//
+							if (cv::norm(p - q) < int(height / maxLenght) && errorVector[i] < mFilterLength)
 							{
 								drawLine(frameCopy, p, q, 3);
 							}
@@ -217,7 +219,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 	outputhistogram.copyTo(_histogram);
 }
 
-void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist) const
+void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, std::vector<float> error, std::vector<cv::Point2f> prevCorner, std::vector<cv::Point2f> corner, int width, int height, cv::Mat& motionHist) const
 {
 	//float *motionDir = new float[13];
 	//float *motionLen = new float[13]; //averaged by MAX(width/height)
@@ -266,6 +268,15 @@ void defuse::MoHist1Xtractor::extractMotionHistogram(std::vector<uchar> status, 
 
 			float mvX = pA.x - pB.x;
 			float mvY = pA.y - pB.y;
+
+			//Filter to length motion vector, the same as displayed
+			//Skip to length motion vectors
+			if (cv::norm(pA - pB) < int(height / maxLenght) && error[i] < mFilterLength)
+			{
+				continue;
+			}
+
+
 
 			float powDist = pow(mvX, 2.0) + pow(mvY, 2.0);
 			float len = 0;

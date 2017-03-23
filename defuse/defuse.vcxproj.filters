@@ -115,13 +115,7 @@
       <Filter>Quelldateien\util</Filter>
     </ClCompile>
     <ClCompile Include="defuse_info.cpp" />
-    <ClCompile Include="modules\similarity\distance.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
     <ClCompile Include="modules\similarity\evaluatedquery.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\gd1parameter.cpp">
       <Filter>Quelldateien\similarity</Filter>
     </ClCompile>
     <ClCompile Include="modules\similarity\minkowski1.cpp">
@@ -133,16 +127,10 @@
     <ClCompile Include="modules\similarity\smd1.cpp">
       <Filter>Quelldateien\similarity</Filter>
     </ClCompile>
-    <ClCompile Include="modules\similarity\smd1parameter.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
     <ClCompile Include="modules\similarity\sqfd1.cpp">
       <Filter>Quelldateien\similarity</Filter>
     </ClCompile>
-    <ClCompile Include="modules\similarity\sqfd1parameter.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\mahalanobis.cpp">
+    <ClCompile Include="modules\similarity\mahalanobis1.cpp">
       <Filter>Quelldateien\similarity</Filter>
     </ClCompile>
   </ItemGroup>
@@ -237,9 +225,6 @@
     <ClInclude Include="modules\similarity\evaluatedquery.hpp">
       <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\gd1parameter.hpp">
-      <Filter>Headerdateien\similarity</Filter>
-    </ClInclude>
     <ClInclude Include="modules\similarity\minkowski1.hpp">
       <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
@@ -258,10 +243,13 @@
     <ClInclude Include="modules\similarity\sqfd1parameter.hpp">
       <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\mahalanobis.hpp">
+    <ClInclude Include="modules\similarity\minkowski1parameter.hpp">
       <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\mhdparameter.hpp">
+    <ClInclude Include="modules\similarity\mahalanobis1parameter.hpp">
+      <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\similarity\mahalanobis1.hpp">
       <Filter>Headerdateien\similarity</Filter>
     </ClInclude>
   </ItemGroup>
