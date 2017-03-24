@@ -132,6 +132,12 @@ Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter);
 
 static bool display = false;
 
+std::mutex m;
+std::unique_lock<std::mutex> f() {
+	std::unique_lock<std::mutex> guard(m);
+	return std::move(guard);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -233,6 +239,17 @@ int main(int argc, char **argv)
 	File log(workingdir.getPath(), logfile.str());
 	log.addDirectoryToPath("logs");
 
+	//Log input paramters for later usages
+	LOG_INFO("Input Parameter");
+	std::string cmd = "";
+	for (int i = 0; i < argc; i++)
+	{
+		cmd += argv[i];
+		cmd += " ";
+
+	}
+	LOG_INFO(cmd);
+
 	LOG_INFO("************************************************");
 	LOG_INFO("DeXtraction-v2.0");
 	LOG_INFO("Used Feature: " + descriptorname + "\n");
@@ -284,12 +301,13 @@ void processVideoDirectory()
 
 		for (int iClipFile = 0; iClipFile < clippathes.size(); iClipFile++)
 		{
-			numClips += static_cast<int>(clippathes.size());
+			
 			boost::filesystem::path isClipFileDir{ clippathes.at(iClipFile) };
 			if(boost::filesystem::is_directory(isClipFileDir))
 			{
 				std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(isClipFileDir.string());
 
+				numClips += static_cast<int>(files.size());
 				for(int iFile = 0; iFile < files.size(); iFile++)
 				{
 					File* file = new File(files.at(iFile));
@@ -342,6 +360,8 @@ void processVideoDirectory()
 			else
 			{
 				File* file = new File(clippathes.at(iClipFile));
+				numClips += static_cast<int>(clippathes.size());
+
 				std::string filename = file->getFilename();
 				std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
 				Directory parentdirectory(parentpath);
@@ -480,7 +500,15 @@ Features* xtract(VideoBase* _videobase, Parameter* _parameter)
 	}
 	xtractor->display = display;
 
+
+	size_t e1_start = cv::getTickCount();
 	Features* features = xtractor->xtract(_videobase);
+	size_t e1_end = cv::getTickCount();
+	float elapsed_sec = (e1_end - e1_start / cv::getTickFrequency());
+
+	std::unique_lock<std::mutex> guard(f());
+	LOG_PERFMON(PTIME, "Computation-Time: Extaction \t" << extractionsettings << "\t" << elapsed_sec);
+	guard.unlock();
 
 	delete xtractor;
 	return features;

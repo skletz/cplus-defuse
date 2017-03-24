@@ -10,6 +10,35 @@ defuse::Minkowski::Minkowski(Parameter* _parameter)
 
 float defuse::Minkowski::compute(Features& _f1, Features& _f2)
 {
+	float result = 0;
+
+	if(mDistance == 1)
+	{
+		result = computeL1(_f1, _f2);
+	}else if(mDistance == 2)
+	{
+		result = computeL2(_f1, _f2);
+	}else
+	{
+		LOG_FATAL("Distance greater than 2 are not implemented! Aborted");
+		result = -10000.0;
+	}
+
+	return result;
+}
+
+float defuse::Minkowski::computeL1(Features& _f1, Features& _f2) const
+{
+	cv::Mat f1 = _f1.mVectors;
+	cv::Mat f2 = _f2.mVectors;
+
+	float result = cv::norm(f1 - f2, cv::NORM_L1);
+
+	return result;
+}
+
+float defuse::Minkowski::computeL2(Features& _f1, Features& _f2) const
+{
 	cv::Mat f1 = _f1.mVectors;
 	cv::Mat f2 = _f2.mVectors;
 

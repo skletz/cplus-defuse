@@ -53,7 +53,7 @@ float defuse::SQFD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2) 
 	}
 
 	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
-	return -1.0;
+	return -10000.0;
 
 }
 
@@ -69,7 +69,7 @@ float defuse::SQFD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2, 
 	}
 
 	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
-	return -1.0;
+	return -10000.0;
 }
 
 double defuse::SQFD::computePartialSQFD(Features& _f1, Features& _f2) const

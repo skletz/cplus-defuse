@@ -221,6 +221,17 @@ int main(int argc, char **argv)
 	cpluslogger::Logger::get()->filelogging(true);
 	cpluslogger::Logger::get()->perfmonitoring(true);
 
+	//Log input paramters for later usages
+	LOG_INFO("Input Parameter");
+	std::string cmd = "";
+	for(int i = 0; i < argc; i++)
+	{
+		cmd += argv[i];
+		cmd += " ";
+
+	}
+	LOG_INFO(cmd);
+
 	LOG_INFO("************************************************");
 	LOG_INFO("DeValuation-v2.0");
 	LOG_INFO("Descriptor Type: " + xtractsettings);
@@ -376,13 +387,15 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 	//Only used if randomization is true
 	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
 
+	
 	//evalaute the mean average precision value for each group
 	for (auto it = groups.begin(); it != groups.end(); ++it)
 	{
 		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
 		std::vector<Features*> group = (*it).second;
 		float mapPerGroup = 0;
-
+		std::string name = "MAP ";
+		name += std::to_string(group.size());
 		for (int iGroup = 0; iGroup < group.size(); iGroup++)
 		{
 			if (iGroup == 0)
@@ -393,8 +406,8 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 			Features element = *group.at(iGroup);
 			if (!ranodmazieTest)
 			{
-				//pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
-				compare(element, model, distance, printexecutiontime);
+				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+				//compare(element, model, distance, printexecutiontime);
 			}
 			else
 			{
@@ -438,6 +451,11 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 				serialize(results, outputdir);
 
 				writeAveragePrecisionValue(results, apstats);
+
+
+				std::unique_lock<std::mutex> guard(f());
+				cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
+				guard.unlock();
 			}
 			pendingFutures.clear();
 
@@ -541,6 +559,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	results.reserve(_model.size());
 
 	float distance = 0.0;
+	float elapsed_sec = 0.0;
 	for (int iElem = 0; iElem < _model.size(); iElem++)
 	{
 		Features* element = _model.at(iElem);
@@ -555,12 +574,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 		}
 
 		size_t e1_end = cv::getTickCount();
-		float elapsed_sec = (e1_end - e1_start / cv::getTickFrequency());
-
-		std::unique_lock<std::mutex> guard(f());
-		LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec);
-		guard.unlock();
-
+		elapsed_sec += (e1_end - e1_start / cv::getTickFrequency());
 
 		ResultBase* result = new ResultBase();
 		result->mVideoID = element->mVideoID;
@@ -571,6 +585,10 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 
 		results.push_back(result);
 	}
+
+	std::unique_lock<std::mutex> guard(f());
+	LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << _model.size() << "\t"  << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec / float(_model.size()));
+	guard.unlock();
 
 	std::sort(results.begin(), results.end(), [](const ResultBase* s1, const ResultBase* s2)
 	{

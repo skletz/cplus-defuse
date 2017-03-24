@@ -50,7 +50,7 @@ float defuse::SMD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2) c
 	}
 
 	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
-	return -1.0;
+	return -10000.0;
 }
 
 float defuse::SMD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2, int skipDim) const
@@ -64,7 +64,7 @@ float defuse::SMD::compute(Features& _f1, int _idx1, Features& _f2, int _idx2, i
 	}
 
 	LOG_FATAL("Minkowski distance greater than 2 are not implemented. Aborted!");
-	return -1.0;
+	return -10000.0;
 }
 
 float defuse::SMD::assymmetrischQuery(Features& _f1, Features& _f2) const
