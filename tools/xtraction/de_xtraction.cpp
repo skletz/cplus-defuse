@@ -401,6 +401,9 @@ void processVideoDirectory()
 		LOG_DEBUG("Directoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
 		size_t start = cv::getTickCount();
 		LOG_DEBUG("Waiting of pending values ...");
+		std::string name = "Extraction ";
+		name += std::to_string(pendingFutures.size());
+
 		for (int i = 0; i < pendingFutures.size(); i++)
 		{
 			Features* features = pendingFutures.at(i).get();
@@ -423,6 +426,11 @@ void processVideoDirectory()
 			File* output = new File(outputdir->getPath(), stream.str(), ".yml");
 			output->addDirectoryToPath(descriptorshort);
 			output->addDirectoryToPath(extractionsettings);
+
+
+			std::unique_lock<std::mutex> guard(f());
+			cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
+			guard.unlock();
 
 			serialize(features, output);
 
