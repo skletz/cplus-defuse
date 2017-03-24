@@ -1,6 +1,8 @@
 [submodule "libs/cpluslogger"]
 	path = libs/cpluslogger
 	url = https://github.com/skletz/cpluslogger.git
+	branch = master
 [submodule "libs/cplusutil"]
 	path = libs/cplusutil
 	url = https://github.com/skletz/cplusutil.git
+	branch = master
