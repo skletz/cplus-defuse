@@ -37,6 +37,11 @@ namespace defuse {
 		int mVariant;
 
 
+		float maxLenght = 3.0; //= height / 3.0
+		int mFilterLength = 5;
+
+		int mIterations = 5;
+
 		//Contrast, Entropy - Grayscale Bitmap
 		//TODO make grayscale bits and window radius changable via parameter settings
 		int mGrayscaleBits = 5;
@@ -51,7 +56,7 @@ namespace defuse {
 		void computeSignatures(cv::VideoCapture& _video, cv::OutputArray _signatures) const;
 
 		void getSamples(cv::Mat& frame, std::vector<cv::Point2f> initPoints, cv::Mat& samples) const;
-		void getMotionDirection(std::vector<uchar>& statusVector, std::vector<float>& errorVector, std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& currPoints, cv::Mat& out) const;
+		void getMotionDirection(std::vector<uchar>& statusVector, std::vector<float>& errorVector, std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& currPoints, int height, int width, cv::Mat& out) const;
 		void getTemporalSamples(cv::Mat& samples, cv::Mat& signatures) const;
 
 
