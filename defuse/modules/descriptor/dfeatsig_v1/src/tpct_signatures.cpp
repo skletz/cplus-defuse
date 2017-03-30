@@ -1,6 +1,7 @@
 #include "tpct_signatures.hpp"
 #include <opencv2/core.hpp>
 #include "constants.h"
+#include <cpluslogger.h>
 
 using namespace analysis::tpct_signatures;
 TPCTSignatures::TPCTSignatures()
@@ -12,10 +13,14 @@ TPCTSignatures::~TPCTSignatures()
 {
 }
 
-void TPCTSignatures::computeTemporalSignature(cv::InputArrayOfArrays _staticsignatures, cv::OutputArray _temporalsignature) const
+void TPCTSignatures::computeTemporalSignature(std::vector<cv::Mat>& staticsignatures, cv::OutputArray& _temporalsignature) const
 {
-	std::vector<cv::Mat> staticsignatures;
-	_staticsignatures.getMatVector(staticsignatures);
+	//std::vector<cv::Mat> staticsignatures;
+	//_staticsignatures.getMatVector(staticsignatures);
+
+	if(staticsignatures.size() == 0) {
+		LOG_INFO("Static signatures are zero - cannot track motion");
+	}
 
 	for (int i = 0; i < staticsignatures.size(); i++)
 	{

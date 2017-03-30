@@ -15,7 +15,7 @@ namespace analysis
 
 			TPCTSignatures();
 			~TPCTSignatures();
-			void computeTemporalSignature(cv::InputArray& _staticsignature, cv::OutputArray& _temporalsignature) const;
+			void computeTemporalSignature(std::vector<cv::Mat>& staticsignatures, cv::OutputArray& _temporalsignature) const;
 			void enlarge(cv::InputArray& _staticsignature, cv::OutputArray& _temporalsignature) const;
 
 			static float computeQuadraticFormDistance(const cv::InputArray signature0, const cv::InputArray signature1, const cv::xfeatures2d::pct_signatures::Similarity &similarity = cv::xfeatures2d::pct_signatures::HeuristicSimilarity());

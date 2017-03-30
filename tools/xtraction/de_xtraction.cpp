@@ -98,6 +98,7 @@
 **/
 
 #include <future>
+#include <chrono>
 #include <cpluslogger.h>
 #include <cplusutil.h>
 #include <defuse.hpp>
@@ -123,12 +124,12 @@ static Directory* clipsdir = nullptr;
 static File* videoFile = nullptr; //In the case of the input is only one video file
 static Directory* outputdir = nullptr;
 
-void processVideoDirectory();
-void processVideoFile();
+void processVideoDirectory(Xtractor* xtractor);
+void processVideoFile(Xtractor* xtractor);
 
-Features* xtract(VideoBase* _videobase, Parameter* _parameter);
-bool serialize(Features* _features, File* _file);
-Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter);
+Features* xtract(VideoBase* _videobase, Xtractor* xtractor);
+bool serialize(Features* _features, File _file);
+Features* extractVideo(Directory* dir, File* videofile, Xtractor* xtractor);
 
 static bool display = false;
 
@@ -260,23 +261,48 @@ int main(int argc, char **argv)
 	LOG_INFO("************************************************\n");
 
 
+	Xtractor* xtractor = nullptr;
+
+	if (descriptortype == 0)
+	{
+		xtractor = new SFS1Xtractor(paramter);
+	}
+	else if (descriptortype == 1)
+	{
+		xtractor = new DFS1Xtractor(paramter);
+	}
+	else if (descriptortype == 2)
+	{
+		xtractor = new DFS2Xtractor(paramter);
+	}
+	else if (descriptortype == 3)
+	{
+		xtractor = new MoHist1Xtractor(paramter);
+	}
+	else
+	{
+		LOG_FATAL("Extraction Method not implemented " << descriptortype);
+	}
+
+	xtractor->display = display;
+
 	if (videopathIsDirectory)
 	{
 		clipsdir = new Directory(videopath);
 		cpluslogger::Logger::get()->logfile(log.getFile());
 		cpluslogger::Logger::get()->filelogging(true);
 		cpluslogger::Logger::get()->perfmonitoring(true);
-		processVideoDirectory();
+		processVideoDirectory(xtractor);
 
 	}
 	else
 	{
 		videoFile = new File(videopath);
 		clipsdir = new Directory(videoFile->getFile().substr(0, videoFile->getFile().find_last_of("/\\")));
-		processVideoFile();
+		processVideoFile(xtractor);
 	}
 
-
+	delete xtractor;
 	delete paramter;
 	delete outputdir;
 
@@ -286,7 +312,7 @@ int main(int argc, char **argv)
 	return EXIT_SUCCESS;
 }
 
-void processVideoDirectory()
+void processVideoDirectory(Xtractor* xtractor)
 {
 	std::vector<std::string> entries = cplusutil::FileIO::getFileListFromDirectory(clipsdir->getPath());
 	int numClips = 0;
@@ -352,9 +378,9 @@ void processVideoDirectory()
 					//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
 
 					if(!display)
-						pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+						pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
 					else
-						xtract(videoclip, paramter);
+						xtract(videoclip, xtractor);
 				}					
 			}
 			else
@@ -389,17 +415,17 @@ void processVideoDirectory()
 				VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
 				//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
 
-				if(!display)
-					pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, paramter));
+				if (!display)
+					pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
 				else
-					xtract(videoclip, paramter);
+					xtract(videoclip, xtractor);
+					
 			}
 		}
 
 
 
 		LOG_DEBUG("Directoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
-		size_t start = cv::getTickCount();
 		LOG_DEBUG("Waiting of pending values ...");
 		std::string name = "Extraction ";
 		name += std::to_string(pendingFutures.size());
@@ -423,9 +449,9 @@ void processVideoDirectory()
 			}
 
 
-			File* output = new File(outputdir->getPath(), stream.str(), ".yml");
-			output->addDirectoryToPath(descriptorshort);
-			output->addDirectoryToPath(extractionsettings);
+			File output(outputdir->getPath(), stream.str(), ".yml");
+			output.addDirectoryToPath(descriptorshort);
+			output.addDirectoryToPath(extractionsettings);
 
 
 			std::unique_lock<std::mutex> guard(f());
@@ -434,18 +460,12 @@ void processVideoDirectory()
 
 			serialize(features, output);
 
-			delete output;
+			//delete output;
 			delete features;
 		}
 
-
-
-
 		LOG_DEBUG("End Calculation ..." << "\tDirectoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
-		size_t end = cv::getTickCount();
-		double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
 
-		//LOG_PERFMON(PINTERIM, "Execution Time (FeatureSignatures of Segmetns of Category + Serialization): ""\tCategory\t" << entries.at(iEntry) << "\tSegment Count\t" << pendingFutures.size() << "\tElapsed Time\t" << elapsedTime);
 	}
 
 	LOG_PERFMON(PINTERIM, "Number of all Segments\t" << numClips);
@@ -454,9 +474,9 @@ void processVideoDirectory()
 		getchar();
 }
 
-void processVideoFile()
+void processVideoFile(Xtractor* xtractor)
 {
-	Features* features = extractVideo(clipsdir, videoFile, paramter);
+	Features* features = extractVideo(clipsdir, videoFile, xtractor);
 	std::stringstream stream;
 	if (descriptortype < 3)
 	{
@@ -472,60 +492,44 @@ void processVideoFile()
 	}
 
 
-	File* output = new File(outputdir->getPath(), stream.str(), ".yml");
-	output->addDirectoryToPath(descriptorshort);
-	output->addDirectoryToPath(extractionsettings);
+	File output(outputdir->getPath(), stream.str(), ".yml");
+	output.addDirectoryToPath(descriptorshort);
+	output.addDirectoryToPath(extractionsettings);
 
 	serialize(features, output);
 
-	delete output;
+	//delete output;
 	delete features;
 }
 
-Features* xtract(VideoBase* _videobase, Parameter* _parameter)
+Features* xtract(VideoBase* _videobase, Xtractor* xtractor)
 {
-	Xtractor* xtractor = nullptr;
-
-	if (descriptortype == 0)
-	{
-		xtractor = new SFS1Xtractor(_parameter);
-	}
-	else if (descriptortype == 1)
-	{
-		xtractor = new DFS1Xtractor(_parameter);
-	}
-	else if (descriptortype == 2)
-	{
-		xtractor = new DFS2Xtractor(_parameter);
-	}
-	else if (descriptortype == 3)
-	{
-		xtractor = new MoHist1Xtractor(_parameter);
-	}
-	else
-	{
-		LOG_FATAL("Extraction Method not implemented " << descriptortype);
-	}
-	xtractor->display = display;
-
-
+	
+	
 	size_t e1_start = cv::getTickCount();
+	auto w0_begin = std::chrono::steady_clock::now();
+
 	Features* features = xtractor->xtract(_videobase);
+
+	auto w1_end = std::chrono::steady_clock::now();
 	size_t e1_end = cv::getTickCount();
-	float elapsed_sec = (e1_end - e1_start / cv::getTickFrequency());
+
+	double elapsed_secs = (e1_end - e1_start) / cv::getTickFrequency();
+	double wall_clock = std::chrono::duration_cast<
+		std::chrono::duration<double> >(w1_end - w0_begin).count();
 
 	std::unique_lock<std::mutex> guard(f());
-	LOG_PERFMON(PTIME, "Computation-Time: Extaction \t" << extractionsettings << "\t" << elapsed_sec);
+	LOG_PERFMON(PTIME, "Computation-Time (secs): Extaction \t" << extractionsettings << "\t" << elapsed_secs << "\t" << wall_clock);
 	guard.unlock();
 
-	delete xtractor;
+
 	return features;
 }
 
-bool serialize(Features* _features, File* _file)
+bool serialize(Features* _features, File _file)
 {
 	int featurecount = 1;
-	cv::FileStorage fs(_file->getFile(), cv::FileStorage::WRITE);
+	cv::FileStorage fs(_file.getFile(), cv::FileStorage::WRITE);
 
 	if (!fs.isOpened()) {
 		LOG_ERROR("Error in serialization of Video: Invalid file " << "");
@@ -536,7 +540,6 @@ bool serialize(Features* _features, File* _file)
 	fs << "Model" << extractionsettings;
 	fs << "FeatureCount" << static_cast<int>(featurecount);
 	fs << "Data" << "[";
-
 
 	if (descriptortype < 3)
 	{
@@ -551,14 +554,13 @@ bool serialize(Features* _features, File* _file)
 		LOG_FATAL("Extraction Method not implemented " << descriptortype);
 	}
 
-
 	fs << "]";
 	fs.release();
 
 	return true;
 }
 
-Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter)
+Features* extractVideo(Directory* dir, File* videofile, Xtractor* xtractor)
 {
 	File* file = videofile;
 	std::string filename = file->getFilename();
@@ -585,7 +587,7 @@ Features* extractVideo(Directory* dir, File* videofile, Parameter* paramter)
 
 	VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
 
-	Features* feature = xtract(videoclip, paramter);
+	Features* feature = xtract(videoclip, xtractor);
 
 	return feature;
 }

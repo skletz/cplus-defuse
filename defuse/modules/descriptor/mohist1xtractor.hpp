@@ -49,6 +49,8 @@ namespace defuse {
 		void drawLine(cv::Mat& image, cv::Point p, cv::Point q, int scale);
 
 		double square(int a);
+		
+		//void showMotionHistogram(cv::Mat& motionHist, bool showLength);
 	};
 
 }

@@ -69,6 +69,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 {
 	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
 	int numberOfFramesPerShot = mMaxFrames;
+	//LOG_ERROR("Number of Frames " << numframes);
 
 	//the shot has fewer frames than shuld be used
 	if (mMaxFrames > numframes)
@@ -84,15 +85,21 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	if (mFrameSelection == 0) 
 	{
 		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
+		//LOG_INFO("Video Length " << numframes);
 
-		for (int iFrame = 0; iFrame < numframes-1; iFrame = iFrame + interval)
+		for (int iFrame = 0; iFrame < (numframes - interval); iFrame = iFrame + interval)
 		{
 			cv::Mat image, signatures;
 			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
 			_video.grab();
 			_video.retrieve(image);
 
-			mPCTSignatures->computeSignature(image, signatures);
+			if (!image.empty())
+				mPCTSignatures->computeSignature(image, signatures);
+			else
+			{
+				LOG_ERROR("Image at " << iFrame << " was empty");
+			}
 
 			//use all frames that exists
 			if (interval == 0)
@@ -102,6 +109,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 
 			if (!signatures.empty())
 				sampledsignatures.push_back(signatures);
+
 		}
 
 	}
@@ -130,7 +138,6 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	if(sampledsignatures.size() > mMaxFrames)
 	{
 		LOG_FATAL("Bug: More frames extracted than should be used. Aborted!")
-		return;
 	}
 
 	tSignatures.copyTo(_signatures);

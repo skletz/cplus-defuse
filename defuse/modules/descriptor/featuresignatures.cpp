@@ -10,7 +10,7 @@ defuse::FeatureSignatures::FeatureSignatures(std::string _mVideoFileName, int _v
 void defuse::FeatureSignatures::write(cv::FileStorage& fs) const
 {
 	fs << "{"
-		<< "VideoFileName" << mVideoFileName
+		//<< "VideoFileName" << mVideoFileName
 		<< "VideoID" << static_cast<int>(mVideoID)
 		<< "StartFrameNr" << static_cast<int>(mStartFrameNr)
 		<< "FrameCount" << static_cast<int>(mFrameCount)

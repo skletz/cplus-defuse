@@ -427,3 +427,29 @@ double defuse::MoHist1Xtractor::square(int a)
 {
 	return a * a;
 }
+
+/*void showMotionHistogram(cv::Mat& motionHist, bool showLength)
+{
+	// Draw the histograms Direction and Length
+	int hist_w = 854; int hist_h = 480;
+	
+	/// Establish the number of bins
+	int histSize = 25; //13 MD + 13 Length + 1 No direction
+	int bin_w = cvRound( (double) hist_w/histSize );
+	
+	cv::Mat histImage( hist_h, hist_w, cv::CV_8UC3, cv::Scalar( 0,0,0) );
+
+	/// Draw for each dimension
+	for( int i = 1; i < histSize; i++ )
+	{
+	  line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ) ,
+					   Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
+					   Scalar( 255, 0, 0), 2, 8, 0  );
+					   
+	  line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ) ,
+					   Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
+					   Scalar( 0, 255, 0), 2, 8, 0  );
+	}
+	
+	
+}*/

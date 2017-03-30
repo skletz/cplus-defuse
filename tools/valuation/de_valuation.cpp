@@ -387,7 +387,6 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 	//Only used if randomization is true
 	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
 
-	
 	//evalaute the mean average precision value for each group
 	for (auto it = groups.begin(); it != groups.end(); ++it)
 	{
@@ -451,7 +450,6 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 				serialize(results, outputdir);
 
 				writeAveragePrecisionValue(results, apstats);
-
 
 				std::unique_lock<std::mutex> guard(f());
 				cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
@@ -587,7 +585,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	}
 
 	std::unique_lock<std::mutex> guard(f());
-	LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << _model.size() << "\t"  << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec / float(_model.size()));
+	LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << _model.size() << "\t" << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec / float(_model.size()));
 	guard.unlock();
 
 	std::sort(results.begin(), results.end(), [](const ResultBase* s1, const ResultBase* s2)
