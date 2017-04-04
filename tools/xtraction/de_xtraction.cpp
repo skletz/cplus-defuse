@@ -54,9 +54,10 @@
  *		-arg11: Minimal weight adjustable clustering - Default: 2 <INT>
  *		-arg12: Minimal distance adjustable clustering - Default: 0.01 <FLOAT>
  *		-arg13: Frame selection
- *			0 = use fix number of frames per segment
- *			1 = use fix number per second
- *			2 = use all frames
+ *			0 = use fix number of frames per segment (v1)
+ *			1 = use fix number of frames per segment (v2)
+ *			2 = use fix number per second
+ *			3 = use all frames
  *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)			
  *		***********************************************************
  *		TYPE: 2 = dynamic feature signatures variant 2 using optical-flow
@@ -72,9 +73,10 @@
  *		-arg11: Minimal weight adjustable clustering - Default: 2 <INT>
  *		-arg12: Minimal distance adjustable clustering - Default: 0.01 <FLOAT>
  *		-arg13: Frame selection
- *			0 = use fix number of frames per segment
- *			1 = use fix number per second
- *			2 = use all frames
+ *			0 = use fix number of frames per segment (v1)
+ *			1 = use fix number of frames per segment (v2)
+ *			2 = use fix number per second
+ *			3 = use all frames
  *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)
  *		***********************************************************
  *		TYPE: 3 = motion histogram variant 1
@@ -86,9 +88,10 @@
  *			2 = GAUSSIAN
   *		-arg8: Path to a directory of samplepoint files, if distribution is RANDOM ..\\data\\samplepoints			
  *		-arg9: Frame selection
- *			0 = use fix number of frames per segment
- *			1 = use fix number per second
- *			2 = use all frames
+ *			0 = use fix number of frames per segment (v1)
+ *			1 = use fix number of frames per segment (v2)
+ *			2 = use fix number per second
+ *			3 = use all frames
  *		-arg10: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
  *		-arg11: samplex
  *		-arg12: sampley
@@ -153,6 +156,7 @@ int main(int argc, char **argv)
 		videopath = argv[3];
 		outputpath = argv[4];
 		descriptortype = std::atoi(argv[5]);
+		
 
 		if (descriptortype == 0) //Default static feature signatures variant 1
 		{
@@ -218,6 +222,10 @@ int main(int argc, char **argv)
 			static_cast<MoHist1Parameter *>(paramter)->samplex = std::atoi(argv[11]);
 			static_cast<MoHist1Parameter *>(paramter)->sampley = std::atoi(argv[12]);
 			display = std::atoi(argv[13]);
+
+			Directory tmp(outputpath);
+			tmp.addDirectory("images");
+			static_cast<MoHist1Parameter *>(paramter)->imgOutputPath = tmp.getPath();
 		}
 
 		//generate filename depending on the descriptor

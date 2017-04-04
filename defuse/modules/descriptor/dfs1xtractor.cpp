@@ -81,12 +81,22 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	std::vector<cv::Mat> sampledsignatures;
 
 	int interval = 0;
+	int counter = 0;
+	int limit = 0;
+
 	//use fix number of frames per segment
 	if (mFrameSelection == 0) 
 	{
 		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
-		//LOG_INFO("Video Length " << numframes);
 
+		if (numframes % mMaxFrames == 0)
+		{
+			limit = numframes - 1;
+		}
+		else
+		{
+			limit = (interval * mMaxFrames) - 1;
+		}
 		for (int iFrame = 0; iFrame < (numframes - interval); iFrame = iFrame + interval)
 		{
 			cv::Mat image, signatures;

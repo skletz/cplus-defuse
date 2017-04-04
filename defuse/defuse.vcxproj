@@ -114,7 +114,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\defuse\include;..\libs\cplusutil\build\include;..\libs\cpluslogger\build\include;$(OpenCV_DIR)\include;$(Boost_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\opencv-histlib\include;..\defuse\include;..\libs\cplusutil\build\include;..\libs\cpluslogger\build\include;$(OpenCV_DIR)\include;$(Boost_DIR)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -130,6 +130,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\libs\opencv-histlib\src\histLib.cpp" />
     <ClCompile Include="defuse_info.cpp" />
     <ClCompile Include="modules\descriptor\dfeatsig_v1\src\tpct_signatures.cpp" />
     <ClCompile Include="modules\descriptor\dfs1parameter.cpp" />

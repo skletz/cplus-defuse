@@ -38,6 +38,10 @@ namespace defuse {
 		float maxLenght = 3.0; //= height / 3.0
 		int mFilterLength = 5;
 
+		std::string imgOutputPath;
+		std::string videoImgOutputpath = "";
+		std::string currentVideoFile = "";
+
 		MoHist1Xtractor(Parameter* _parameter);
 
 		Features* xtract(VideoBase* _videobase) override;
@@ -50,7 +54,7 @@ namespace defuse {
 
 		double square(int a);
 		
-		//void showMotionHistogram(cv::Mat& motionHist, bool showLength);
+		void drawMotionHistogram(cv::Mat& motionHist, bool showLength, cv::Mat& histImage);
 	};
 
 }

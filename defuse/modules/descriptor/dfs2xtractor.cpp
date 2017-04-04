@@ -367,13 +367,23 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	cv::Mat tsamples, backupSamples;
 	std::vector<cv::Mat> temporalsamples;
 	int interval = 0;
+	int counter = 0;
+	int limit = 0;
 
 	//use fix number of frames per segment
 	if (mFrameSelection == 0)
 	{
 		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
 
-		for (int iFrame = 0; iFrame  < (numframes - interval); iFrame = iFrame + interval)
+		if (numframes % mMaxFrames == 0)
+		{
+			limit = numframes - 1;
+		}
+		else
+		{
+			limit = (interval * mMaxFrames) - 1;
+		}
+		for (int iFrame = 0; iFrame  < limit; iFrame = iFrame + interval)
 		{
 			//Vectors of samplepoints
 			cv::Mat samples;

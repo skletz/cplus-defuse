@@ -52,6 +52,9 @@
     <Filter Include="Quelldateien\similarity">
       <UniqueIdentifier>{afc30c18-9fb8-4e91-9297-45fdd3a9ff34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="OpenCV-Histlib">
+      <UniqueIdentifier>{f9ae9ba4-2f4d-4c0a-b2e7-0daa19978201}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="modules\descriptor\featsig\src\grayscale_bitmap.cpp">
@@ -132,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="modules\similarity\mahalanobis1.cpp">
       <Filter>Quelldateien\similarity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\opencv-histlib\src\histLib.cpp">
+      <Filter>OpenCV-Histlib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

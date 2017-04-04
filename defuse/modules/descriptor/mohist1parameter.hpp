@@ -24,6 +24,8 @@ namespace defuse {
 		int samplex;
 		int sampley;
 
+		std::string imgOutputPath = "";
+
 		std::string get() override
 		{
 			std::stringstream st;
