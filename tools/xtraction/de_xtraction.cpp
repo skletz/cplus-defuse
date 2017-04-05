@@ -55,9 +55,9 @@
  *		-arg12: Minimal distance adjustable clustering - Default: 0.01 <FLOAT>
  *		-arg13: Frame selection
  *			0 = use fix number of frames per segment (v1)
- *			1 = use fix number of frames per segment (v2)
- *			2 = use fix number per second
- *			3 = use all frames
+ *			1 = use fix number per second
+ *			2 = use all frames
+ *			3 = use fix number of frames per segment (v2)
  *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)			
  *		***********************************************************
  *		TYPE: 2 = dynamic feature signatures variant 2 using optical-flow
@@ -185,6 +185,7 @@ int main(int argc, char **argv)
 			static_cast<DFS1Parameter *>(paramter)->staticparamter.minimalWeight = std::atoi(argv[11]);
 			static_cast<DFS1Parameter *>(paramter)->staticparamter.minimalDistance = std::stof(argv[12]);
 
+			LOG_INFO("Frame Selection " << std::atoi(argv[13]));
 			static_cast<DFS1Parameter *>(paramter)->frameSelection = std::atoi(argv[13]);
 			static_cast<DFS1Parameter *>(paramter)->frames = std::atoi(argv[14]);
 			display = std::atoi(argv[15]);

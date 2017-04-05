@@ -11,6 +11,8 @@ namespace defuse {
 	{
 	public:
 
+		std::string mVideoFileName;
+
 		int mVideoID;
 
 		int mClazz;

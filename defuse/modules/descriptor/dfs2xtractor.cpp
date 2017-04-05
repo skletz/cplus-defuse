@@ -344,6 +344,7 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	{
 		//grapping starts from 0
 		numberOfFramesPerShot = numframes - 1;
+		LOG_ERROR("Video Segment is smaller than max frames");
 	}
 
 	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;

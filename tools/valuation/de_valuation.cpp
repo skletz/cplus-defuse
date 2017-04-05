@@ -26,8 +26,8 @@
 *		3 = mahalanobis distance
 *	-arg6: Evaluation Method
 *		0 = mean average precision
-*		1 = precision/recall@k
-*		2 = random
+*		1 = random mean average precision
+*		2 = precision/recall@k
 *	-arg7: Path to CSV File AP Values ..\\data\\log-evaluation-maps.csv
 *	-args > 8 depends on the type of the choosen distance, evaluation method
 *	***********************************************************
@@ -63,6 +63,7 @@
 *	***********************************************************
 *	TYPE: 2 = mahalanobis distance
 *	***********************************************************
+*	
 * @author skletz
 * @version 2.0 13/03/17
 *
@@ -80,12 +81,12 @@ using namespace defuse;
 static int distancemethod = 0;
 static int xtractionmethod = 0;
 static int evaluationmethod = 0;
+static int atKValue = 3;
 static std::string distancemethodname = "signature matching distance";
 static std::string distancemethodnameshort = "SMD1";
 
 static std::string evlautionmethodname = "mean average precision";
-static std::string evaluationmethodnameshort = "MAP";
-
+static std::string evaluationmethodnameshort = "MAP-R@k-P@k";
 static Parameter* paramter = new SFS1Parameter();
 
 static std::string evalsettings = "";
@@ -98,7 +99,6 @@ static Directory* outputdir = nullptr;
 static File* csvMAPValues = nullptr; 
 
 static std::string dataset = "data_test-v1_0";
-static bool ranodmazieTest = false;
 static std::string csvFileMAPPath = "";
 static bool appendValues = false;
 
@@ -117,13 +117,19 @@ bool serialize(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, Di
 
 bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, File* _file);
 
-bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model);
+bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model, std::string type);
 
 Features* deserialize(std::string _file);
 
 void evaluteResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> result, int group);
 
-double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values);
+double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, 	std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values);
+void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float>>& class_values);
+
+void evaluteRecallPrecisionAtk()
+{
+	
+}
 
 std::mutex m;
 std::unique_lock<std::mutex> f() {
@@ -155,7 +161,7 @@ int main(int argc, char **argv)
 			paramter = new MinkowskiParamter();
 			static_cast<MinkowskiParamter *>(paramter)->distance = std::atoi(argv[8]);
 
-			ranodmazieTest = std::atoi(argv[9]);
+			atKValue = std::atoi(argv[9]);
 
 		}
 		else if (distancemethod == 1)
@@ -171,7 +177,7 @@ int main(int argc, char **argv)
 			static_cast<SMDParamter *>(paramter)->cost = std::atoi(argv[11]);
 			static_cast<SMDParamter *>(paramter)->lambda = std::stof(argv[12]);
 
-			ranodmazieTest = std::atoi(argv[13]);
+			atKValue = std::atoi(argv[13]);
 
 		}
 		else if (distancemethod == 2)
@@ -184,14 +190,14 @@ int main(int argc, char **argv)
 			static_cast<SQFDParamter *>(paramter)->similarity = std::atoi(argv[9]);
 			static_cast<SQFDParamter *>(paramter)->alpha = std::stof(argv[10]);
 
-			ranodmazieTest = std::atoi(argv[11]);
+			atKValue = std::atoi(argv[11]);
 
 		}else if(distancemethod == 3)
 		{
 			distancemethodname = "Mahalanobis distance";
 			distancemethodnameshort = "MHD";
 
-			ranodmazieTest = std::atoi(argv[8]);
+			atKValue = std::atoi(argv[8]);
 		}
 
 		evalsettings = paramter->getFilename();
@@ -337,7 +343,7 @@ int main(int argc, char **argv)
 	//Output of the average precision values for statistical evaluation
 	//Distinguish between random ap values and calculated
 	std::stringstream tmp;
-	if (ranodmazieTest) {
+	if (evaluationmethod == 1) {
 		std::string n = "RANDOM";
 		tmp << name << n << "_" << "Aps";
 		modelname += ("_" + n);
@@ -354,17 +360,52 @@ int main(int argc, char **argv)
 	Directory outputdirParent(outputpath);
 	File* apstats = new File(outputdirParent.getPath(), apcsvfile, ".csv");
 
-	std::vector<std::pair<int, float>> class_values;
+	std::vector<std::pair<int, float>> classMapValues;
+	//std::vector<std::pair<int, float>> classPrecisionValues;
+	//std::vector<std::pair<int, float>> classRecallValues;
 
-	double map = evaluateMeanAveragePrecision(groups, model, distance, apstats, class_values);
-	map = map / float(groups.size());
+	if(evaluationmethod == 0)
+	{
+		std::vector<std::pair<int, float>> classMapValues;
+		double map = evaluateMeanAveragePrecision(groups, model, distance, apstats, classMapValues);
+		map = map / float(groups.size());
+		LOG_PERFMON(PRESULT, "Mean of Mean Average Precision:" << "\tSize\t" << numFeatures << "\tModel\t" << xtractsettings << "\t" << evalsettings << "\t" "\tMAP\t" << map);
+		addValuesMAPToCSV(csvMAPValues, classMapValues, map, modelname, "MAP");
 
-	size_t end = cv::getTickCount();
-	//double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
-	LOG_PERFMON(PRESULT, "Mean of Mean Average Precision:" << "\tSize\t" << numFeatures << "\tModel\t" << xtractsettings << "\t" << evalsettings << "\t" "\tMAP\t" << map);
-	//LOG_PERFMON(PTIME, "Execution Time of Evaluation (ms): \t" << elapsedTime * 1000.0);
+	}
+	else if (evaluationmethod == 2)
+	{
+		std::vector<std::pair<int, float>> classPrecisionValues;
+		std::vector<std::pair<int, float>> classRecallValues;
 
-	addValuesMAPToCSV(csvMAPValues, class_values, map, modelname);
+		std::vector<std::tuple<int, float, float>> classPrecisionRecallValues;
+		evaluatePrecisionRecallAtK(atKValue, groups, model, distance, classPrecisionRecallValues);
+
+		float avgPAt = 0.0;
+		float avgRAt = 0.0;
+
+		for (int i = 0; i < classPrecisionRecallValues.size(); i++)
+		{
+			avgPAt += std::get<1>(classPrecisionRecallValues.at(i));
+			avgRAt += std::get<2>(classPrecisionRecallValues.at(i));
+
+			classPrecisionValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<1>(classPrecisionRecallValues.at(i))));
+			classRecallValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<2>(classPrecisionRecallValues.at(i))));
+		}
+
+		avgPAt /= float(classPrecisionRecallValues.size());
+		avgRAt /= float(classPrecisionRecallValues.size());
+
+		for(int i = 0; i < classPrecisionRecallValues.size(); i++)
+		{
+			std::string p = "P@" + std::to_string(atKValue);
+			addValuesMAPToCSV(csvMAPValues, classPrecisionValues, avgPAt, modelname, p);
+
+			std::string r = "R@" + std::to_string(atKValue);
+			addValuesMAPToCSV(csvMAPValues, classRecallValues, avgRAt, modelname, r);
+		}
+
+	}
 
 	delete distance;
 	delete paramter;
@@ -373,6 +414,92 @@ int main(int argc, char **argv)
 	delete csvMAPValues;
 	delete apstats;
 
+}
+
+void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float>>& class_values)
+{
+	//Output
+	std::vector<std::tuple<int, float, float>> tmpValues;
+
+	//Parallel processing
+	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
+
+	//Only used if randomization is true
+	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
+
+	//evalaute the mean average precision value for each group
+	for (auto it = groups.begin(); it != groups.end(); ++it)
+	{
+		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
+		std::vector<Features*> group = (*it).second;
+		float mapPerGroup = 0;
+		std::string name = "MAP ";
+		name += std::to_string(group.size());
+		for (int iGroup = 0; iGroup < group.size(); iGroup++)
+		{
+			if (iGroup == 0)
+				printexecutiontime = true;
+			else
+				printexecutiontime = false;
+
+			Features element = *group.at(iGroup);
+			pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+
+		}
+
+		int currentGroup = (*it).first;
+
+		float relevantRetrievedperQuery = 0.0;
+		float precisionAtPerGroup = 0.0;
+		float recallAtPerGroup = 0.0;
+
+		precisionAtPerGroup = 0.0;
+		recallAtPerGroup = 0.0;
+
+		std::unique_lock<std::mutex> guard(f());
+		LOG_INFO("Group\t" << currentGroup << "\tSize:\t" << group.size());
+		guard.unlock();
+		for (int i = 0; i < pendingFutures.size(); i++)
+		{
+			std::pair<EvaluatedQuery*, std::vector<ResultBase*>> results = pendingFutures.at(i).get();
+			mapPerGroup = mapPerGroup + results.first->mAPValue;
+
+			int matches = 0;
+			relevantRetrievedperQuery = 0.0;
+			//get precision and recall at 
+			for (int iResult = 0; iResult < k; iResult++)
+			{
+				if (results.first->mClazz == results.second.at(iResult)->mClazz)
+				{
+					matches++;
+				}
+
+				relevantRetrievedperQuery += (matches / float(iResult + 1));
+			}
+
+
+			precisionAtPerGroup += (relevantRetrievedperQuery / float(k));
+			recallAtPerGroup += (matches / float(group.size()));
+
+			std::unique_lock<std::mutex> guard(f());
+			cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
+			guard.unlock();
+		}
+
+
+
+		precisionAtPerGroup = (precisionAtPerGroup / float(group.size()));
+		recallAtPerGroup = (recallAtPerGroup / float(group.size()));
+
+		LOG_PERFMON(PINTERIM, "Precision at \t" << k << " per Group" << "\t" << currentGroup << "\t" << precisionAtPerGroup);
+		LOG_PERFMON(PINTERIM, "Recall at \t" << k << " per Group" << "\t" << currentGroup << recallAtPerGroup);
+
+		pendingFutures.clear();
+
+		tmpValues.push_back(std::make_tuple(currentGroup, precisionAtPerGroup, recallAtPerGroup));
+	}
+
+	class_values.swap(tmpValues);
 }
 
 double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values)
@@ -403,22 +530,21 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 				printexecutiontime = false;
 
 			Features element = *group.at(iGroup);
-			if (!ranodmazieTest)
+			if (evaluationmethod == 1)
 			{
-				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
-				//compare(element, model, distance, printexecutiontime);
+				randomResults.push_back(compareRandom(element, model, distance, printexecutiontime));
 			}
 			else
 			{
-				randomResults.push_back(compareRandom(element, model, distance, printexecutiontime));
-				//mapPerGroup += compareRandom(element, model, distance, printexecutiontime).first->mAPValue;
+				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+				//compare(element, model, distance, printexecutiontime);
 			}
 
 		}
 
 		int currentGroup = (*it).first;
 
-		if (ranodmazieTest)
+		if (evaluationmethod == 1)
 		{
 
 			for (int iRandomResult = 0; iRandomResult < randomResults.size(); iRandomResult++)
@@ -439,6 +565,7 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 		}
 		else
 		{
+
 			std::unique_lock<std::mutex> guard(f());
 			LOG_INFO("Group\t" << currentGroup << "\tSize:\t" << group.size());
 			guard.unlock();
@@ -455,19 +582,16 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 				cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
 				guard.unlock();
 			}
+
 			pendingFutures.clear();
 
 			mapPerGroup = mapPerGroup / float(group.size());
 
 			map = map + mapPerGroup;
 
-
-
 			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
 			tmp_values.push_back(std::make_pair(currentGroup, mapPerGroup));
-
 		}
-
 	}
 
 	class_values.swap(tmp_values);
@@ -575,6 +699,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 		elapsed_sec += (e1_end - e1_start / cv::getTickFrequency());
 
 		ResultBase* result = new ResultBase();
+		result->mVideoFileName = element->mVideoFileName;
 		result->mVideoID = element->mVideoID;
 		result->mStartFrameNumber = element->mStartFrameNr;
 		result->mFrameCount = element->mFrameCount;
@@ -593,8 +718,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 		return (s1->mDistance < s2->mDistance);
 	});
 
-	size_t start = cv::getTickCount();
-	int relevant = 0;
+	int matches = 0;
 
 	float precisionAsSum = 0;
 
@@ -609,18 +733,19 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 
 		if (rankedresult->mClazz == _query.mClazz)
 		{
-			relevant++;
-			precisionAsSum += (static_cast<float>(relevant) / static_cast<float>(iResult));
+			matches++;
+			precisionAsSum += (static_cast<float>(matches) / static_cast<float>(iResult));
 		}
 
-		precision = ((static_cast<float>(relevant) / static_cast<float>(iResult)));
+		precision = ((static_cast<float>(matches) / static_cast<float>(iResult)));
 
 		rankedresult->mPrecision = precision;
 	}
 
-	float ap = (precisionAsSum / static_cast<float>(relevant));
+	float ap = (precisionAsSum / static_cast<float>(matches));
 
 	EvaluatedQuery* evalQuery = new EvaluatedQuery();
+	evalQuery->mVideoFileName = _query.mVideoFileName;
 	evalQuery->mClazz = _query.mClazz;
 	evalQuery->mAPValue = ap;
 	evalQuery->mFrameCount = _query.mFrameCount;
@@ -630,9 +755,6 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	std::pair<EvaluatedQuery*, std::vector<ResultBase*>> apresults;
 	apresults.first = evalQuery;
 	apresults.second = results;
-	size_t end = cv::getTickCount();
-	double elapsedTime = (end - start) / (cv::getTickFrequency() * 1.0f);
-
 	return apresults;
 }
 
@@ -669,7 +791,6 @@ bool serialize(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, Di
 
 	delete output;
 	return true;
-	return true;
 
 }
 
@@ -682,7 +803,7 @@ bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBas
 
 	std::stringstream ss1, ss2;
 	ss1 << static_cast<int>(_results.first->mVideoID) << ";" << static_cast<int>(_results.first->mStartFrameNumber) << ";" << static_cast<int>(_results.first->mClazz);
-	ss2 << static_cast<int>(_results.first->mVideoID) << "_" << static_cast<int>(_results.first->mStartFrameNumber) << "_" << static_cast<int>(_results.first->mClazz);
+	ss2 << _results.first->mVideoFileName;
 
 	outfile << ss2.str() << ";" << ss1.str() << ";" << static_cast<float>(_results.first->mAPValue);
 	outfile << std::endl;
@@ -692,7 +813,7 @@ bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBas
 	return true;
 }
 
-bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model)
+bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model, std::string type)
 {
 	std::ifstream csvfileIn;
 	csvfileIn.open(_file->getFile().c_str(), std::ios_base::in);
@@ -715,6 +836,7 @@ bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_val
 	std::vector<std::string> newLine(elems);
 
 	newLine.at(0) = model + ";";
+	newLine.at(0) += type + ";" ;
 	for (int i = 1; i < elems.size(); i++)
 	{
 		int elem = std::atoi(elems.at(i).c_str());

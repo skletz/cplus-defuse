@@ -76,6 +76,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	{
 		//starts from 0
 		numberOfFramesPerShot = numframes - 1;
+		LOG_ERROR("Video Segment is smaller than max frames");
 	}
 
 	std::vector<cv::Mat> sampledsignatures;
@@ -97,7 +98,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 		{
 			limit = (interval * mMaxFrames) - 1;
 		}
-		for (int iFrame = 0; iFrame < (numframes - interval); iFrame = iFrame + interval)
+		for (int iFrame = 0; iFrame < limit; iFrame = iFrame + interval)
 		{
 			cv::Mat image, signatures;
 			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
@@ -136,7 +137,53 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 		//@TODO Implement all frames
 		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
 		return;
-	}else
+	}
+	else if (mFrameSelection == 3)
+	{
+		LOG_FATAL("Frame Selection 3 is under development. Abort?")
+		int half = numframes / float(2);
+
+		int interval1 = half / float(numberOfFramesPerShot / double(2));
+
+		for (int j = interval1; j < half; j = j + interval1)
+		{
+			cv::Mat image1, signatures1;
+
+			_video.set(CV_CAP_PROP_POS_FRAMES, j);
+			_video.grab();
+			_video.retrieve(image1);
+
+			mPCTSignatures->computeSignature(image1, signatures1);
+
+			if (!signatures1.empty())
+				sampledsignatures.push_back(signatures1);
+
+			sampledsignatures.push_back(signatures1);
+		}
+
+		cv::Mat image2, signatures2;
+		_video.set(CV_CAP_PROP_POS_FRAMES, half);
+		_video.grab();
+		_video.retrieve(image2);
+		mPCTSignatures->computeSignature(image2, signatures2);
+
+		if (!signatures2.empty())
+			sampledsignatures.push_back(signatures2);
+
+		for (int j = half + interval1; j < numframes; j = j + interval1)
+		{
+			cv::Mat image3, signatures3;
+
+			_video.set(CV_CAP_PROP_POS_FRAMES, j);
+			_video.grab();
+			_video.retrieve(image3);
+
+			mPCTSignatures->computeSignature(image3, signatures3);
+			if (!signatures3.empty())
+				sampledsignatures.push_back(signatures3);
+		}
+	}
+	else
 	{
 		LOG_FATAL("Frame Selection 3 not implemented; use a fix number per segment, second or all frames. Aborted!")
 		return;
@@ -147,7 +194,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 
 	if(sampledsignatures.size() > mMaxFrames)
 	{
-		LOG_FATAL("Bug: More frames extracted than should be used. Aborted!")
+		LOG_FATAL("Bug: More frames extracted than should be used. Abort?")
 	}
 
 	tSignatures.copyTo(_signatures);

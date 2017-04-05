@@ -9,6 +9,7 @@ namespace defuse {
 	class ResultBase
 	{
 	public:
+		std::string mVideoFileName;
 
 		int mVideoID;
 

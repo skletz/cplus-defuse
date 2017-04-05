@@ -1,0 +1,107 @@
+%YAML:1.0
+Dataset: test_data
+Model: SFS1
+Distance: SMD_GD_L2_M0_D1_C0_L1
+VideoID: 1
+StartFrameNr: 113587
+FrameCount: 250
+Clazz: 2
+AP: 8.8749998807907104e-01
+ResultCount: 12
+Data:
+   -
+      VideoFileName: "1.mp4_113587-0009"
+      VideoID: 1
+      StartFrameNr: 113587
+      FrameCount: 250
+      Clazz: 2
+      Distance: 0.
+      Matches: 1.
+   -
+      VideoFileName: "1.mp4_113587-0002"
+      VideoID: 1
+      StartFrameNr: 113587
+      FrameCount: 250
+      Clazz: 2
+      Distance: 2.0523688793182373e+00
+      Matches: 1.
+   -
+      VideoFileName: "1.mp4_17084-0001"
+      VideoID: 1
+      StartFrameNr: 17084
+      FrameCount: 192
+      Clazz: 3
+      Distance: 2.0634567737579346e+00
+      Matches: 6.6666668653488159e-01
+   -
+      VideoFileName: "11.mp4_185193-0025"
+      VideoID: 11
+      StartFrameNr: 185193
+      FrameCount: 250
+      Clazz: 2
+      Distance: 2.0791893005371094e+00
+      Matches: 7.5000000000000000e-01
+   -
+      VideoFileName: "11.mp4_185193-0027"
+      VideoID: 11
+      StartFrameNr: 185193
+      FrameCount: 250
+      Clazz: 2
+      Distance: 2.1800217628479004e+00
+      Matches: 8.0000001192092896e-01
+   -
+      VideoFileName: "104.mp4_37470-0004"
+      VideoID: 104
+      StartFrameNr: 37470
+      FrameCount: 250
+      Clazz: 3
+      Distance: 2.3865087032318115e+00
+      Matches: 6.6666668653488159e-01
+   -
+      VideoFileName: "104.mp4_20186-0004"
+      VideoID: 104
+      StartFrameNr: 20186
+      FrameCount: 250
+      Clazz: 3
+      Distance: 2.3899364471435547e+00
+      Matches: 5.7142859697341919e-01
+   -
+      VideoFileName: "1.mp4_18181-0002"
+      VideoID: 1
+      StartFrameNr: 18181
+      FrameCount: 232
+      Clazz: 3
+      Distance: 2.6335806846618652e+00
+      Matches: 5.0000000000000000e-01
+   -
+      VideoFileName: "102.mp4_0-0009"
+      VideoID: 102
+      StartFrameNr: 0
+      FrameCount: 250
+      Clazz: 25
+      Distance: 2.7931292057037354e+00
+      Matches: 4.4444444775581360e-01
+   -
+      VideoFileName: "101.mp4_13113-0007"
+      VideoID: 101
+      StartFrameNr: 13113
+      FrameCount: 250
+      Clazz: 25
+      Distance: 2.9911708831787109e+00
+      Matches: 4.0000000596046448e-01
+   -
+      VideoFileName: "101.mp4_13113-0009"
+      VideoID: 101
+      StartFrameNr: 13113
+      FrameCount: 250
+      Clazz: 25
+      Distance: 3.1692185401916504e+00
+      Matches: 3.6363637447357178e-01
+   -
+      VideoFileName: "144.mp4_4-0022"
+      VideoID: 144
+      StartFrameNr: 4
+      FrameCount: 55
+      Clazz: 25
+      Distance: 3.2404389381408691e+00
+      Matches: 3.3333334326744080e-01
