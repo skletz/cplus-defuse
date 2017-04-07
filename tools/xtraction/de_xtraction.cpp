@@ -95,6 +95,10 @@
  *		-arg10: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
  *		-arg11: samplex
  *		-arg12: sampley
+ *		***********************************************************
+ *		Last parameter visualize extraction without saving it
+ *		***********************************************************
+ *		-argsLAST: 0 false, 1 true 
  * @author skletz
  * @version 2.0 13/03/17
  * 
@@ -251,24 +255,6 @@ int main(int argc, char **argv)
 
 	//Log input paramters for later usages
 	LOG_INFO("Input Parameter");
-	std::string cmd = "";
-	for (int i = 0; i < argc; i++)
-	{
-		cmd += argv[i];
-		cmd += " ";
-
-	}
-	LOG_INFO(cmd);
-
-	LOG_INFO("************************************************");
-	LOG_INFO("DeXtraction-v2.0");
-	LOG_INFO("Used Feature: " + descriptorname + "\n");
-	LOG_INFO("Input Directory: " << videopath);
-	LOG_INFO("Output Directory: " << outputpath);
-	LOG_INFO("Logging: " << log.getFile().c_str());
-	LOG_INFO(paramter->get());
-	LOG_INFO("************************************************\n");
-
 
 	Xtractor* xtractor = nullptr;
 
@@ -295,14 +281,37 @@ int main(int argc, char **argv)
 
 	xtractor->display = display;
 
+	std::string cmd = "";
+	for (int i = 0; i < argc; i++)
+	{
+		cmd += argv[i];
+		cmd += " ";
+
+	}
+
+
 	if (videopathIsDirectory)
 	{
 		clipsdir = new Directory(videopath);
 		cpluslogger::Logger::get()->logfile(log.getFile());
 		cpluslogger::Logger::get()->filelogging(true);
 		cpluslogger::Logger::get()->perfmonitoring(true);
-		processVideoDirectory(xtractor);
+	}
 
+	LOG_INFO(cmd);
+
+	LOG_INFO("************************************************");
+	LOG_INFO("DeXtraction-v2.0");
+	LOG_INFO("Used Feature: " + descriptorname + "\n");
+	LOG_INFO("Input Directory: " << videopath);
+	LOG_INFO("Output Directory: " << outputpath);
+	LOG_INFO("Logging: " << log.getFile().c_str());
+	LOG_INFO(paramter->get());
+	LOG_INFO("************************************************\n");
+
+	if (videopathIsDirectory)
+	{
+		processVideoDirectory(xtractor);
 	}
 	else
 	{
@@ -310,6 +319,8 @@ int main(int argc, char **argv)
 		clipsdir = new Directory(videoFile->getFile().substr(0, videoFile->getFile().find_last_of("/\\")));
 		processVideoFile(xtractor);
 	}
+
+
 
 	delete xtractor;
 	delete paramter;
@@ -325,7 +336,8 @@ void processVideoDirectory(Xtractor* xtractor)
 {
 	std::vector<std::string> entries = cplusutil::FileIO::getFileListFromDirectory(clipsdir->getPath());
 	int numClips = 0;
-	LOG_PERFMON(PINTERIM, "Number of Categories\t" << entries.size());
+	float computationTimes = 0.0;
+	LOG_PERFMON(PINTERIM, "Groups:\t" << entries.size());
 	for (int iEntry = 0; iEntry < entries.size(); iEntry++)
 	{
 		std::string entry = entries.at(iEntry);
@@ -334,15 +346,15 @@ void processVideoDirectory(Xtractor* xtractor)
 
 		std::vector<std::future<Features*>> pendingFutures;
 
+		numClips += static_cast<int>(clippathes.size());
+
 		for (int iClipFile = 0; iClipFile < clippathes.size(); iClipFile++)
 		{
-			
+
 			boost::filesystem::path isClipFileDir{ clippathes.at(iClipFile) };
 			if(boost::filesystem::is_directory(isClipFileDir))
 			{
 				std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(isClipFileDir.string());
-
-				numClips += static_cast<int>(files.size());
 				for(int iFile = 0; iFile < files.size(); iFile++)
 				{
 					File* file = new File(files.at(iFile));
@@ -384,7 +396,6 @@ void processVideoDirectory(Xtractor* xtractor)
 					}
 
 					VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
-					//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
 
 					if(!display)
 						pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
@@ -395,8 +406,7 @@ void processVideoDirectory(Xtractor* xtractor)
 			else
 			{
 				File* file = new File(clippathes.at(iClipFile));
-				numClips += static_cast<int>(clippathes.size());
-
+	
 				std::string filename = file->getFilename();
 				std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
 				Directory parentdirectory(parentpath);
@@ -422,7 +432,6 @@ void processVideoDirectory(Xtractor* xtractor)
 				}
 
 				VideoBase* videoclip = new VideoBase(file, videoID, startFrameNr, clazz);
-				//async Insufficient Memory exception - Solution - Change from 32-bit to 64-bit
 
 				if (!display)
 					pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
@@ -433,15 +442,17 @@ void processVideoDirectory(Xtractor* xtractor)
 		}
 
 
-
-		LOG_DEBUG("Directoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
 		LOG_DEBUG("Waiting of pending values ...");
+		LOG_INFO("Current Directoy:\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
+		
 		std::string name = "Extraction ";
 		name += std::to_string(pendingFutures.size());
 
+		float computationTime = 0.0;
 		for (int i = 0; i < pendingFutures.size(); i++)
 		{
 			Features* features = pendingFutures.at(i).get();
+			computationTime += features->mExtractionTime;
 
 			std::stringstream stream;
 			if (descriptortype < 3)
@@ -454,33 +465,34 @@ void processVideoDirectory(Xtractor* xtractor)
 			}
 			else
 			{
-				LOG_FATAL("Extraction Method not implemented " << descriptortype);
+				LOG_FATAL("Descriptor " << descriptortype << " not implemented!");
 			}
-
 
 			File output(outputdir->getPath(), stream.str(), ".yml");
 			output.addDirectoryToPath(descriptorshort);
 			output.addDirectoryToPath(extractionsettings);
 
-
 			std::unique_lock<std::mutex> guard(f());
 			cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
 			guard.unlock();
-
 			serialize(features, output);
-
-			//delete output;
 			delete features;
 		}
 
-		LOG_DEBUG("End Calculation ..." << "\tDirectoy\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
+		computationTime /= float(pendingFutures.size());
+		computationTimes += computationTime;
+
+		LOG_PERFMON(PTIME, "Average Computation-Time: Extracting (secs) per Group Count: \t" << clippathes.size() << "\t" << computationTime);
+		LOG_DEBUG("End of Calculation: \t" << "\tSize:\t" << clippathes.size());
 
 	}
 
-	LOG_PERFMON(PINTERIM, "Number of all Segments\t" << numClips);
+	LOG_PERFMON(PINTERIM, "Video Segments:\t" << numClips);
+	
+	computationTimes /= float(entries.size());
+	LOG_PERFMON(PTIME, "Computation-Time: Extracting (secs) \t" << entries.size() << "\t" << extractionsettings << "\t" << computationTimes);
 
-	if(display)
-		getchar();
+	if(display) getchar();
 }
 
 void processVideoFile(Xtractor* xtractor)
@@ -513,24 +525,17 @@ void processVideoFile(Xtractor* xtractor)
 
 Features* xtract(VideoBase* _videobase, Xtractor* xtractor)
 {
-	
-	
-	size_t e1_start = cv::getTickCount();
-	auto w0_begin = std::chrono::steady_clock::now();
+	size_t e1_start = double(cv::getTickCount());
 
 	Features* features = xtractor->xtract(_videobase);
 
-	auto w1_end = std::chrono::steady_clock::now();
-	size_t e1_end = cv::getTickCount();
+	size_t e1_end = double(cv::getTickCount());
 
-	double elapsed_secs = (e1_end - e1_start) / cv::getTickFrequency();
-	double wall_clock = std::chrono::duration_cast<
-		std::chrono::duration<double> >(w1_end - w0_begin).count();
-
-	std::unique_lock<std::mutex> guard(f());
-	LOG_PERFMON(PTIME, "Computation-Time (secs): Extaction \t" << extractionsettings << "\t" << elapsed_secs << "\t" << wall_clock);
-	guard.unlock();
-
+	double elapsed_secs = (e1_end - e1_start) / double(cv::getTickFrequency());
+	features->mExtractionTime = elapsed_secs;
+	//std::unique_lock<std::mutex> guard(f());
+	//LOG_PERFMON(PTIME, "Computation-Time (secs): Extaction \t" << extractionsettings << "\t" << elapsed_secs);
+	//guard.unlock();
 
 	return features;
 }

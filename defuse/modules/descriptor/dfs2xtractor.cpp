@@ -81,7 +81,6 @@ defuse::Features* defuse::DFS2Xtractor::xtract(VideoBase* _videobase)
 	return featuresignatures;
 }
 
-
 void defuse::DFS2Xtractor::getSamples(cv::Mat& frame, std::vector<cv::Point2f> points, cv::Mat& out) const
 {
 	cv::Mat samples;
@@ -127,7 +126,6 @@ void defuse::DFS2Xtractor::getSamples(cv::Mat& frame, std::vector<cv::Point2f> p
 	}
 
 }
-
 
 void defuse::DFS2Xtractor::getMotionDirection(std::vector<uchar>& statusVector, std::vector<float>& errorVector, std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& currPoints, int height, int width, cv::Mat& out) const
 {
@@ -343,8 +341,7 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	if (mMaxFrames > numframes)
 	{
 		//grapping starts from 0
-		numberOfFramesPerShot = numframes - 1;
-		LOG_ERROR("Video Segment is smaller than max frames");
+		numberOfFramesPerShot = numframes;
 	}
 
 	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;
@@ -409,10 +406,7 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 				currPoints = std::vector<cv::Point2f>(initPoints);
 			}
 
-
 			getSamples(frame, currPoints, samples);
-
-
 
 			if (iFrame > 0)
 			{
@@ -529,16 +523,262 @@ void defuse::DFS2Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	}
 	else if (mFrameSelection == 1)//use fix number of frames per second
 	{
-		//TODO Implement fix number per segment
-		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
-			return;
+		int maxFrames = 0;
+		if(mMaxFrames < numframes)
+		{
+			maxFrames = numframes;
+		}
+		//every maxFrames'th frame is used
+		for (int iFrame = 0; iFrame < numframes; iFrame = iFrame + maxFrames)
+		{
+			//Vectors of samplepoints
+			cv::Mat samples;
+			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
+
+			//Capture the current frame
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+			_video.grab();
+			_video.retrieve(frame);
+
+			if (frame.empty()) continue;
+
+			//convert the frame to grayscale
+			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+			if (mVariant == 1)
+			{
+				if (prevPoints.size() != currPoints.size())
+					prevPoints = currPoints;
+			}
+			else
+			{
+				currPoints = std::vector<cv::Point2f>(initPoints);
+			}
+
+			getSamples(frame, currPoints, samples);
+
+			if (iFrame > 0)
+			{
+				//Indicates wheter the flow for the corresponding features has been found
+				std::vector<uchar> statusVector;
+				statusVector.resize(currPoints.size());
+				//Indicates the error for the corresponding feature
+				std::vector<float> errorVector;
+				errorVector.resize(currPoints.size());
+
+				cv::calcOpticalFlowPyrLK(
+					prevGrayFrame, grayFrame, prevPoints,
+					currPoints, statusVector, errorVector
+				);
+				getMotionDirection(statusVector, errorVector, prevPoints, currPoints, height, widht, samples);
+
+				if (display)
+				{
+					//visualize STARTs
+					cv::Mat frameCopy = frame.clone();
+					for (uint i = 0; i < statusVector.size(); i++) {
+						if (statusVector[i] != 0) {
+
+							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
+							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
+
+							drawLine(frameCopy, p, q, 3);
+						}
+					}
+
+					//cv::imshow("FrameCopy", frameCopy);
+					cv::Mat sampleImg;
+					draw2DSampleSignature(frame, samples, sampleImg);
+
+					cv::Mat resFrame, resSampleImg;
+
+					cv::resize(frameCopy, resFrame, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Video Stream", resFrame);
+					cv::moveWindow("Video Stream", 0, 0);
+
+					cv::resize(sampleImg, resSampleImg, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Feature Signatures", resSampleImg);
+					cv::moveWindow("Feature Signatures", resFrame.cols + 10, 0);
+
+					int keyPressed;
+					keyPressed = cv::waitKey(5);
+
+					//visualization ENDs				
+				}
+
+				prevPoints.clear();
+			}
+
+			try
+			{
+				if (iFrame == 0)
+				{
+					backupSamples.release();
+					samples.copyTo(backupSamples);
+				}
+				else
+				{
+					cv::vconcat(samples, backupSamples, backupSamples);
+					tsamples.release();
+					backupSamples.copyTo(tsamples);
+				}
+
+			}
+			catch (std::exception& e) {
+				LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
+				LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << numframes);
+				LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (numframes / 25 / 60));
+				break;
+			}
+
+			prevGrayFrame = grayFrame.clone();
+			prevPoints = std::vector<cv::Point2f>(initPoints);
+
+		}
+
+		getTemporalSamples(tsamples, signatures);
+
+		if (display)
+		{
+			cv::Mat signatureImg, resSignatureImg;
+			draw2DFSSignature(frame, signatures, signatureImg);
+			drawSignatureMotionDirection(signatures, signatureImg, frame.cols, frame.rows);
+
+			cv::resize(signatureImg, resSignatureImg, cv::Size(frame.cols / 2, frame.rows / 2));
+			cv::imshow("Flow-based Feature Signatures", resSignatureImg);
+			cv::moveWindow("Flow-based Feature Signatures", (resSignatureImg.cols * 2) + 10, 0);
+
+			while (cv::waitKey(1) != 27);
+
+			cv::destroyAllWindows();
+		}
 	}
 	//use all frames
 	else if (mFrameSelection == 2)
 	{
-		//@TODO Implement all frames
-		LOG_FATAL("Frame Selection 2 not implemented; use a fix number per segment = 0. Aborted!")
-			return;
+		for (int iFrame = 0; iFrame < numframes; iFrame++)
+		{
+			//Vectors of samplepoints
+			cv::Mat samples;
+			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
+
+			//Capture the current frame
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+			_video.grab();
+			_video.retrieve(frame);
+
+			if (frame.empty()) continue;
+
+			//convert the frame to grayscale
+			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+			if (mVariant == 1)
+			{
+				if (prevPoints.size() != currPoints.size())
+					prevPoints = currPoints;
+			}
+			else
+			{
+				currPoints = std::vector<cv::Point2f>(initPoints);
+			}
+
+			getSamples(frame, currPoints, samples);
+
+			if (iFrame > 0)
+			{
+				//Indicates wheter the flow for the corresponding features has been found
+				std::vector<uchar> statusVector;
+				statusVector.resize(currPoints.size());
+				//Indicates the error for the corresponding feature
+				std::vector<float> errorVector;
+				errorVector.resize(currPoints.size());
+
+				cv::calcOpticalFlowPyrLK(
+					prevGrayFrame, grayFrame, prevPoints,
+					currPoints, statusVector, errorVector
+				);
+				getMotionDirection(statusVector, errorVector, prevPoints, currPoints, height, widht, samples);
+
+				if (display)
+				{
+					//visualize STARTs
+					cv::Mat frameCopy = frame.clone();
+					for (uint i = 0; i < statusVector.size(); i++) {
+						if (statusVector[i] != 0) {
+
+							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
+							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
+
+							drawLine(frameCopy, p, q, 3);
+						}
+					}
+
+					//cv::imshow("FrameCopy", frameCopy);
+					cv::Mat sampleImg;
+					draw2DSampleSignature(frame, samples, sampleImg);
+
+					cv::Mat resFrame, resSampleImg;
+
+					cv::resize(frameCopy, resFrame, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Video Stream", resFrame);
+					cv::moveWindow("Video Stream", 0, 0);
+
+					cv::resize(sampleImg, resSampleImg, cv::Size(frame.cols / 2, frame.rows / 2));
+					cv::imshow("Feature Signatures", resSampleImg);
+					cv::moveWindow("Feature Signatures", resFrame.cols + 10, 0);
+
+					int keyPressed;
+					keyPressed = cv::waitKey(5);
+
+					//visualization ENDs				
+				}
+
+				prevPoints.clear();
+			}
+
+			try
+			{
+				if (iFrame == 0)
+				{
+					backupSamples.release();
+					samples.copyTo(backupSamples);
+				}
+				else
+				{
+					cv::vconcat(samples, backupSamples, backupSamples);
+					tsamples.release();
+					backupSamples.copyTo(tsamples);
+				}
+
+			}
+			catch (std::exception& e) {
+				LOG_ERROR("An exception occurred during copyTo and cconcat of samples: " << e.what());
+				LOG_ERROR("Sampling ended with framenumber " << iFrame << " of" << numframes);
+				LOG_ERROR("Sampling ended with minute " << (iFrame / 25 / 60) << " of" << (numframes / 25 / 60));
+				break;
+			}
+
+			prevGrayFrame = grayFrame.clone();
+			prevPoints = std::vector<cv::Point2f>(initPoints);
+
+		}
+
+		getTemporalSamples(tsamples, signatures);
+
+		if (display)
+		{
+			cv::Mat signatureImg, resSignatureImg;
+			draw2DFSSignature(frame, signatures, signatureImg);
+			drawSignatureMotionDirection(signatures, signatureImg, frame.cols, frame.rows);
+
+			cv::resize(signatureImg, resSignatureImg, cv::Size(frame.cols / 2, frame.rows / 2));
+			cv::imshow("Flow-based Feature Signatures", resSignatureImg);
+			cv::moveWindow("Flow-based Feature Signatures", (resSignatureImg.cols * 2) + 10, 0);
+
+			while (cv::waitKey(1) != 27);
+
+			cv::destroyAllWindows();
+		}
 	}
 	else
 	{

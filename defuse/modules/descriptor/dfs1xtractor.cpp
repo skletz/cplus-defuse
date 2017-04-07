@@ -75,8 +75,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 	if (mMaxFrames > numframes)
 	{
 		//starts from 0
-		numberOfFramesPerShot = numframes - 1;
-		LOG_ERROR("Video Segment is smaller than max frames");
+		numberOfFramesPerShot = numframes;
 	}
 
 	std::vector<cv::Mat> sampledsignatures;
@@ -98,6 +97,7 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 		{
 			limit = (interval * mMaxFrames) - 1;
 		}
+
 		for (int iFrame = 0; iFrame < limit; iFrame = iFrame + interval)
 		{
 			cv::Mat image, signatures;
@@ -105,21 +105,26 @@ void defuse::DFS1Xtractor::computeSignatures(cv::VideoCapture& _video, cv::Outpu
 			_video.grab();
 			_video.retrieve(image);
 
-			if (!image.empty())
-				mPCTSignatures->computeSignature(image, signatures);
-			else
-			{
-				LOG_ERROR("Image at " << iFrame << " was empty");
-			}
+			if (image.empty()) continue;
+
+			mPCTSignatures->computeSignature(image, signatures);
+
+			//if (!image.empty())
+			//	mPCTSignatures->computeSignature(image, signatures);
+			//else
+			//{
+			//	LOG_ERROR("Image at " << iFrame << " was empty");
+			//}
 
 			//use all frames that exists
-			if (interval == 0)
-			{
-				iFrame++;
-			}
+			//if (interval == 0)
+			//{
+			//	iFrame++;
+			//}
 
-			if (!signatures.empty())
-				sampledsignatures.push_back(signatures);
+			if (signatures.empty()) continue;
+
+			sampledsignatures.push_back(signatures);
 
 		}
 

@@ -98,8 +98,8 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 	if (mMaxFrames > numframes)
 	{
 		//grapping starts from 0
-		numberOfFramesPerShot = numframes - 1;
-		LOG_ERROR("Video Segment is smaller than max frames");
+		numberOfFramesPerShot = numframes;
+		//LOG_ERROR("Video Segment is smaller than max frames");
 	}
 
 	std::vector<cv::Point2f> prevPoints, currPoints, initPoints;
@@ -122,15 +122,12 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 	cv::Mat frame, prevFrame, prevGrayFrame, grayFrame;
 
 	//std::vector<cv::Point2f> prevCorners, corners;
-
 	//unsigned int numframes = _video.get(CV_CAP_PROP_FRAME_COUNT);
-
 	//int samplingrate = 1; //each frame
 	//if (mMaxFrames != 0)
 	//{
 	//	samplingrate = numframes / mMaxFrames; //mFrames per Second
 	//}
-
 	//cv::Mat frame, prevGrayFrame, grayFrame;
 
 	int interval = 0;
@@ -248,6 +245,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 
 	}else if(mFrameSelection == 1)
 	{
+		//LOG_ERROR("Number of Frames: " << numframes);
 		interval = static_cast<int>(numframes / float(numberOfFramesPerShot));
 
 		if (numframes % mMaxFrames == 0)
@@ -268,7 +266,7 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 			_video.grab();
 			_video.retrieve(prevFrame);
 
-			if (prevFrame.empty() && frame.empty()) continue;
+			if (prevFrame.empty() || frame.empty()) continue;
 
 			//convert the frames to grayscale
 			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
@@ -330,7 +328,95 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 				int wait = cv::waitKey(1);
 				//visualization ENDs				
 			}
+		}
+	}
+	else if (mFrameSelection == 2) //use all frames
+	{
 
+		for (int iFrame = 0; iFrame < numframes; iFrame++)
+		{
+			counter++;
+			//Capture the current frame
+			_video.set(CV_CAP_PROP_POS_FRAMES, iFrame);
+			_video.grab();
+			_video.retrieve(frame);
+
+			if (frame.empty()) continue;
+
+			//convert the frame to grayscale
+			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+			currPoints = std::vector<cv::Point2f>(initPoints);
+
+			if (iFrame > 0)
+			{
+				//Indicates wheter the flow for the corresponding features has been found
+				std::vector<uchar> statusVector;
+				statusVector.resize(currPoints.size());
+				//Indicates the error for the corresponding feature
+				std::vector<float> errorVector;
+				errorVector.resize(currPoints.size());
+
+
+				//Calculate movements between previous and actual frame
+				cv::calcOpticalFlowPyrLK(prevGrayFrame, grayFrame, prevPoints, currPoints, statusVector, errorVector);
+
+				cv::Mat motionHist;
+				extractMotionHistogram(statusVector, errorVector, prevPoints, currPoints, width, height, motionHist);
+
+				if (iFrame == interval)
+					motionHist.copyTo(outputhistogram);
+				else
+					outputhistogram = outputhistogram + motionHist;
+
+				if (display)
+				{
+					//visualize STARTs
+					cv::Mat frameCopy = frame.clone();
+					for (uint i = 0; i < statusVector.size(); i++)
+					{
+						if (statusVector[i] != 0) {
+
+							cv::Point p(ceil(prevPoints[i].x), ceil(prevPoints[i].y));
+							cv::Point q(ceil(currPoints[i].x), ceil(currPoints[i].y));
+							drawLine(frameCopy, p, q, 3);
+						}
+					}
+
+
+
+					std::string framename = videofile + "_Frame_" + std::to_string(iFrame) + ".jpg";
+					std::string featurename1 = videofile + "_MV_" + std::to_string(iFrame) + ".jpg";
+
+					File f(framename);
+					f.setPath(imgOutputPath);
+					cv::imwrite(f.getFile(), frame);
+
+					cv::imshow("Frame ", frameCopy);
+
+					File fn(featurename1);
+					fn.setPath(imgOutputPath);
+
+					cv::imwrite(fn.getFile(), frameCopy);
+
+					int wait = cv::waitKey(1);
+					//visualization ENDs				
+				}
+			}
+			else
+			{
+				if(display)
+				{
+					std::string framename = videofile + "_Frame_" + std::to_string(iFrame) + ".jpg";
+					File f(framename);
+					f.setPath(imgOutputPath);
+					cv::imwrite(f.getFile(), frame);
+				}
+
+			}
+
+			prevGrayFrame = grayFrame.clone();
+			prevPoints = std::vector<cv::Point2f>(initPoints);
 		}
 	}
 
@@ -347,15 +433,10 @@ void defuse::MoHist1Xtractor::computeMotionHistogram(cv::VideoCapture& _video, c
 		File f(histname);
 		f.setPath(imgOutputPath);
 		cv::imwrite(f.getFile(), histImage);
-
-		//int wait = cv::waitKey(1);
-
-		//while (cv::waitKey(1) != 27);
 		cv::destroyAllWindows();
 	}
 
 	outputhistogram = outputhistogram / float(counter);
-
 	outputhistogram.copyTo(_histogram);
 }
 

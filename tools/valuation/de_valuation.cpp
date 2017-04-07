@@ -63,6 +63,13 @@
 *	***********************************************************
 *	TYPE: 2 = mahalanobis distance
 *	***********************************************************
+*	NOT IMPLEMENTED YET
+*	***********************************************************
+*	Options for Evaluation Method
+*	***********************************************************
+*	TYPE: 2 = Precision/Recall@k
+*	***********************************************************
+*	-argsLAST: k Value <INT> for Precision u. Recall default 3
 *	
 * @author skletz
 * @version 2.0 13/03/17
@@ -107,29 +114,22 @@ std::string modelname = "";
 //Output of the average precision values for statistical evaluation
 std::string apcsvfile = "";
 
-std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
-	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime);
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(Features& _query, std::vector<Features*> _model, Distance* measure);
 
-std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
-	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime);
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(Features& _query, std::vector<Features*> _model, Distance* measure);
 
 bool serialize(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, Directory* _director);
 
 bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, File* _file);
 
+bool writeAverageResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, File* _file);
+
 bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_values, float average, std::string model, std::string type);
 
 Features* deserialize(std::string _file);
-
-void evaluteResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> result, int group);
-
 double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups, 	std::vector<Features*> model, Distance* distance, File* apstats, std::vector<std::pair<int, float>>& class_values);
-void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float>>& class_values);
+void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float, float>>& class_values);
 
-void evaluteRecallPrecisionAtk()
-{
-	
-}
 
 std::mutex m;
 std::unique_lock<std::mutex> f() {
@@ -375,35 +375,40 @@ int main(int argc, char **argv)
 	}
 	else if (evaluationmethod == 2)
 	{
+		std::vector<std::pair<int, float>> classAvgPrecisionValues;
 		std::vector<std::pair<int, float>> classPrecisionValues;
 		std::vector<std::pair<int, float>> classRecallValues;
 
-		std::vector<std::tuple<int, float, float>> classPrecisionRecallValues;
+		std::vector<std::tuple<int, float, float, float>> classPrecisionRecallValues;
 		evaluatePrecisionRecallAtK(atKValue, groups, model, distance, classPrecisionRecallValues);
 
+		float avgAvgPAt = 0.0;
 		float avgPAt = 0.0;
 		float avgRAt = 0.0;
 
 		for (int i = 0; i < classPrecisionRecallValues.size(); i++)
 		{
-			avgPAt += std::get<1>(classPrecisionRecallValues.at(i));
-			avgRAt += std::get<2>(classPrecisionRecallValues.at(i));
+			avgAvgPAt += std::get<1>(classPrecisionRecallValues.at(i));
+			avgPAt += std::get<2>(classPrecisionRecallValues.at(i));
+			avgRAt += std::get<3>(classPrecisionRecallValues.at(i));
 
-			classPrecisionValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<1>(classPrecisionRecallValues.at(i))));
-			classRecallValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<2>(classPrecisionRecallValues.at(i))));
+			classAvgPrecisionValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<1>(classPrecisionRecallValues.at(i))));
+			classPrecisionValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<2>(classPrecisionRecallValues.at(i))));
+			classRecallValues.push_back(std::make_pair(std::get<0>(classPrecisionRecallValues.at(i)), std::get<3>(classPrecisionRecallValues.at(i))));
 		}
 
-		avgPAt /= float(classPrecisionRecallValues.size());
+		avgAvgPAt /= float(classPrecisionRecallValues.size());
 		avgRAt /= float(classPrecisionRecallValues.size());
+		avgPAt /= float(classPrecisionRecallValues.size());
 
-		for(int i = 0; i < classPrecisionRecallValues.size(); i++)
-		{
-			std::string p = "P@" + std::to_string(atKValue);
-			addValuesMAPToCSV(csvMAPValues, classPrecisionValues, avgPAt, modelname, p);
+		std::string avgp = "AvgP@" + std::to_string(atKValue);
+		addValuesMAPToCSV(csvMAPValues, classAvgPrecisionValues, avgAvgPAt, modelname, avgp);
 
-			std::string r = "R@" + std::to_string(atKValue);
-			addValuesMAPToCSV(csvMAPValues, classRecallValues, avgRAt, modelname, r);
-		}
+		std::string p = "P@" + std::to_string(atKValue);
+		addValuesMAPToCSV(csvMAPValues, classPrecisionValues, avgPAt, modelname, p);
+
+		std::string r = "R@" + std::to_string(atKValue);
+		addValuesMAPToCSV(csvMAPValues, classRecallValues, avgRAt, modelname, r);
 
 	}
 
@@ -416,10 +421,10 @@ int main(int argc, char **argv)
 
 }
 
-void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float>>& class_values)
+void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> groups, std::vector<Features*> model, Distance* distance, std::vector<std::tuple<int, float, float, float>>& class_values)
 {
 	//Output
-	std::vector<std::tuple<int, float, float>> tmpValues;
+	std::vector<std::tuple<int, float, float, float>> tmpValues;
 
 	//Parallel processing
 	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
@@ -435,24 +440,23 @@ void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> gro
 		float mapPerGroup = 0;
 		std::string name = "MAP ";
 		name += std::to_string(group.size());
+
+		
 		for (int iGroup = 0; iGroup < group.size(); iGroup++)
 		{
-			if (iGroup == 0)
-				printexecutiontime = true;
-			else
-				printexecutiontime = false;
-
 			Features element = *group.at(iGroup);
-			pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+			pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
 
 		}
 
 		int currentGroup = (*it).first;
 
 		float relevantRetrievedperQuery = 0.0;
-		float precisionAtPerGroup = 0.0;
+		float avgPrecisionAtPerGroup = 0.0;
 		float recallAtPerGroup = 0.0;
+		float precisionAtPerGroup = 0.0;
 
+		avgPrecisionAtPerGroup = 0.0;
 		precisionAtPerGroup = 0.0;
 		recallAtPerGroup = 0.0;
 
@@ -478,7 +482,8 @@ void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> gro
 			}
 
 
-			precisionAtPerGroup += (relevantRetrievedperQuery / float(k));
+			avgPrecisionAtPerGroup += (relevantRetrievedperQuery / float(k));
+			precisionAtPerGroup += (matches / float(k));
 			recallAtPerGroup += (matches / float(group.size()));
 
 			std::unique_lock<std::mutex> guard(f());
@@ -486,17 +491,17 @@ void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> gro
 			guard.unlock();
 		}
 
-
-
+		avgPrecisionAtPerGroup = (avgPrecisionAtPerGroup / float(group.size()));
 		precisionAtPerGroup = (precisionAtPerGroup / float(group.size()));
 		recallAtPerGroup = (recallAtPerGroup / float(group.size()));
 
+		LOG_PERFMON(PINTERIM, "Average Precision at \t" << k << " per Group" << "\t" << currentGroup << "\t" << avgPrecisionAtPerGroup);
 		LOG_PERFMON(PINTERIM, "Precision at \t" << k << " per Group" << "\t" << currentGroup << "\t" << precisionAtPerGroup);
-		LOG_PERFMON(PINTERIM, "Recall at \t" << k << " per Group" << "\t" << currentGroup << recallAtPerGroup);
+		LOG_PERFMON(PINTERIM, "Recall at \t" << k << " per Group" << "\t" << currentGroup << "\t" << recallAtPerGroup);
 
 		pendingFutures.clear();
 
-		tmpValues.push_back(std::make_tuple(currentGroup, precisionAtPerGroup, recallAtPerGroup));
+		tmpValues.push_back(std::make_tuple(currentGroup, avgPrecisionAtPerGroup, precisionAtPerGroup, recallAtPerGroup));
 	}
 
 	class_values.swap(tmpValues);
@@ -511,6 +516,8 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 	//Parallel processing
 	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
 
+	float computationTimes = 0.0;
+	
 	//Only used if randomization is true
 	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
 
@@ -522,21 +529,19 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 		float mapPerGroup = 0;
 		std::string name = "MAP ";
 		name += std::to_string(group.size());
+
 		for (int iGroup = 0; iGroup < group.size(); iGroup++)
 		{
-			if (iGroup == 0)
-				printexecutiontime = true;
-			else
-				printexecutiontime = false;
 
 			Features element = *group.at(iGroup);
+
 			if (evaluationmethod == 1)
 			{
-				randomResults.push_back(compareRandom(element, model, distance, printexecutiontime));
+				randomResults.push_back(compareRandom(element, model, distance));
 			}
 			else
 			{
-				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance, printexecutiontime));
+				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
 				//compare(element, model, distance, printexecutiontime);
 			}
 
@@ -565,7 +570,7 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 		}
 		else
 		{
-
+			float computationTime = 0.0;
 			std::unique_lock<std::mutex> guard(f());
 			LOG_INFO("Group\t" << currentGroup << "\tSize:\t" << group.size());
 			guard.unlock();
@@ -573,38 +578,52 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 			{
 				std::pair<EvaluatedQuery*, std::vector<ResultBase*>> results = pendingFutures.at(i).get();
 				mapPerGroup = mapPerGroup + results.first->mAPValue;
+				computationTime += results.first->mSearchtime;
 
 				serialize(results, outputdir);
 
 				writeAveragePrecisionValue(results, apstats);
+
+				File *tmp = new File(apstats->getFile());
+				tmp->extendFileName("RS");
+				writeAverageResults(results, tmp);
+				delete tmp;
+				
 
 				std::unique_lock<std::mutex> guard(f());
 				cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
 				guard.unlock();
 			}
 
+			computationTime /= float(pendingFutures.size());
+			computationTimes += computationTime;
 			pendingFutures.clear();
 
 			mapPerGroup = mapPerGroup / float(group.size());
 
 			map = map + mapPerGroup;
 
+			LOG_PERFMON(PTIME, "Average Computation-Time: Searching (secs) per Group: \t" << currentGroup << "\t" << computationTime);
 			LOG_PERFMON(PINTERIM, "Mean Average Precision per Group: \t" << currentGroup << "\t" << mapPerGroup);
 			tmp_values.push_back(std::make_pair(currentGroup, mapPerGroup));
 		}
 	}
+	
+	computationTimes /= float(groups.size());
+	LOG_PERFMON(PTIME, "Computation-Time: Searching (secs) \t" << model.size() << "\t" << xtractsettings << "\t" << evalsettings << "\t" << computationTimes);
+	//guard.unlock();
 
 	class_values.swap(tmp_values);
 	return map;
 }
 
-std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
-	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime)
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(Features& _query, std::vector<Features*> _model, Distance* measure)
 {
 	std::vector<ResultBase*> results;
 	results.reserve(_model.size());
 
 	float distance = 0.0;
+	float searchtime = 0.0;
 	for (int iElem = 0; iElem < _model.size(); iElem++)
 	{
 		Features* element = _model.at(iElem);
@@ -663,6 +682,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
 	evalQuery->mFrameCount = _query.mFrameCount;
 	evalQuery->mStartFrameNumber = _query.mStartFrameNr;
 	evalQuery->mVideoID = _query.mVideoID;
+	evalQuery->mSearchtime = searchtime;
 
 	std::pair<EvaluatedQuery*, std::vector<ResultBase*>> apresults;
 	apresults.first = evalQuery;
@@ -674,29 +694,35 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compareRandom(
 
 
 
-std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
-	Features& _query, std::vector<Features*> _model, Distance* measure, bool executiontime)
+std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(Features& _query, std::vector<Features*> _model, Distance* measure)
 {
 	std::vector<ResultBase*> results;
 	results.reserve(_model.size());
-
+	float searchtime = 0.0;
 	float distance = 0.0;
-	float elapsed_sec = 0.0;
+	double elapsed_secs = 0.0;
 	for (int iElem = 0; iElem < _model.size(); iElem++)
 	{
 		Features* element = _model.at(iElem);
 
+		size_t e1_start, e1_end;
+		
+		e1_start = double(cv::getTickCount());
+		//time(&t1_start);
 
-		size_t e1_start = cv::getTickCount();
 		distance = measure->compute(_query, *element);
+		//time(&t2_end);
 
 		if (distance < 0)
 		{
 			LOG_ERROR("Error distance is small than zero " << distance);
 		}
 
-		size_t e1_end = cv::getTickCount();
-		elapsed_sec += (e1_end - e1_start / cv::getTickFrequency());
+		e1_end = cv::getTickCount();
+		double tickFrequency = double(cv::getTickFrequency());
+		double tmp = (e1_end - e1_start) / tickFrequency;
+		elapsed_secs += tmp;
+		//elapsed_secs2 += (t2_end - t1_start);
 
 		ResultBase* result = new ResultBase();
 		result->mVideoFileName = element->mVideoFileName;
@@ -709,9 +735,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 		results.push_back(result);
 	}
 
-	std::unique_lock<std::mutex> guard(f());
-	LOG_PERFMON(PTIME, "Computation-Time: Searching \t" << _model.size() << "\t" << xtractsettings << "\t" << evalsettings << "\t" << elapsed_sec / float(_model.size()));
-	guard.unlock();
+	searchtime = elapsed_secs / float(_model.size());
 
 	std::sort(results.begin(), results.end(), [](const ResultBase* s1, const ResultBase* s2)
 	{
@@ -751,10 +775,12 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(
 	evalQuery->mFrameCount = _query.mFrameCount;
 	evalQuery->mStartFrameNumber = _query.mStartFrameNr;
 	evalQuery->mVideoID = _query.mVideoID;
+	evalQuery->mSearchtime = searchtime;
 
 	std::pair<EvaluatedQuery*, std::vector<ResultBase*>> apresults;
 	apresults.first = evalQuery;
 	apresults.second = results;
+
 	return apresults;
 }
 
@@ -810,6 +836,29 @@ bool writeAveragePrecisionValue(std::pair<EvaluatedQuery*, std::vector<ResultBas
 
 	outfile.close();
 
+	return true;
+}
+
+bool writeAverageResults(std::pair<EvaluatedQuery*, std::vector<ResultBase*>> _results, File* _file)
+{
+
+	std::ofstream outfile;
+
+	outfile.open(_file->getFile(), std::ios_base::app);
+
+	std::stringstream ss1, ss2;
+	ss1 << _results.first->mVideoFileName << "," << _results.first->mVideoID << "," << _results.first->mFrameCount << "," << static_cast<int>(_results.first->mClazz) << "," << static_cast<float>(_results.first->mAPValue);
+
+
+	for(int iResult = 0; iResult < _results.second.size(); iResult++)
+	{
+		ss2 << _results.second.at(iResult)->mVideoFileName << "," << _results.second.at(iResult)->mVideoID << "," << _results.second.at(iResult)->mFrameCount << "," << _results.second.at(iResult)->mClazz << "," << _results.second.at(iResult)->mDistance << "," << _results.second.at(iResult)->mPrecision << ";";
+	}
+
+	outfile << ss1.str() << ";" << ss2.str();
+	outfile << std::endl;
+
+	outfile.close();
 	return true;
 }
 

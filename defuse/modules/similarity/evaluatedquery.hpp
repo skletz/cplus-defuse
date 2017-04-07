@@ -22,6 +22,8 @@ namespace defuse {
 		unsigned int mFrameCount;
 
 		float mAPValue;
+
+		float mSearchtime;
 		EvaluatedQuery() {};
 	};
 }

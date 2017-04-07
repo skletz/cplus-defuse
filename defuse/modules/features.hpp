@@ -27,6 +27,8 @@ namespace defuse {
 
 		cv::Mat mVectors;
 
+		float mExtractionTime;
+
 		void write(cv::FileStorage& fs) const;
 		void read(const cv::FileNode& node);
 
