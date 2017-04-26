@@ -20,6 +20,7 @@
 
 
 static std::string input = "..\\data-v1_1";
+static std::string input2 = "..\\data-v1_1";
 static std::string extension = ".mp4";
 static std::string output = "..\\data-v1_2";
 static int maxChunksize = 10;
@@ -168,59 +169,125 @@ void processFilenameType2(std::vector<std::string> entries, Directory tempdir3)
 //Assuming that all video files are in subdirectories ..//chunks//ch_10//videoname//chunks.mp4
 int main(int argc, char **argv)
 {
+	//Convert the output from chunk extractor into the right input format
+	//*******************************************************************
+	//Input: I:\SQUASH\datasets\data_mtap-v1_1\chunks\orig .mp4 I:\SQUASH\datasets\data_mtap-v1_2\orig\311 2 311 2
+	//*******************************************************************
+	//input = argv[1];
+	//extension = argv[2];
+	//output = argv[3];
+	//maxChunksize = std::atoi(argv[4]);
+	//dirs = argv[5];
+	//filenameType = std::atoi(argv[6]); //currently 2 completely different filename types are implemented
+
+
+	//Directory* inputdir = new Directory(input);
+	//Directory* outputdir = new Directory(output);
+
+	//LOG_INFO("Searching ...");
+	//std::vector<std::string> entries;
+	////entries = getRecursiveAllFilesFromDirectory(inputdir->getPath(), extension);
+	//LOG_INFO("Found: " << entries.size() << " entries with " << extension << " in " << input);
+
+	//std::vector<std::string> directories = cplusutil::FileIO::getFileListFromDirectory(inputdir->getPath());
+
+	//Directory tempdir1(*outputdir);
+	//tempdir1.addDirectory("chunks");
+
+	//Directory tempdir2(tempdir1);
+	//tempdir2.addDirectory("ch_" + std::to_string(maxChunksize));
+
+	//std::vector<std::string> processDirs = cplusutil::String::split(dirs, ',');
+
+	//for (int iDirectory = 0; iDirectory < directories.size(); iDirectory++)
+	//{
+	//	//the directory is a directory which contains the class number
+	//	Directory iDir(directories.at(iDirectory));
+
+	//	int clazz;
+	//	{
+	//		std::istringstream reader(iDir.mDirName);
+	//		reader >> clazz;
+	//	}
+
+	//	entries = getRecursiveAllFilesFromDirectory(directories.at(iDirectory), extension);
+
+	//	Directory tempdir3(tempdir2);
+	//	tempdir3.addDirectory(std::to_string(clazz));
+
+	//	if (std::find(processDirs.begin(), processDirs.end(), iDir.mDirName) != processDirs.end())
+	//	{
+	//		if(filenameType == 1)
+	//		{
+	//			processFilenameType1(entries, tempdir3);
+	//		}else
+	//		{
+	//			processFilenameType2(entries, tempdir3);
+	//		}
+	//	}
+	//}
+
+	//Convert the output from cnn extractor into the right input format
+	//*******************************************************************
+
 	input = argv[1];
 	extension = argv[2];
 	output = argv[3];
-	maxChunksize = std::atoi(argv[4]);
-	dirs = argv[5];
-	filenameType = std::atoi(argv[6]); //currently 2 completely different filename types are implemented
+	input2 = argv[4];
 
+	Directory inputdir(input);
+	Directory outputdir(output);
+	Directory inputdir2(input2);
 
-	Directory* inputdir = new Directory(input);
-	Directory* outputdir = new Directory(output);
+	std::vector<std::string> entries = cplusutil::FileIO::getFileListFromDirectory(inputdir.getPath());
 
-	LOG_INFO("Searching ...");
-	std::vector<std::string> entries;
-	//entries = getRecursiveAllFilesFromDirectory(inputdir->getPath(), extension);
-	LOG_INFO("Found: " << entries.size() << " entries with " << extension << " in " << input);
-
-	std::vector<std::string> directories = cplusutil::FileIO::getFileListFromDirectory(inputdir->getPath());
-
-	Directory tempdir1(*outputdir);
-	tempdir1.addDirectory("chunks");
-
-	Directory tempdir2(tempdir1);
-	tempdir2.addDirectory("ch_" + std::to_string(maxChunksize));
-
-	std::vector<std::string> processDirs = cplusutil::String::split(dirs, ',');
-
-	for (int iDirectory = 0; iDirectory < directories.size(); iDirectory++)
+	for (int iEntry = 0; iEntry < entries.size(); iEntry++)
 	{
-		//the directory is a directory which contains the class number
-		Directory iDir(directories.at(iDirectory));
+		std::string entry = entries.at(iEntry);
 
-		int clazz;
+		boost::filesystem::path isClipFileDir{ entry };
+		if (boost::filesystem::is_directory(isClipFileDir))
 		{
-			std::istringstream reader(iDir.mDirName);
-			reader >> clazz;
-		}
+			std::vector<std::string> files = cplusutil::FileIO::getFileListFromDirectory(entry);
 
-		entries = getRecursiveAllFilesFromDirectory(directories.at(iDirectory), extension);
-
-		Directory tempdir3(tempdir2);
-		tempdir3.addDirectory(std::to_string(clazz));
-
-		if (std::find(processDirs.begin(), processDirs.end(), iDir.mDirName) != processDirs.end())
-		{
-			if(filenameType == 1)
+			for (int iFile = 0; iFile < files.size(); iFile++)
 			{
-				processFilenameType1(entries, tempdir3);
-			}else
-			{
-				processFilenameType2(entries, tempdir3);
+				File file(files.at(iFile));
+				std::string filename = file.getFilename();
+				std::string parentpath = files.at(iFile).substr(0, files.at(iFile).find_last_of("/\\"));
+				Directory parentdirectory(parentpath);
+
+				int clazz;
+				{
+					std::istringstream reader(parentdirectory.mDirName);
+					reader >> clazz;
+				}
+
+				File copyToFile(files.at(iFile));
+				//File copyFromFile(files.at(iFile));
+				file.setPath(inputdir2.getPath());
+
+				if(file.getFileExtension() == extension)
+				{
+					std::string tmpfilename = file.getFilename().substr(0, file.getFilename().find_last_of("."));
+					tmpfilename += ".";
+					tmpfilename += std::to_string(clazz);
+					copyToFile.setFilename(tmpfilename);
+					
+					copyToFile.setPath(outputdir.getPath());
+					copyToFile.setFileExtension(extension);
+
+					LOG_INFO("Copy from  " << file.getFile());
+					LOG_INFO("Copy to  " << copyToFile.getFile());
+					boost::filesystem::copy_file(file.getFile(), copyToFile.getFile());
+
+				}
+
 			}
 		}
+
 	}
+
 
 }
 	

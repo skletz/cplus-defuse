@@ -31,7 +31,7 @@ namespace defuse {
 
 		void write(cv::FileStorage& fs) const;
 		void read(const cv::FileNode& node);
-
+		//virtual void readFloatArray(const std::string file) = 0;
 
 		Features() {};
 		~Features() {};
@@ -63,6 +63,8 @@ namespace defuse {
 
 		x.read(node);
 	}
+
+	
 }
 #endif
 #endif

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #  #######################################################
-#  extract_annos (Version 1.0) ###########################
+#  xtract-keyframe (Version 1.1) #########################
 
 #  ******_****_******_*******
 #  *****| |**| |****| |******
@@ -13,7 +13,8 @@
 #  **************************
 
 #  ########################################################
-#  
+#  Extracts the middle frame of each video segment
+#  Using ffprobe, ffmpeg
 #  ########################################################
 
 INPUT=$1
@@ -27,19 +28,19 @@ OUTPUT=$2
         #echo directory: $dir
         #echo parent dir: $(dirname "$dir")
         ##echo parent only: "${dir##*/}"
-        
+
         for file in $dir/*
         do
             #echo file: $file
             #echo filename: $(basename "$file")
-            
+
             name=$(echo $(basename "$file") | sed -e 's/\.[^.]*$//')
             #echo $name
-            
+
             mkdir -p $OUTPUT${dir##*/}
             eval "$(ffprobe -v error -of flat=s=_ -show_entries format=duration $file)"
             ffmpeg -i $file -ss "$(echo "$format_duration/2" | bc)" -q:v 2 -frames:v 1 $OUTPUT${dir##*/}/$name.jpg
 
         done
-        
+
     done

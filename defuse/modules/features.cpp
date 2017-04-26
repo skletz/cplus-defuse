@@ -28,3 +28,4 @@ defuse::Features::Features(std::string mVideoFileName, int _videoID, int _clazz,
 	mVectors = cv::Mat();
 }
 
+

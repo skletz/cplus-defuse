@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="..\libs\opencv-histlib\src\histLib.cpp" />
     <ClCompile Include="defuse_info.cpp" />
+    <ClCompile Include="modules\descriptor\cnn\cnnfeatures.cpp" />
     <ClCompile Include="modules\descriptor\dfeatsig_v1\src\tpct_signatures.cpp" />
     <ClCompile Include="modules\descriptor\dfs1parameter.cpp" />
     <ClCompile Include="modules\descriptor\dfs1xtractor.cpp" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\defuse.hpp" />
+    <ClInclude Include="modules\descriptor\cnn\cnnfeatures.hpp" />
     <ClInclude Include="modules\descriptor\dfeatsig_v1\include\signatures.h" />
     <ClInclude Include="modules\descriptor\dfeatsig_v1\src\constants.h" />
     <ClInclude Include="modules\descriptor\dfeatsig_v1\src\tf_signatures.h" />

@@ -139,6 +139,9 @@
     <ClCompile Include="..\libs\opencv-histlib\src\histLib.cpp">
       <Filter>OpenCV-Histlib</Filter>
     </ClCompile>
+    <ClCompile Include="modules\descriptor\cnn\cnnfeatures.cpp">
+      <Filter>Quelldateien\feature</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="modules\descriptor\featsig\include\signatures.h">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="modules\similarity\mahalanobis1.hpp">
       <Filter>Headerdateien\similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\descriptor\cnn\cnnfeatures.hpp">
+      <Filter>Headerdateien\feature</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

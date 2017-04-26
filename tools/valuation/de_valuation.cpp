@@ -83,6 +83,7 @@
 #include <random>
 #include <iomanip>
 #include <boost/format.hpp>
+#include "../../defuse/modules/descriptor/cnn/cnnfeatures.hpp"
 using namespace defuse;
 
 static int distancemethod = 0;
@@ -319,7 +320,6 @@ int main(int argc, char **argv)
 	else if (xtractionmethod == 4)
 	{
 		idxWeight = -1;
-		LOG_INFO("Extraction method 4 is not implemented.")
 	}
 
 	//Initialize distance method for the processing of the parameters
@@ -916,32 +916,51 @@ bool addValuesMAPToCSV(File* _file, std::vector<std::pair<int, float>> class_val
 
 Features* deserialize(std::string _file)
 {
-	cv::FileStorage fileStorage(_file, cv::FileStorage::READ);
-
-	if (!fileStorage.isOpened()) {
-		LOG_FATAL("Fatal Error in deserialization of Model: Invalid feature file " << _file);
-		return nullptr;
-	}
-
-	cv::FileNode node = fileStorage["Data"];
-	cv::FileNodeIterator it = node.begin(), it_end = node.end();
-
 	Features* features = nullptr;
-
-	for (; it != it_end; ++it)
+	if (xtractionmethod < 4)
 	{
-		if (xtractionmethod < 3)
-		{
-			features = new FeatureSignatures();
-		}
-		else if (xtractionmethod == 3)
-		{
-			features = new MotionHistogram();
+		cv::FileStorage fileStorage(_file, cv::FileStorage::READ);
+
+		if (!fileStorage.isOpened()) {
+			LOG_FATAL("Fatal Error in deserialization of Model: Invalid feature file " << _file);
+			return nullptr;
 		}
 
-		(*features).read(*it);
+		cv::FileNode node = fileStorage["Data"];
+		cv::FileNodeIterator it = node.begin(), it_end = node.end();
+
+		for (; it != it_end; ++it)
+		{
+			if (xtractionmethod < 3)
+			{
+				features = new FeatureSignatures();
+			}
+			else if (xtractionmethod == 3)
+			{
+				features = new MotionHistogram();
+			}
+
+			(*features).read(*it);
+
+		}
+
+		fileStorage.release();
+	}else
+	{
+		CNNFeatures* tmp = new CNNFeatures();
+		tmp->readFloatArray(_file);
+		
+		features = new CNNFeatures();
+		features->mVideoFileName = tmp->mVideoFileName;
+		features->mClazz = tmp->mClazz;
+		features->mFrameCount = tmp->mFrameCount;
+		features->mStartFrameNr = tmp->mStartFrameNr;
+		features->mVectors = tmp->mVectors;
+		features->mVideoID = tmp->mVideoID;
+		delete tmp;
+		//LOG_INFO("Test");
 	}
 
-	fileStorage.release();
+
 	return features;
 }
