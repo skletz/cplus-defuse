@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "distance.hpp"
 #include "../parameter.hpp"
 

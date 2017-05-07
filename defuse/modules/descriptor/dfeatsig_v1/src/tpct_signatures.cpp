@@ -1,7 +1,7 @@
 #include "tpct_signatures.hpp"
 #include <opencv2/core.hpp>
 #include "constants.h"
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 
 using namespace analysis::tpct_signatures;
 TPCTSignatures::TPCTSignatures()

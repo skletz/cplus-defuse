@@ -2,8 +2,8 @@
 #define _DEFUSE_MOTIONHISTOGRAM_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
-#include <cpluslogger.h>
+#include <cplusutil.hpp>
+#include <cpluslogger.hpp>
 #include <opencv2/opencv.hpp>
 #include "../features.hpp"
 

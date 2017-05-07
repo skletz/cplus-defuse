@@ -1,6 +1,6 @@
 #include "samplepoints.hpp"
 
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 
 defuse::SamplePoints::SamplePoints(int samplesCnt)
 {

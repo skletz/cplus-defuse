@@ -2,7 +2,7 @@
 #define _DEFUSE_SAMPLEPOINTS_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include <opencv2/opencv.hpp>
 #include <boost/unordered_map.hpp>
 #include <opencv2/core/persistence.hpp>

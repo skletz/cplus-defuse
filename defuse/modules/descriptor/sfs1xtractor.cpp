@@ -1,7 +1,7 @@
 #include "sfs1xtractor.hpp"
 #include "sfs1parameter.hpp"
 #include "featuresignatures.hpp"
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 
 defuse::SFS1Xtractor::SFS1Xtractor(Parameter* _parameter)
 {

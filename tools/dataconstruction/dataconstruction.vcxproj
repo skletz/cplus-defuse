@@ -84,7 +84,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\libs\cplusutil\build\include;..\..\libs\cpluslogger\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libs\cplusutil\cplusutil\include;..\..\libs\cpluslogger\cpluslogger\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,10 +114,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\libs\cpluslogger\cpluslogger.vcxproj">
+    <ProjectReference Include="..\..\libs\cpluslogger\vs\cpluslogger.vcxproj">
       <Project>{8da23bf9-79ea-47f0-92b8-6538241ef7e8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\cplusutil\cplusutil.vcxproj">
+    <ProjectReference Include="..\..\libs\cplusutil\vs\cplusutil.vcxproj">
       <Project>{006d52f0-0ecc-43bf-b5da-e2b9a38d9727}</Project>
     </ProjectReference>
   </ItemGroup>

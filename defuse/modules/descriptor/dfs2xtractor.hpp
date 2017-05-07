@@ -2,7 +2,7 @@
 #define _DEFUSE_DFS2XTRACTOR_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "featsig/include/signatures.h"
 #include "dfeatsig_v1//src/tpct_signatures.hpp"
 #include "../features.hpp"

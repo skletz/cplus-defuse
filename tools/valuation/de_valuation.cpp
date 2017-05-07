@@ -77,8 +77,8 @@
 **/
 
 #include <future>
-#include <cpluslogger.h>
-#include <cplusutil.h>
+#include <cpluslogger.hpp>
+#include <cplusutil.hpp>
 #include <defuse.hpp>
 #include <random>
 #include <iomanip>

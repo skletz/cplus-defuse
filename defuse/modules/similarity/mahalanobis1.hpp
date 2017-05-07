@@ -2,7 +2,7 @@
 #define _DEFUSE_MAHALANOBIS_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "distance.hpp"
 #include "../parameter.hpp"
 

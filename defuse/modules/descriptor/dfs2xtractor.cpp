@@ -1,6 +1,6 @@
 #include "dfs2xtractor.hpp"
 #include "dfs2parameter.hpp"
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 #include "featuresignatures.hpp"
 
 #define _USE_MATH_DEFINES 

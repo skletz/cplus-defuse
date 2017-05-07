@@ -2,7 +2,7 @@
 #define _DEFUSE_RESULTBASE_HPP_
 #ifdef __cplusplus
 
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 #include <opencv2/core/persistence.hpp>
 namespace defuse {
 

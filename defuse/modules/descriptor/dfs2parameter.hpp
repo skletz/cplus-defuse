@@ -2,7 +2,7 @@
 #define _DEFUSE_DFS2PARAMETER_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "../parameter.hpp"
 #include "sfs1parameter.hpp"
 

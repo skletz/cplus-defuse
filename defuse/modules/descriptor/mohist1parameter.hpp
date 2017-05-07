@@ -2,7 +2,7 @@
 #define _DEFUSE_MOHIST1PARAMETER_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "../parameter.hpp"
 
 namespace defuse {

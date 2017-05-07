@@ -1,6 +1,6 @@
 #include "mohist1xtractor.hpp"
 #include "mohist1parameter.hpp"
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 
 #include <histLib.h>
 

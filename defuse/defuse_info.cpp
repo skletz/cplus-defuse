@@ -1,5 +1,5 @@
-#include <cpluslogger.h>
-#include <cplusutil.h>
+#include <cpluslogger.hpp>
+#include <cplusutil.hpp>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <boost/version.hpp>

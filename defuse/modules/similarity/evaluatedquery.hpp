@@ -2,7 +2,7 @@
 #define _DEFUSE_EVALUATEDQUERY_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 
 
 namespace defuse {

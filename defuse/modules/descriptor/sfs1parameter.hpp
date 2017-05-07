@@ -2,7 +2,7 @@
 #define _DEFUSE_SFS1PARAMETER_HPP_
 #ifdef __cplusplus
 
-#include <cplusutil.h>
+#include <cplusutil.hpp>
 #include "../parameter.hpp"
 
 namespace defuse {

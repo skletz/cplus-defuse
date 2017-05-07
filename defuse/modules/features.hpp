@@ -2,7 +2,7 @@
 #define _DEFUSE_FEATURES_HPP_
 #ifdef __cplusplus
 
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 #include <vector>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/persistence.hpp>

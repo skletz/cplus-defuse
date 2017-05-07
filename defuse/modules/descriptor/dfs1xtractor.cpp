@@ -1,6 +1,6 @@
 #include "dfs1xtractor.hpp"
 #include "dfs1parameter.hpp"
-#include <cpluslogger.h>
+#include <cpluslogger.hpp>
 #include "featuresignatures.hpp"
 
 defuse::DFS1Xtractor::DFS1Xtractor(Parameter* _parameter)
