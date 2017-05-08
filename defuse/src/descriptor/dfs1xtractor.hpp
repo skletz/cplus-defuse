@@ -6,7 +6,7 @@
 #include "dfeatsig_v1//src/tpct_signatures.hpp"
 #include "../features.hpp"
 #include "../parameter.hpp"
-#include "../../videobase.hpp"
+#include "../videobase.hpp"
 #include "../xtractor.hpp"
 #include "util/samplepoints.hpp"
 

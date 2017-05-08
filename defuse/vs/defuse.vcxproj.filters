@@ -19,250 +19,219 @@
     <Filter Include="DFSV1Signatures">
       <UniqueIdentifier>{e3c915b2-6177-489a-bfab-a9aa86b6d5b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DFSV2Signatures">
-      <UniqueIdentifier>{989d62c2-f2de-467d-a4a4-0dd5161128d7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\descriptor">
-      <UniqueIdentifier>{56acdfc1-abdc-446a-b2b4-6a9c4c1b873e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\feature">
-      <UniqueIdentifier>{b807089c-0ce4-4851-a4d4-d8cac0f363f2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\abstract">
-      <UniqueIdentifier>{8de76c05-3d53-4aeb-adc0-22ce93a632c3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Quelldateien\descriptor">
-      <UniqueIdentifier>{55621556-9bb2-4bd6-99a7-4ddf07311f54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Quelldateien\feature">
-      <UniqueIdentifier>{8318fa21-65b0-458d-836f-9049df24d67d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Quelldateien\abstract">
-      <UniqueIdentifier>{cbed1c16-638b-4815-9b08-3b70b7bf13fe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Quelldateien\util">
-      <UniqueIdentifier>{9ee2b230-bb86-4332-bce3-14353b513b9b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\util">
-      <UniqueIdentifier>{06310918-845b-4bc6-94f2-74e4c38ab559}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\similarity">
-      <UniqueIdentifier>{39cd6f14-95fa-4008-82fa-a460a32ac866}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Quelldateien\similarity">
-      <UniqueIdentifier>{afc30c18-9fb8-4e91-9297-45fdd3a9ff34}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="OpenCV-Histlib">
-      <UniqueIdentifier>{f9ae9ba4-2f4d-4c0a-b2e7-0daa19978201}</UniqueIdentifier>
+    <Filter Include="CHistLib">
+      <UniqueIdentifier>{b8ca5ba2-1751-41da-8170-5a0e3fec96e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="modules\descriptor\featsig\src\grayscale_bitmap.cpp">
+    <ClCompile Include="..\src\parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\videobase.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\xtractor.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\defuse_info.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\features.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\evaluatedquery.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\gd1parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\mahalanobis1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\minkowski1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\resultbase.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\smd1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\similarity\sqfd1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\dfs1parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\dfs1xtractor.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\dfs2parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\dfs2xtractor.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\featuresignatures.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\mohist1parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\mohist1xtractor.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\motionhistogram.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\sfs1parameter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\sfs1xtractor.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\featsig\src\grayscale_bitmap.cpp">
       <Filter>PCTSignatures</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\featsig\src\pct_clusterizer.cpp">
+    <ClCompile Include="..\src\descriptor\featsig\src\pct_clusterizer.cpp">
       <Filter>PCTSignatures</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\featsig\src\pct_sampler.cpp">
+    <ClCompile Include="..\src\descriptor\featsig\src\pct_sampler.cpp">
       <Filter>PCTSignatures</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\featsig\src\pct_signatures.cpp">
+    <ClCompile Include="..\src\descriptor\featsig\src\pct_signatures.cpp">
       <Filter>PCTSignatures</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\dfeatsig_v1\src\tpct_signatures.cpp">
+    <ClCompile Include="..\src\descriptor\cnn\cnnfeatures.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\descriptor\dfeatsig_v1\src\tpct_signatures.cpp">
       <Filter>DFSV1Signatures</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\dfs1parameter.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
+    <ClCompile Include="..\src\descriptor\util\samplepoints.cpp">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="modules\descriptor\dfs1xtractor.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\dfs2parameter.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\dfs2xtractor.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\sfs1xtractor.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\sfs1parameter.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\mohist1xtractor.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\featuresignatures.cpp">
-      <Filter>Quelldateien\feature</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\motionhistogram.cpp">
-      <Filter>Quelldateien\feature</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\mohist1parameter.cpp">
-      <Filter>Quelldateien\descriptor</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\features.cpp">
-      <Filter>Quelldateien\abstract</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\parameter.cpp">
-      <Filter>Quelldateien\abstract</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\xtractor.cpp">
-      <Filter>Quelldateien\abstract</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\util\samplepoints.cpp">
-      <Filter>Quelldateien\util</Filter>
-    </ClCompile>
-    <ClCompile Include="videobase.cpp">
-      <Filter>Quelldateien\util</Filter>
-    </ClCompile>
-    <ClCompile Include="defuse_info.cpp" />
-    <ClCompile Include="modules\similarity\evaluatedquery.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\minkowski1.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\resultbase.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\smd1.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\sqfd1.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\similarity\mahalanobis1.cpp">
-      <Filter>Quelldateien\similarity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\libs\opencv-histlib\src\histLib.cpp">
-      <Filter>OpenCV-Histlib</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\descriptor\cnn\cnnfeatures.cpp">
-      <Filter>Quelldateien\feature</Filter>
+    <ClCompile Include="..\..\libs\opencv-histlib\src\histLib.cpp">
+      <Filter>CHistLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="modules\descriptor\featsig\include\signatures.h">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\constants.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\distance.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\grayscale_bitmap.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\pct_clusterizer.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\pct_sampler.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\pct_signatures.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\featsig\src\similarity.hpp">
-      <Filter>PCTSignatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\dfeatsig_v1\include\signatures.h">
-      <Filter>DFSV1Signatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\dfeatsig_v1\src\constants.h">
-      <Filter>DFSV1Signatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\dfeatsig_v1\src\tf_signatures.h">
-      <Filter>DFSV1Signatures</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\descriptor\dfeatsig_v1\src\tpct_signatures.hpp">
-      <Filter>DFSV1Signatures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\defuse.hpp">
+    <ClInclude Include="..\src\features.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\dfs1parameter.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\dfs1xtractor.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\videobase.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\dfs2parameter.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\xtractor.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\dfs2xtractor.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\similarity\distance.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\mohist1parameter.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\similarity\evaluatedquery.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\mohist1xtractor.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\similarity\mahalanobis1.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\sfs1parameter.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\similarity\mahalanobis1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\sfs1xtractor.hpp">
-      <Filter>Headerdateien\descriptor</Filter>
+    <ClInclude Include="..\src\similarity\minkowski1.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\motionhistogram.hpp">
-      <Filter>Headerdateien\feature</Filter>
+    <ClInclude Include="..\src\similarity\minkowski1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\featuresignatures.hpp">
-      <Filter>Headerdateien\feature</Filter>
+    <ClInclude Include="..\src\similarity\resultbase.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\features.hpp">
-      <Filter>Headerdateien\abstract</Filter>
+    <ClInclude Include="..\src\similarity\smd1.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\parameter.hpp">
-      <Filter>Headerdateien\abstract</Filter>
+    <ClInclude Include="..\src\similarity\smd1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\xtractor.hpp">
-      <Filter>Headerdateien\abstract</Filter>
+    <ClInclude Include="..\src\similarity\sqfd1.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\util\samplepoints.hpp">
-      <Filter>Headerdateien\util</Filter>
+    <ClInclude Include="..\src\similarity\sqfd1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="videobase.hpp">
-      <Filter>Headerdateien\util</Filter>
+    <ClInclude Include="..\src\descriptor\dfs1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\distance.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\dfs1xtractor.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\evaluatedquery.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\dfs2parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\minkowski1.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\dfs2xtractor.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\resultbase.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\featuresignatures.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\smd1.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\mohist1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\smd1parameter.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\mohist1xtractor.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\sqfd1.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\motionhistogram.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\sqfd1parameter.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\sfs1parameter.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\minkowski1parameter.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\sfs1xtractor.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\mahalanobis1parameter.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\featsig\include\signatures.h">
+      <Filter>PCTSignatures</Filter>
     </ClInclude>
-    <ClInclude Include="modules\similarity\mahalanobis1.hpp">
-      <Filter>Headerdateien\similarity</Filter>
+    <ClInclude Include="..\src\descriptor\featsig\src\constants.hpp">
+      <Filter>PCTSignatures</Filter>
     </ClInclude>
-    <ClInclude Include="modules\descriptor\cnn\cnnfeatures.hpp">
-      <Filter>Headerdateien\feature</Filter>
+    <ClInclude Include="..\src\descriptor\featsig\src\distance.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\featsig\src\grayscale_bitmap.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\featsig\src\pct_clusterizer.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\featsig\src\pct_sampler.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\featsig\src\pct_signatures.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\featsig\src\similarity.hpp">
+      <Filter>PCTSignatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\cnn\cnnfeatures.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\dfeatsig_v1\include\signatures.h">
+      <Filter>DFSV1Signatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\dfeatsig_v1\src\constants.h">
+      <Filter>DFSV1Signatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\dfeatsig_v1\src\tf_signatures.h">
+      <Filter>DFSV1Signatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\dfeatsig_v1\src\tpct_signatures.hpp">
+      <Filter>DFSV1Signatures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\descriptor\util\samplepoints.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

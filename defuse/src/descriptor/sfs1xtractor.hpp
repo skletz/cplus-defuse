@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 
-#include "../../videobase.hpp"
+#include "../videobase.hpp"
 #include "featsig/include/signatures.h"
 #include "dfeatsig_v1//src/tpct_signatures.hpp"
 #include "../xtractor.hpp"

@@ -119,7 +119,7 @@
     <ClCompile Include="de_valuation.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\defuse\defuse.vcxproj">
+    <ProjectReference Include="..\..\defuse\vs\defuse.vcxproj">
       <Project>{7a073147-48a8-44de-9997-9d049fe510fd}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\libs\cpluslogger\vs\cpluslogger.vcxproj">

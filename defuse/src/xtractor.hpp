@@ -3,8 +3,8 @@
 #ifdef __cplusplus
 
 #include <string>
-#include "../modules/features.hpp"
-#include "../videobase.hpp"
+#include "features.hpp"
+#include "videobase.hpp"
 
 namespace defuse {
 
