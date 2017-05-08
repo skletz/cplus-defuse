@@ -241,12 +241,14 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-# Customized
-Debug
-Release
-*.old
-VisualGDBCache
-CodeDB
-*.sln
-*.props
-*.vcxproj.filters
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+#NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
