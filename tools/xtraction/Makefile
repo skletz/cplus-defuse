@@ -22,7 +22,7 @@ DEFUSE="../../defuse"
 #OPENCV_LIBS=-lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab
 OPENCV_LIBS=`pkg-config --static --libs opencv`
 
-INCDIR=-I/usr/local/include/opencv2 -I/usr/local/include/opencv -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I../../defuse/include
+INCDIR=-I/usr/local/include/opencv2 -I/usr/local/include/opencv -I$(LOGGER)/cpluslogger/include -I$(UTIL)/cplusutil/cplusutil/include -I$(DEFUSE)/defuse/include
 ADDLIBDIR=-L/usr/local/lib $(LOGGER)/build/staticlib/cpluslogger_1_0.a $(UTIL)/build/staticlib/cplusutil_1_0.a $(DEFUSE)/build/staticlib/defuse_2_0.a
 LDLIBSOPTIONS=$(ADDLIBDIR) $(OPENCV_LIBS) -lboost_filesystem -lboost_system
 

@@ -18,7 +18,7 @@ OBJECTS=$(patsubst $(SRC)/%.cpp,$(TARGET)/$(EXT)/%.o,$(SOURCES))
 UTIL="../libs/cplusutil"
 LOGGER="../libs/cpluslogger"
 
-INCDIR=-I/usr/local/include/opencv2 -I../../cpluslogger/cpluslogger/include -I../../cplusutil/cplusutil/include
+INCDIR=-I/usr/local/include/opencv2 -I$(LOGGER)/cpluslogger/include -I$(UTIL)/cplusutil/include
 ADDLIBDIR=-L/usr/local/lib $(LOGGER)/build/staticlib/cpluslogger_1_0.a $(UTIL)/build/staticlib/cplusutil_1_0.a
 LDLIBSOPTIONS=$(ADDLIBDIR) `pkg-config --static --libs opencv` -lboost_filesystem -lboost_system
 
