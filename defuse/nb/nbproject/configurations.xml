@@ -13,7 +13,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>../src/defuse_info.cpp</itemPath>
       <itemPath>../src/descriptor</itemPath>
       <itemPath>../src/features.cpp</itemPath>
       <itemPath>../src/features.hpp</itemPath>
@@ -43,7 +42,7 @@
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="Debug" type="3">
       <toolsSet>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -53,74 +52,16 @@
         <ccTool>
           <standard>8</standard>
           <incDir>
+            <pElem>/usr/local/include/opencv2</pElem>
             <pElem>../../../cpluslogger/cpluslogger/include</pElem>
             <pElem>../../../cplusutil/cplusutil/include</pElem>
-            <pElem>/usr/local/include/opencv2</pElem>
           </incDir>
+          <commandLine>-fPIC</commandLine>
         </ccTool>
-        <linkerTool>
-          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb</output>
-          <linkerAddLib>
-            <pElem>/usr/local/lib</pElem>
-          </linkerAddLib>
-          <linkerLibItems>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../../../cplusutil/nb"
-                            CT="3"
-                            CN="Debug"
-                            AC="false"
-                            BL="true"
-                            WD="../../../cplusutil/nb"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../../../cplusutil/nb"
-                            CT="3"
-                            CN="Release"
-                            AC="true"
-                            BL="true"
-                            WD="../../../cplusutil/nb"
-                            BC="${MAKE}  -f Makefile CONF=Release"
-                            CC="${MAKE}  -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../../../cpluslogger/nb"
-                            CT="3"
-                            CN="Debug"
-                            AC="false"
-                            BL="true"
-                            WD="../../../cpluslogger/nb"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../../../cpluslogger/nb"
-                            CT="3"
-                            CN="Release"
-                            AC="true"
-                            BL="true"
-                            WD="../../../cpluslogger/nb"
-                            BC="${MAKE}  -f Makefile CONF=Release"
-                            CC="${MAKE}  -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
-            <linkerOptionItem>-lboost_filesystem</linkerOptionItem>
-            <linkerOptionItem>-lboost_system</linkerOptionItem>
-          </linkerLibItems>
-        </linkerTool>
+        <archiverTool>
+        </archiverTool>
       </compileType>
       <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
       </item>
@@ -166,8 +107,6 @@
         </archiverTool>
       </compileType>
       <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
       </item>

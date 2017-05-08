@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/511e4115/defuse_info.o \
 	${OBJECTDIR}/_ext/511e4115/features.o \
 	${OBJECTDIR}/_ext/511e4115/parameter.o \
 	${OBJECTDIR}/_ext/511e4115/videobase.o \
@@ -46,8 +45,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-fPIC
+CXXFLAGS=-fPIC
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -56,55 +55,40 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib ../../../cplusutil/nb/dist/Debug/GNU-Linux/libnb.a ../../../cplusutil/nb/dist/Release/GNU-Linux/libnb.a ../../../cpluslogger/nb/dist/Debug/GNU-Linux/libnb.a ../../../cpluslogger/nb/dist/Release/GNU-Linux/libnb.a `pkg-config --libs opencv` -lboost_filesystem -lboost_system  
+LDLIBSOPTIONS=-L/usr/local/lib ../../../cplusutil/nb/dist/Debug/GNU-Linux/libnb.a ../../../cplusutil/nb/dist/Release/GNU-Linux/libnb.a ../../../cpluslogger/nb/dist/Debug/GNU-Linux/libnb.a ../../../cpluslogger/nb/dist/Release/GNU-Linux/libnb.a `pkg-config --static --libs opencv` -lboost_filesystem -lboost_system  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb: ../../../cplusutil/nb/dist/Debug/GNU-Linux/libnb.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb: ../../../cplusutil/nb/dist/Release/GNU-Linux/libnb.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb: ../../../cpluslogger/nb/dist/Debug/GNU-Linux/libnb.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb: ../../../cpluslogger/nb/dist/Release/GNU-Linux/libnb.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/_ext/511e4115/defuse_info.o: ../src/defuse_info.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I/usr/local/include/opencv2 `pkg-config --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/defuse_info.o ../src/defuse_info.cpp
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a
+	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a ${OBJECTFILES} 
+	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a
 
 ${OBJECTDIR}/_ext/511e4115/features.o: ../src/features.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I/usr/local/include/opencv2 `pkg-config --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/features.o ../src/features.cpp
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include `pkg-config --static --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/features.o ../src/features.cpp
 
 ${OBJECTDIR}/_ext/511e4115/parameter.o: ../src/parameter.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I/usr/local/include/opencv2 `pkg-config --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/parameter.o ../src/parameter.cpp
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include `pkg-config --static --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/parameter.o ../src/parameter.cpp
 
 ${OBJECTDIR}/_ext/511e4115/videobase.o: ../src/videobase.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I/usr/local/include/opencv2 `pkg-config --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/videobase.o ../src/videobase.cpp
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include `pkg-config --static --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/videobase.o ../src/videobase.cpp
 
 ${OBJECTDIR}/_ext/511e4115/xtractor.o: ../src/xtractor.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include -I/usr/local/include/opencv2 `pkg-config --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/xtractor.o ../src/xtractor.cpp
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 -I../../../cpluslogger/cpluslogger/include -I../../../cplusutil/cplusutil/include `pkg-config --static --cflags opencv` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/xtractor.o ../src/xtractor.cpp
 
 # Subprojects
 .build-subprojects:
-	cd ../../../cplusutil/nb && ${MAKE}  -f Makefile CONF=Debug
-	cd ../../../cplusutil/nb && ${MAKE}  -f Makefile CONF=Release
-	cd ../../../cpluslogger/nb && ${MAKE}  -f Makefile CONF=Debug
-	cd ../../../cpluslogger/nb && ${MAKE}  -f Makefile CONF=Release
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -112,10 +96,6 @@ ${OBJECTDIR}/_ext/511e4115/xtractor.o: ../src/xtractor.cpp
 
 # Subprojects
 .clean-subprojects:
-	cd ../../../cplusutil/nb && ${MAKE}  -f Makefile CONF=Debug clean
-	cd ../../../cplusutil/nb && ${MAKE}  -f Makefile CONF=Release clean
-	cd ../../../cpluslogger/nb && ${MAKE}  -f Makefile CONF=Debug clean
-	cd ../../../cpluslogger/nb && ${MAKE}  -f Makefile CONF=Release clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

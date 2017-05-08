@@ -20,7 +20,7 @@ LOGGER="../libs/cpluslogger"
 
 INCDIR=-I/usr/local/include/opencv2 -I../../cpluslogger/cpluslogger/include -I../../cplusutil/cplusutil/include
 ADDLIBDIR=-L/usr/local/lib $(LOGGER)/build/staticlib/cpluslogger_1_0.a $(UTIL)/build/staticlib/cplusutil_1_0.a
-LDLIBSOPTIONS=$(ADDLIBDIR) `pkg-config --libs opencv` -lboost_filesystem -lboost_system
+LDLIBSOPTIONS=$(ADDLIBDIR) `pkg-config --static --libs opencv` -lboost_filesystem -lboost_system
 
 all: clean directories subsystem info staticlib
 

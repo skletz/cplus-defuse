@@ -4,8 +4,7 @@
 
 #include <cpluslogger.hpp>
 #include <vector>
-//#include <opencv2/core/mat.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 
 namespace defuse {
 

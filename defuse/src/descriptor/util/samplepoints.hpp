@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <cplusutil.hpp>
-#include <opencv2/opencv.hpp>
+
 #include <boost/unordered_map.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <boost/assign/list_of.hpp>

@@ -9,16 +9,16 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=libnb.a
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/libnb.a
+CND_ARTIFACT_NAME_Debug=nb
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/nb
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=nb.tar
 CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/nb.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
-CND_ARTIFACT_NAME_Release=libnb.a
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/libnb.a
+CND_ARTIFACT_NAME_Release=nb
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/nb
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
 CND_PACKAGE_NAME_Release=nb.tar
 CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/nb.tar

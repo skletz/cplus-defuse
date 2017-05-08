@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/511e4115/defuse_info.o \
 	${OBJECTDIR}/_ext/511e4115/features.o \
 	${OBJECTDIR}/_ext/511e4115/parameter.o \
 	${OBJECTDIR}/_ext/511e4115/videobase.o \
@@ -67,11 +66,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a: ${OBJECTFILES}
 	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a
-
-${OBJECTDIR}/_ext/511e4115/defuse_info.o: ../src/defuse_info.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/511e4115/defuse_info.o ../src/defuse_info.cpp
 
 ${OBJECTDIR}/_ext/511e4115/features.o: ../src/features.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/511e4115

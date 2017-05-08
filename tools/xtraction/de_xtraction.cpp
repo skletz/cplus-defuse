@@ -125,7 +125,7 @@ static std::string outputpath = "..\\data\\features\\";
 static std::string samplepointspath = "..\\data\\samplepoints\\";
 
 static std::string dataset = "data_test-v1_0";
-static boolean videopathIsDirectory = true;
+static bool videopathIsDirectory = true;
 
 static Directory* clipsdir = nullptr;
 static File* videoFile = nullptr; //In the case of the input is only one video file
