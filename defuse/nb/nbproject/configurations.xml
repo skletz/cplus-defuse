@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>../include/defuse.hpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../src/defuse_info.cpp</itemPath>
+      <itemPath>../src/descriptor</itemPath>
+      <itemPath>../src/features.cpp</itemPath>
+      <itemPath>../src/features.hpp</itemPath>
+      <itemPath>../src/parameter.cpp</itemPath>
+      <itemPath>../src/parameter.hpp</itemPath>
+      <itemPath>../src/similarity</itemPath>
+      <itemPath>../src/videobase.cpp</itemPath>
+      <itemPath>../src/videobase.hpp</itemPath>
+      <itemPath>../src/xtractor.cpp</itemPath>
+      <itemPath>../src/xtractor.hpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../src</Elem>
+    <Elem>../include</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../../../cpluslogger/cpluslogger/include</pElem>
+            <pElem>../../../cplusutil/cplusutil/include</pElem>
+            <pElem>/usr/local/include/opencv2</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb</output>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cplusutil/nb"
+                            CT="3"
+                            CN="Debug"
+                            AC="false"
+                            BL="true"
+                            WD="../../../cplusutil/nb"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cplusutil/nb"
+                            CT="3"
+                            CN="Release"
+                            AC="true"
+                            BL="true"
+                            WD="../../../cplusutil/nb"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cpluslogger/nb"
+                            CT="3"
+                            CN="Debug"
+                            AC="false"
+                            BL="true"
+                            WD="../../../cpluslogger/nb"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cpluslogger/nb"
+                            CT="3"
+                            CN="Release"
+                            AC="true"
+                            BL="true"
+                            WD="../../../cpluslogger/nb"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerOptionItem>-lboost_filesystem</linkerOptionItem>
+            <linkerOptionItem>-lboost_system</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/features.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/features.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/similarity" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/videobase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/videobase.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/features.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/features.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/similarity" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/videobase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/videobase.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
