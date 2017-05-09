@@ -8,7 +8,10 @@
             <cpp-extensions>cpp</cpp-extensions>
             <header-extensions>hpp</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
-            <make-dep-projects/>
+            <make-dep-projects>
+                <make-dep-project>../../../cplusutil/nb</make-dep-project>
+                <make-dep-project>../../../cpluslogger/nb</make-dep-project>
+            </make-dep-projects>
             <sourceRootList>
                 <sourceRootElem>../src</sourceRootElem>
                 <sourceRootElem>../include</sourceRootElem>
@@ -16,7 +19,7 @@
             <confList>
                 <confElem>
                     <name>Debug</name>
-                    <type>3</type>
+                    <type>1</type>
                 </confElem>
                 <confElem>
                     <name>Release</name>

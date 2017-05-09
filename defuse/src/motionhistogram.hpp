@@ -5,7 +5,7 @@
 #include <cplusutil.hpp>
 #include <cpluslogger.hpp>
 #include <opencv2/opencv.hpp>
-#include "../features.hpp"
+#include "features.hpp"
 
 namespace defuse {
 

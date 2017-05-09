@@ -1,8 +1,13 @@
 #include <cpluslogger.hpp>
 #include <cplusutil.hpp>
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <boost/version.hpp>
+#include "xtractor.hpp"
+#include "parameter.hpp"
+#include "sfs1xtractor.hpp"
+#include "sfs1parameter.hpp"
 
 // DeFUSE (Version 1.0) *******************************
 // ****************************************************
@@ -16,6 +21,11 @@
 // ****************************************************
 
 
+using namespace std;
+using namespace defuse;
+static int descriptortype = 0;
+static Parameter* paramter = new SFS1Parameter();
+
 int main(int argc, char* argv[])
 {
 	std::cout << "DeFUSE (Fusion of several Dynamic Content Descriptors)" << std::endl;
@@ -28,5 +38,18 @@ int main(int argc, char* argv[])
 		<< BOOST_VERSION % 100                // patch level
 		<< std::endl;
 	std::cout << "The OpenCV Version is " << CV_VERSION << std::endl;
+        
+            	Xtractor* xtractor = nullptr;
+       
+        
+	if (descriptortype == 0)
+	{
+		xtractor = new SFS1Xtractor(paramter);
+	}
+	else
+	{
+		LOG_FATAL("Extraction Method not implemented " << descriptortype);
+	}
+        
 	return 0;
 }

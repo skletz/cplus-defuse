@@ -14,11 +14,50 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>../src/descriptor</itemPath>
+      <itemPath>../src/dfs1parameter.cpp</itemPath>
+      <itemPath>../src/dfs1parameter.hpp</itemPath>
+      <itemPath>../src/dfs1xtractor.cpp</itemPath>
+      <itemPath>../src/dfs1xtractor.hpp</itemPath>
+      <itemPath>../src/dfs2parameter.cpp</itemPath>
+      <itemPath>../src/dfs2parameter.hpp</itemPath>
+      <itemPath>../src/dfs2xtractor.cpp</itemPath>
+      <itemPath>../src/dfs2xtractor.hpp</itemPath>
+      <itemPath>../src/distance.hpp</itemPath>
+      <itemPath>../src/evaluatedquery.cpp</itemPath>
+      <itemPath>../src/evaluatedquery.hpp</itemPath>
       <itemPath>../src/features.cpp</itemPath>
       <itemPath>../src/features.hpp</itemPath>
+      <itemPath>../src/featuresignatures.cpp</itemPath>
+      <itemPath>../src/featuresignatures.hpp</itemPath>
+      <itemPath>../src/gd1parameter.cpp</itemPath>
+      <itemPath>../src/mahalanobis1.cpp</itemPath>
+      <itemPath>../src/mahalanobis1.hpp</itemPath>
+      <itemPath>../src/mahalanobis1parameter.hpp</itemPath>
+      <itemPath>../src/minkowski1.cpp</itemPath>
+      <itemPath>../src/minkowski1.hpp</itemPath>
+      <itemPath>../src/minkowski1parameter.hpp</itemPath>
+      <itemPath>../src/mohist1parameter.cpp</itemPath>
+      <itemPath>../src/mohist1parameter.hpp</itemPath>
+      <itemPath>../src/mohist1xtractor.cpp</itemPath>
+      <itemPath>../src/mohist1xtractor.hpp</itemPath>
+      <itemPath>../src/motionhistogram.cpp</itemPath>
+      <itemPath>../src/motionhistogram.hpp</itemPath>
       <itemPath>../src/parameter.cpp</itemPath>
       <itemPath>../src/parameter.hpp</itemPath>
-      <itemPath>../src/similarity</itemPath>
+      <itemPath>../src/resultbase.cpp</itemPath>
+      <itemPath>../src/resultbase.hpp</itemPath>
+      <itemPath>../src/samplepoints.cpp</itemPath>
+      <itemPath>../src/samplepoints.hpp</itemPath>
+      <itemPath>../src/sfs1parameter.cpp</itemPath>
+      <itemPath>../src/sfs1parameter.hpp</itemPath>
+      <itemPath>../src/sfs1xtractor.cpp</itemPath>
+      <itemPath>../src/sfs1xtractor.hpp</itemPath>
+      <itemPath>../src/smd1.cpp</itemPath>
+      <itemPath>../src/smd1.hpp</itemPath>
+      <itemPath>../src/smd1parameter.hpp</itemPath>
+      <itemPath>../src/sqfd1.cpp</itemPath>
+      <itemPath>../src/sqfd1.hpp</itemPath>
+      <itemPath>../src/sqfd1parameter.hpp</itemPath>
       <itemPath>../src/videobase.cpp</itemPath>
       <itemPath>../src/videobase.hpp</itemPath>
       <itemPath>../src/xtractor.cpp</itemPath>
@@ -35,6 +74,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <itemPath>../src/defuse_info.cpp</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>../src</Elem>
@@ -42,7 +82,7 @@
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="3">
+    <conf name="Debug" type="1">
       <toolsSet>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -55,25 +95,164 @@
             <pElem>/usr/local/include/opencv2</pElem>
             <pElem>../../../cpluslogger/cpluslogger/include</pElem>
             <pElem>../../../cplusutil/cplusutil/include</pElem>
+            <pElem>../../libs/opencv-histlib/include</pElem>
           </incDir>
           <commandLine>-fPIC</commandLine>
         </ccTool>
-        <archiverTool>
-        </archiverTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb</output>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cplusutil/nb"
+                            CT="3"
+                            CN="Debug"
+                            AC="false"
+                            BL="true"
+                            WD="../../../cplusutil/nb"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cplusutil/nb"
+                            CT="3"
+                            CN="Release"
+                            AC="true"
+                            BL="true"
+                            WD="../../../cplusutil/nb"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cpluslogger/nb"
+                            CT="3"
+                            CN="Debug"
+                            AC="false"
+                            BL="true"
+                            WD="../../../cpluslogger/nb"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../../cpluslogger/nb"
+                            CT="3"
+                            CN="Release"
+                            AC="true"
+                            BL="true"
+                            WD="../../../cpluslogger/nb"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libnb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerOptionItem>-lpthread</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --static --libs opencv`</linkerOptionItem>
+            <linkerOptionItem>-lboost_filesystem</linkerOptionItem>
+            <linkerOptionItem>-lboost_system</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs2parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs2parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs2xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs2xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/distance.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/evaluatedquery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/evaluatedquery.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/features.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/features.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/featuresignatures.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/featuresignatures.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/gd1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/minkowski1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/minkowski1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/minkowski1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mohist1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mohist1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mohist1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mohist1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/motionhistogram.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/motionhistogram.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src/parameter.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/parameter.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/similarity" ex="false" tool="3" flavor2="0">
+      <item path="../src/resultbase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/resultbase.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/samplepoints.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/samplepoints.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sfs1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sfs1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sfs1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sfs1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/smd1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/smd1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/smd1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sqfd1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sqfd1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sqfd1parameter.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/videobase.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -83,6 +262,13 @@
       </item>
       <item path="../src/xtractor.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <folder path="SourceFiles">
+        <ccTool>
+          <incDir>
+            <pElem>../src/descriptor/util</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
     </conf>
     <conf name="Release" type="3">
       <toolsSet>
@@ -108,17 +294,97 @@
       </compileType>
       <item path="../include/defuse.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/defuse_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../src/descriptor" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs2parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs2parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/dfs2xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/dfs2xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/distance.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/evaluatedquery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/evaluatedquery.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/features.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/features.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/featuresignatures.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/featuresignatures.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/gd1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mahalanobis1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/minkowski1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/minkowski1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/minkowski1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mohist1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mohist1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mohist1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mohist1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/motionhistogram.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/motionhistogram.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src/parameter.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/parameter.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/similarity" ex="false" tool="3" flavor2="0">
+      <item path="../src/resultbase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/resultbase.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/samplepoints.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/samplepoints.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sfs1parameter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sfs1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sfs1xtractor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sfs1xtractor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/smd1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/smd1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/smd1parameter.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sqfd1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/sqfd1.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/sqfd1parameter.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/videobase.cpp" ex="false" tool="1" flavor2="0">
       </item>

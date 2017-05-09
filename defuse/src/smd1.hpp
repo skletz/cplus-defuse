@@ -1,12 +1,12 @@
 #ifndef _DEFUSE_SMD1_HPP_
 #define _DEFUSE_SMD1_HPP_
+
+#ifdef __cplusplus
 #include "minkowski1parameter.hpp"
 #include "minkowski1.hpp"
-#ifdef __cplusplus
-
 #include <cplusutil.hpp>
 #include "distance.hpp"
-#include "../parameter.hpp"
+#include "parameter.hpp"
 
 namespace defuse {
 

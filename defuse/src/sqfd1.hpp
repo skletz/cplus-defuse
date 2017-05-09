@@ -1,12 +1,13 @@
 #ifndef _DEFUSE_SQFD1_HPP_
 #define _DEFUSE_SQFD1_HPP_
-#include "minkowski1parameter.hpp"
-#include "minkowski1.hpp"
+
 #ifdef __cplusplus
 
+#include "minkowski1parameter.hpp"
+#include "minkowski1.hpp"
 #include <cplusutil.hpp>
 #include "distance.hpp"
-#include "../parameter.hpp"
+#include "parameter.hpp"
 
 namespace defuse {
 

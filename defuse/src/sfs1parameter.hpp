@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <cplusutil.hpp>
-#include "../parameter.hpp"
+#include "parameter.hpp"
 
 namespace defuse {
 

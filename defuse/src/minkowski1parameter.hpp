@@ -1,29 +1,32 @@
-#ifndef _DEFUSE_MHD1PARAMETER_HPP_
-#define _DEFUSE_MHD1PARAMETER_HPP_
-#include "../parameter.hpp"
+#ifndef _DEFUSE_GD1PARAMETER_HPP_
+#define _DEFUSE_GD1PARAMETER_HPP_
 #ifdef __cplusplus
 
+#include "parameter.hpp"
 #include <string>
 #include <sstream>
 
 namespace defuse {
 
 	//Paramters for Ground Distance
-	class MHDParamter : public Parameter
+	class MinkowskiParamter : public Parameter
 	{
 	public:
+
+		int distance = 2; //The distance function 2 = euclidian distance
 
 		std::string get() override
 		{
 			std::stringstream st;
-			st << "";
+			st << "Ground distance: L" << distance;
 			return st.str();
 		}
 
 		std::string getFilename() override
 		{
 			std::stringstream st;
-			st << "";
+			st << "GD";
+			st << "_L" << distance;
 			return st.str();
 		}
 	};

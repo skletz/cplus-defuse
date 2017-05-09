@@ -2,7 +2,7 @@
 #define _DEFUSE_DISTANCE_HPP_
 #ifdef __cplusplus
 
-#include "../features.hpp"
+#include "features.hpp"
 
 namespace defuse {
 

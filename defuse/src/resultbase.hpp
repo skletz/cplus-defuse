@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <cpluslogger.hpp>
-#include <opencv2/core/persistence.hpp>
+#include <opencv2/core.hpp>
 namespace defuse {
 
 	class ResultBase

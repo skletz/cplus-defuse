@@ -44,7 +44,6 @@
             <pElem>../../../../cpluslogger/cpluslogger/include</pElem>
             <pElem>../../../../cplusutil/cplusutil/include</pElem>
           </incDir>
-          <commandLine>-fPIC</commandLine>
         </ccTool>
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nb</output>

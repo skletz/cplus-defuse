@@ -5,8 +5,9 @@
 #include <cplusutil.hpp>
 
 #include <boost/unordered_map.hpp>
-#include <opencv2/core/persistence.hpp>
+#include <opencv2/core.hpp>
 #include <boost/assign/list_of.hpp>
+#include <boost/filesystem.hpp>
 
 namespace defuse {
 	namespace fs = boost::filesystem;
@@ -54,7 +55,7 @@ namespace defuse {
 
 	static void write(cv::FileStorage& fs, const std::string&, const SamplePoints& x)
 	{
-		x.write(fs);
+            x.write(fs);
 	}
 
 	static void read(const cv::FileNode& node, SamplePoints& x, const SamplePoints& default_value = SamplePoints())
@@ -62,7 +63,9 @@ namespace defuse {
 		if (node.empty())
 			x = default_value;
 		else
-			x.read(node);
+                    x.read(node);
+
+			
 	}
 }
 #endif

@@ -3,13 +3,13 @@
 #ifdef __cplusplus
 
 #include <cplusutil.hpp>
-#include "featsig/include/signatures.h"
-#include "dfeatsig_v1//src/tpct_signatures.hpp"
-#include "../features.hpp"
-#include "../parameter.hpp"
-#include "../videobase.hpp"
-#include "../xtractor.hpp"
-#include "util/samplepoints.hpp"
+#include "descriptor/featsig/include/signatures.h"
+#include "descriptor/dfeatsig_v1//src/tpct_signatures.hpp"
+#include "features.hpp"
+#include "parameter.hpp"
+#include "videobase.hpp"
+#include "xtractor.hpp"
+#include "samplepoints.hpp"
 
 #include <opencv2/opencv.hpp>
 

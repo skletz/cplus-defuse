@@ -4,7 +4,7 @@
 
 #include <cplusutil.hpp>
 #include "distance.hpp"
-#include "../parameter.hpp"
+#include "parameter.hpp"
 
 namespace defuse {
 

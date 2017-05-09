@@ -1,5 +1,5 @@
 #include "sqfd1.hpp"
-#include <future>
+//#include <future>
 #include "sqfd1parameter.hpp"
 
 defuse::SQFD::SQFD(Parameter* _parameter, int _idxWeight, int _skipDim)
@@ -20,23 +20,23 @@ float defuse::SQFD::compute(Features& _f1, Features& _f2)
 {
 	double result = 0;
 
-	std::vector<std::future<double>> pendingFutures;
+//	std::vector<std::future<double>> pendingFutures;
+//
+//
+//	pendingFutures.push_back(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f1, _f1));
+//	pendingFutures.push_back(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f2, _f2));
+//	std::future<double> result3(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f1, _f2));
+//
+//	for (int i = 0; i < pendingFutures.size(); i++)
+//	{
+//		result += pendingFutures.at(i).get();
+//	}
+//
+//	result -= result3.get() * 2;
 
-
-	pendingFutures.push_back(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f1, _f1));
-	pendingFutures.push_back(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f2, _f2));
-	std::future<double> result3(std::async(std::launch::async, &SQFD::computePartialSQFD, this, _f1, _f2));
-
-	for (int i = 0; i < pendingFutures.size(); i++)
-	{
-		result += pendingFutures.at(i).get();
-	}
-
-	result -= result3.get() * 2;
-
-	//result += computePartialSQFD(_f1, _f1);
-	//result += computePartialSQFD(_f2, _f2);
-	//result -= computePartialSQFD(_f1, _f2) * 2;
+	result += computePartialSQFD(_f1, _f1);
+	result += computePartialSQFD(_f2, _f2);
+	result -= computePartialSQFD(_f1, _f2) * 2;
 
 	return sqrt(result);
 }
