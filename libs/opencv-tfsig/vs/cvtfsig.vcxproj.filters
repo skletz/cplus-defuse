@@ -27,6 +27,9 @@
     <ClInclude Include="..\cvtfsig\src\tpct_signatures.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\cvtfsig\include\cvtfsig.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cvtfsig\src\main.cpp">

@@ -112,6 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\cvpctsig\include\cvpctsig.h" />
     <ClInclude Include="..\cvpctsig\include\signatures.h" />
     <ClInclude Include="..\cvpctsig\src\constants.hpp" />
     <ClInclude Include="..\cvpctsig\src\distance.hpp" />

@@ -1,7 +1,7 @@
 #ifndef __TPCTSIGNATURES_H__
 #define __TPCTSIGNATURES_H__
 #include <opencv2/core/mat.hpp>
-#include "../../../opencv-tfsig/cvtfsig/include/signatures.h"
+#include <cvpctsig.h>
 
 namespace analysis
 {

@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "constants.h"
-#include "../../../opencv-pctsig/cvpctsig/include/signatures.h"
+#include <cvpctsig.h>
 
 namespace tf_signatures
 {

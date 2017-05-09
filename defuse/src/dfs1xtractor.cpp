@@ -3,6 +3,7 @@
 #include <cpluslogger.hpp>
 #include "featuresignatures.hpp"
 
+
 defuse::DFS1Xtractor::DFS1Xtractor(Parameter* _parameter)
 {
 	int samples = dynamic_cast<DFS1Parameter *>(_parameter)->staticparamter.samplepoints;

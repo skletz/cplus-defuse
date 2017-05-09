@@ -112,6 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\cvtfsig\include\cvtfsig.h" />
     <ClInclude Include="..\cvtfsig\include\signatures.h" />
     <ClInclude Include="..\cvtfsig\src\constants.h" />
     <ClInclude Include="..\cvtfsig\src\tf_signatures.h" />

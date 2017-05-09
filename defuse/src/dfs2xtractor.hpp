@@ -9,6 +9,8 @@
 #include "xtractor.hpp"
 #include "samplepoints.hpp"
 
+#include <cvpctsig.h>
+#include <cvtfsig.h>
 #include <opencv2/opencv.hpp>
 
 namespace defuse {

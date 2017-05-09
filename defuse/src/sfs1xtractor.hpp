@@ -2,18 +2,16 @@
 #define _DEFUSE_SFS1XTRACTOR_HPP_
 #ifdef __cplusplus
 
-
 #include "videobase.hpp"
 #include "xtractor.hpp"
 #include "features.hpp"
 #include "parameter.hpp"
 
 #include "samplepoints.hpp"
-
+#include <cvpctsig.h>
 #include <opencv2/opencv.hpp>
 
 namespace defuse {
-	namespace tpct = analysis::tpct_signatures;
 	namespace pct = cv::xfeatures2d;
 
 	class SFS1Xtractor : public Xtractor

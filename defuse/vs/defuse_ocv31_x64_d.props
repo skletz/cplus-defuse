@@ -5,7 +5,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libs\opencv-histlib\include;..\..\libs\cplusutil\cplusutil\include;..\..\libs\cpluslogger\cpluslogger\include;$(OpenCV_DIR)\include;$(Boost_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libs\opencv-histlib\include;..\..\libs\cplusutil\cplusutil\include;..\..\libs\cpluslogger\cpluslogger\include;..\..\libs\opencv-pctsig\cvpctsig\include;..\..\libs\opencv-tfsig\cvtfsig\include;$(OpenCV_DIR)\include;$(Boost_DIR)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>

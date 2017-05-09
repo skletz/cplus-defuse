@@ -39,6 +39,9 @@
     <ClInclude Include="..\cvpctsig\src\similarity.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\cvpctsig\include\cvpctsig.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cvpctsig\src\grayscale_bitmap.cpp">
