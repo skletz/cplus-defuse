@@ -19,7 +19,7 @@ INCDIR=-I/usr/local/include/opencv2
 ADDLIBDIR=-L/usr/local/lib -L/usr/local/share/OpenCV/3rdparty/lib
 LDLIBSOPTIONS=$(ADDLIBDIR) $(OPENCV_LIBS)
 
-all: directories static
+all: directories static prog
 
 directories:
 	mkdir -p $(TARGET)/$(BIN)
