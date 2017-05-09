@@ -1,28 +1,28 @@
 /** DeXtraction (Version 2.0) ***************************
  * ******************************************************
- *       _    _      ()_()     
- *      | |  | |    |(o o)             
+ *       _    _      ()_()
+ *      | |  | |    |(o o)
  *   ___| | _| | ooO--`o'--Ooo
- *  / __| |/ / |/ _ \ __|_  /  
- *  \__ \   <| |  __/ |_ / /   
- *  |___/_|\_\_|\___|\__/___|  
- *                                                   
+ *  / __| |/ / |/ _ \ __|_  /
+ *  \__ \   <| |  __/ |_ / /
+ *  |___/_|\_\_|\___|\__/___|
+ *
  * ******************************************************
  * Purpose: Extract a specific descriptor from a set of videos or fram a specific video file
  * Input/Output:
  *	-arg1: Name of the dataset
  *	-arg2: Type of Input
  *		0 = Path to a specific video file
- *		1 = Path to a directory of video files*		
+ *		1 = Path to a directory of video files*
  *	-arg3: Path to the output directory ..\\data\\features
-  *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4	
+  *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4
  *	-arg5: Type of Descriptor <INT>
  *		0 = static feature signatures (variant 1)
  *		1 = dynamic feature signatures (variant 1) //trajectories
  *		2 = dynamic feature signatures (variant 2) //optical-flow
  *		3 = motion histogram (variant 1)
  *		4 = cnn (fc7 layer)
- *	-args > 5 depends on the type of the choosen descriptor 
+ *	-args > 5 depends on the type of the choosen descriptor
  *		***********************************************************
  *		TYPE: 0 = static feature signatures variant 1
  *		***********************************************************
@@ -58,7 +58,7 @@
  *			1 = use fix number per second
  *			2 = use all frames
  *			3 = use fix number of frames per segment (v2)
- *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)			
+ *		-arg14: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)
  *		***********************************************************
  *		TYPE: 2 = dynamic feature signatures variant 2 using optical-flow
  *		***********************************************************
@@ -86,22 +86,22 @@
  *			0 = RANDOM
  *			1 = REGULAR
  *			2 = GAUSSIAN
-  *		-arg8: Path to a directory of samplepoint files, if distribution is RANDOM ..\\data\\samplepoints			
+  *		-arg8: Path to a directory of samplepoint files, if distribution is RANDOM ..\\data\\samplepoints
  *		-arg9: Frame selection
  *			0 = use fix number of frames per segment (v1)
  *			1 = use fix number of frames per segment (v2)
  *			2 = use fix number per second
  *			3 = use all frames
- *		-arg10: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)		
+ *		-arg10: Number of frames per segment or second, if keyframe selection type is 1,2 (fix number)
  *		-arg11: samplex
  *		-arg12: sampley
  *		***********************************************************
  *		Last parameter visualize extraction without saving it
  *		***********************************************************
- *		-argsLAST: 0 false, 1 true 
+ *		-argsLAST: 0 false, 1 true
  * @author skletz
  * @version 2.0 13/03/17
- * 
+ *
 **/
 
 #include <future>
@@ -151,6 +151,7 @@ int main(int argc, char **argv)
 	if (argc < 3)
 	{
 		LOG_ERROR("xtraction: too few arguments!");
+		return EXIT_SUCCESS;
 	}
 	else
 	{
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
 		videopath = argv[3];
 		outputpath = argv[4];
 		descriptortype = std::atoi(argv[5]);
-		
+
 
 		if (descriptortype == 0) //Default static feature signatures variant 1
 		{
@@ -237,7 +238,7 @@ int main(int argc, char **argv)
 
 	}
 
-	
+
 	//Init output directory
 	outputdir = new Directory(outputpath);
 
@@ -371,7 +372,7 @@ void processVideoDirectory(Xtractor* xtractor)
 
 					int startFrameNr;
 					{
-							
+
 							std::vector<std::string> p;
 							cplusutil::String::split(parts.at(parts.size()-1), '-', p);
 							if(p.size() > 1)
@@ -385,7 +386,7 @@ void processVideoDirectory(Xtractor* xtractor)
 								std::istringstream reader(parts.at(parts.size()-1)); //the last one is the framenumber
 								reader >> startFrameNr;
 
-							}	
+							}
 					}
 
 					int clazz;
@@ -400,12 +401,12 @@ void processVideoDirectory(Xtractor* xtractor)
 						pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
 					else
 						xtract(videoclip, xtractor);
-				}					
+				}
 			}
 			else
 			{
 				File* file = new File(clippathes.at(iClipFile));
-	
+
 				std::string filename = file->getFilename();
 				std::string parentpath = clippathes.at(iClipFile).substr(0, clippathes.at(iClipFile).find_last_of("/\\"));
 				Directory parentdirectory(parentpath);
@@ -436,14 +437,14 @@ void processVideoDirectory(Xtractor* xtractor)
 					pendingFutures.push_back(std::async(std::launch::async, &xtract, videoclip, xtractor));
 				else
 					xtract(videoclip, xtractor);
-					
+
 			}
 		}
 
 
 		LOG_DEBUG("Waiting of pending values ...");
 		LOG_INFO("Current Directoy:\t" << entries.at(iEntry) << "\tSize:\t" << clippathes.size());
-		
+
 		std::string name = "Extraction ";
 		name += std::to_string(pendingFutures.size());
 
@@ -487,7 +488,7 @@ void processVideoDirectory(Xtractor* xtractor)
 	}
 
 	LOG_PERFMON(PINTERIM, "Video Segments:\t" << numClips);
-	
+
 	computationTimes /= float(entries.size());
 	LOG_PERFMON(PTIME, "Computation-Time: Extracting (secs) \t" << entries.size() << "\t" << extractionsettings << "\t" << computationTimes);
 
