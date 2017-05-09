@@ -83,7 +83,7 @@
 #include <random>
 #include <iomanip>
 #include <boost/format.hpp>
-#include "../../defuse/src/descriptor/cnn/cnnfeatures.hpp"
+
 using namespace defuse;
 
 static int distancemethod = 0;

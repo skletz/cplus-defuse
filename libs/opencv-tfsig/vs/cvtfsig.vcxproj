@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7A073147-48A8-44DE-9997-9D049FE510FD}</ProjectGuid>
-    <RootNamespace>defuse</RootNamespace>
+    <ProjectGuid>{B3390706-74E4-499E-9BD5-754B56E8DE32}</ProjectGuid>
+    <RootNamespace>cvtfsig</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -44,7 +44,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -57,19 +57,17 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="defuse_x86_d.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="defuse_x86.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="defuse_ocv31_x64_d.props" />
+    <Import Project="..\..\libs_x64.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="defuse_ocv31_x64.props" />
+    <Import Project="..\..\libs_x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -78,7 +76,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -86,13 +83,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
-    <Link>
-      <AdditionalOptions>/VERBOSE %(AdditionalOptions)</AdditionalOptions>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -114,7 +105,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\libs\opencv-histlib\include;..\defuse\include;..\libs\cplusutil\build\include;..\libs\cpluslogger\cpluslogger\include;$(OpenCV_DIR)\include;$(Boost_DIR)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -122,70 +112,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\libs\opencv-histlib\vs\cvhistlib.vcxproj">
-      <Project>{529b84a3-b4d1-4665-b700-0c3e6d0a42ad}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\libs\opencv-pctsig\vs\cvpctsig.vcxproj">
+    <ClInclude Include="..\cvtfsig\include\signatures.h" />
+    <ClInclude Include="..\cvtfsig\src\constants.h" />
+    <ClInclude Include="..\cvtfsig\src\tf_signatures.h" />
+    <ClInclude Include="..\cvtfsig\src\tpct_signatures.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cvtfsig\src\main.cpp" />
+    <ClCompile Include="..\cvtfsig\src\tpct_signatures.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\opencv-pctsig\vs\cvpctsig.vcxproj">
       <Project>{8605a2f8-7ac4-4610-9f44-66e40e60e9f0}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\opencv-tfsig\vs\cvtfsig.vcxproj">
-      <Project>{b3390706-74e4-499e-9bd5-754b56e8de32}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\cnnfeatures.cpp" />
-    <ClCompile Include="..\src\defuse_info.cpp" />
-    <ClCompile Include="..\src\dfs1parameter.cpp" />
-    <ClCompile Include="..\src\dfs1xtractor.cpp" />
-    <ClCompile Include="..\src\dfs2parameter.cpp" />
-    <ClCompile Include="..\src\dfs2xtractor.cpp" />
-    <ClCompile Include="..\src\evaluatedquery.cpp" />
-    <ClCompile Include="..\src\features.cpp" />
-    <ClCompile Include="..\src\featuresignatures.cpp" />
-    <ClCompile Include="..\src\gd1parameter.cpp" />
-    <ClCompile Include="..\src\mahalanobis1.cpp" />
-    <ClCompile Include="..\src\minkowski1.cpp" />
-    <ClCompile Include="..\src\mohist1parameter.cpp" />
-    <ClCompile Include="..\src\mohist1xtractor.cpp" />
-    <ClCompile Include="..\src\motionhistogram.cpp" />
-    <ClCompile Include="..\src\parameter.cpp" />
-    <ClCompile Include="..\src\resultbase.cpp" />
-    <ClCompile Include="..\src\samplepoints.cpp" />
-    <ClCompile Include="..\src\sfs1parameter.cpp" />
-    <ClCompile Include="..\src\sfs1xtractor.cpp" />
-    <ClCompile Include="..\src\smd1.cpp" />
-    <ClCompile Include="..\src\sqfd1.cpp" />
-    <ClCompile Include="..\src\videobase.cpp" />
-    <ClCompile Include="..\src\xtractor.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\cnnfeatures.hpp" />
-    <ClInclude Include="..\src\dfs1parameter.hpp" />
-    <ClInclude Include="..\src\dfs1xtractor.hpp" />
-    <ClInclude Include="..\src\dfs2parameter.hpp" />
-    <ClInclude Include="..\src\dfs2xtractor.hpp" />
-    <ClInclude Include="..\src\distance.hpp" />
-    <ClInclude Include="..\src\evaluatedquery.hpp" />
-    <ClInclude Include="..\src\features.hpp" />
-    <ClInclude Include="..\src\featuresignatures.hpp" />
-    <ClInclude Include="..\src\mahalanobis1.hpp" />
-    <ClInclude Include="..\src\mahalanobis1parameter.hpp" />
-    <ClInclude Include="..\src\minkowski1.hpp" />
-    <ClInclude Include="..\src\minkowski1parameter.hpp" />
-    <ClInclude Include="..\src\mohist1parameter.hpp" />
-    <ClInclude Include="..\src\mohist1xtractor.hpp" />
-    <ClInclude Include="..\src\motionhistogram.hpp" />
-    <ClInclude Include="..\src\parameter.hpp" />
-    <ClInclude Include="..\src\resultbase.hpp" />
-    <ClInclude Include="..\src\samplepoints.hpp" />
-    <ClInclude Include="..\src\sfs1parameter.hpp" />
-    <ClInclude Include="..\src\sfs1xtractor.hpp" />
-    <ClInclude Include="..\src\smd1.hpp" />
-    <ClInclude Include="..\src\smd1parameter.hpp" />
-    <ClInclude Include="..\src\sqfd1.hpp" />
-    <ClInclude Include="..\src\sqfd1parameter.hpp" />
-    <ClInclude Include="..\src\videobase.hpp" />
-    <ClInclude Include="..\src\xtractor.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

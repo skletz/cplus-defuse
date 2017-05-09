@@ -4,8 +4,6 @@
 
 
 #include "videobase.hpp"
-#include "descriptor/featsig/include/signatures.h"
-#include "descriptor/dfeatsig_v1/src/tpct_signatures.hpp"
 #include "xtractor.hpp"
 #include "features.hpp"
 #include "parameter.hpp"

@@ -2,8 +2,6 @@
 #define _DEFUSE_DFS1XTRACTOR_HPP_
 #ifdef __cplusplus
 
-#include "descriptor/featsig/include/signatures.h"
-#include "descriptor/dfeatsig_v1//src/tpct_signatures.hpp"
 #include "features.hpp"
 #include "parameter.hpp"
 #include "videobase.hpp"

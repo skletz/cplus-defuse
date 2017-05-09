@@ -105,7 +105,6 @@
 **/
 
 #include <future>
-#include <chrono>
 #include <cpluslogger.hpp>
 #include <cplusutil.hpp>
 #include <defuse.hpp>
