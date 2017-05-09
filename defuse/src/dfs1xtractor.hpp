@@ -7,7 +7,7 @@
 #include "videobase.hpp"
 #include "xtractor.hpp"
 #include "samplepoints.hpp"
-
+#include "../../libs/opencv-pctsig/cvpctsig/include/signatures.h"
 #include <opencv2/opencv.hpp>
 
 namespace defuse {

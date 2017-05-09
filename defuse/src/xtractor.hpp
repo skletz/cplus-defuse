@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <string>
-#include "../../libs/opencv-pctsig/cvpctsig//include/signatures.h"
+#include "../../libs/opencv-pctsig/cvpctsig/include/signatures.h"
 #include "../../libs/opencv-tfsig/cvtfsig/include/signatures.h"
 
 #include "features.hpp"
