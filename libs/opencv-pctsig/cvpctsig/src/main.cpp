@@ -1,9 +1,9 @@
 /*
-* PCT Signatures is an implementation of feature signatures. 
-* It was implemented with the focus to contribute to the 
-* OpenCV's extra modules. This module is a preliminary version 
-* which was received in 2015. In more detail, this module 
-* implements PCT (position-color-texture) signature extractor 
+* PCT Signatures is an implementation of feature signatures.
+* It was implemented with the focus to contribute to the
+* OpenCV's extra modules. This module is a preliminary version
+* which was received in 2015. In more detail, this module
+* implements PCT (position-color-texture) signature extractor
 * and SQFD (Signature Quadratic Form Distance).
 *
 * @author Gregor Kovalcik, Martin Krulis, Jakub Lokoc
@@ -22,10 +22,10 @@ using namespace std;
 using namespace cv;
 using namespace xfeatures2d;
 
-#define DO_BENCHMARK true
+#define DO_BENCHMARK 0
 
 
-/** @brief 
+/** @brief
 
 	Example of the PCTSignatures algorithm.
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	
+
 	// create the algorithm
 	Mat signature, result;
 	int initSampleCount = 5000;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 	vector<Point2f> initPoints;
 	PCTSignatures::generateInitPoints(initPoints, initSampleCount, PCTSignatures::PointDistribution::RANDOM);
 	Ptr<PCTSignatures> pctSignatures = PCTSignatures::create(initPoints, initSampleCount, initSeedCount);
-	
+
 	// compute the first image
 	size_t start = getTickCount();
 	pctSignatures->computeSignature(source, signature);
@@ -83,6 +83,7 @@ int main(int argc, char** argv)
 
 
 #ifdef DO_BENCHMARK // benchmark
+	cout << "Benchmark ..." << endl;
 	int imageCount = 100;
 	for (int i = 0; i < imageCount; i++)
 	{
@@ -107,6 +108,7 @@ int main(int argc, char** argv)
 	// single image -> compute and visualize
 	if (argc == 2)
 	{
+		cout << "Single image: Compute and visualize" << endl;
 		PCTSignatures::drawSignature(source, signature, result);
 		namedWindow("Source", WINDOW_AUTOSIZE);		// Create windows for display.
 		namedWindow("Result", WINDOW_AUTOSIZE);
@@ -119,6 +121,7 @@ int main(int argc, char** argv)
 	// example: ../data/image0.jpg ../data/image1.jpg ../data/image2.jpg ../data/image3.jpg
 	else
 	{
+		cout << "Multiple image: Compare to the first one" << endl;
 		for (int i = 2; i < argc; i++)
 		{
 			Mat img = imread(argv[i], CV_LOAD_IMAGE_COLOR);
@@ -138,6 +141,6 @@ int main(int argc, char** argv)
 			cout << "Image: " << argv[i + 2] << ", similarity: " << distances[i] << endl;
 		}
 	}
-	
+
 	return 0;
 }
