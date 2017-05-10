@@ -1,5 +1,5 @@
 #include "sqfd1.hpp"
-//#include <future>
+#include <future>
 #include "sqfd1parameter.hpp"
 
 defuse::SQFD::SQFD(Parameter* _parameter, int _idxWeight, int _skipDim)
