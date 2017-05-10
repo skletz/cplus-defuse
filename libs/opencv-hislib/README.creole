@@ -1,0 +1,53 @@
+== OpenCV-histlib
+
+HistLib is a C++ histogram visualization and manipulation library built with [[http://opencv.willowgarage.com/wiki/|OpenCV]]. This library provides the ability to create custom histograms, generate histograms from grayscale/color images, and apply value channel normalization using a set of simple functions. 
+
+**Please see [[https://github.com/filitchp/opencv-histlib/wiki/Samples|Samples]] on how to use this library.**
+
+| {{https://raw.github.com/wiki/filitchp/opencv-histlib/img/sunset.jpg|Input image}} | {{https://raw.github.com/wiki/filitchp/opencv-histlib/img/sunset.hist.png|Corresponding RGB histogram}} |
+| Input | Histogram |
+
+=== Changes
+
+**Version 0.3**
+ * Switched to the CMake build system
+ * Refactored functions into an object oriented library
+ * Cleaner sample code
+ * Extensive commenting
+----
+
+=== Install
+
+Checkout or extract the source into `~/code/opencv-histlib`
+
+{{{
+# Make a new build directory for the project
+mkdir ~/code/build/opencv-histlib
+cd ~/code/build/opencv-histlib
+
+# Initialize the CMake build environment
+cmake ~/code/opencv-histlib/
+
+# Copy images to the build directory  (required to run the sample code)
+cp -Rf ~/code/opencv-histlib/images ./
+
+# Build and run the sample code
+make
+./sample
+}}}
+
+The output from **sample** should look like this:
+{{{
+Created single channel histogram: ramp.hist.png
+Created value histogram: bars.value.hist.png
+Created BGR histogram: bars.rgb.hist.png
+Created value histogram: sunset.gray.hist.png
+Created BGR histogram: sunset.bgr.hist.png
+Created value histogram: fiveShadesLowContrast.value.hist.png
+Created value histogram: fiveShadesLowContrastNorm.value.hist.png
+Created normalized image: fiveShadesLowContrastNorm.png
+Created clipped image: fiveShadesLowContrastClipped.value.png
+Created value histogram: fiveShadesLowContrastClipped.value.hist.png
+Created value histogram: fiveShades.value.hist.png
+Created value histogram: fiveShadesNorm.value.hist.png
+}}}
