@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(OpenCV_DIR)\include;$(Boost_DIR);..\..\..\libs\cplusutil\cplusutil\include;..\..\..\libs\cpluslogger\cpluslogger\include;..\..\..\defuse\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OpenCV_DIR)\include;$(Boost_DIR);..\..\..\libs\cplusutil\cplusutil\include;..\..\..\libs\cpluslogger\cpluslogger\include;..\..\..\defuse\include;..\..\..\libs\opencv-pctsig\cvpctsig\include;..\..\..\libs\opencv-tfsig\cvtfsig\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
