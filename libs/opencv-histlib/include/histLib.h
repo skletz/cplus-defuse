@@ -146,7 +146,7 @@ class CHistLib
 
     unsigned mHistImageHeight;
     unsigned mHistImageBorder;
-    unsigned mBinCount;
+    int mBinCount;
     unsigned mSpread;
     bool mDrawXAxis;
     bool mDrawSpreadOut;
