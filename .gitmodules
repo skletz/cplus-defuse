@@ -6,6 +6,3 @@
 	path = libs/cplusutil
 	url = https://github.com/skletz/cplusutil.git
 	branch = master
-[submodule "libs/opencv-histlib"]
-	path = libs/opencv-histlib
-	url = https://github.com/filitchp/opencv-histlib.git
