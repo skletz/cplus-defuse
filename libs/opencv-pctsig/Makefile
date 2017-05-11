@@ -24,7 +24,8 @@ OPENCVDIR := $(OPENCV)
 ifdef OPENCVDIR
 OPENCVDIR := $(OPENCV)
 INCDIR = `pkg-config --cflags /opt/local/lib/pkgconfig/opencv.pc`
-LDLIBSOPTIONS = -L$(OPENCV)/lib -lopencv_core -lopencv_highgui -lopencv_features2d -opencv_imgproc
+#LDLIBSOPTIONS = -L$(OPENCV)/lib -lopencv_core -lopencv_highgui -lopencv_features2d -lopencv_imgproc
+LDLIBSOPTIONS =`pkg-config --libs /opt/local/lib/pkgconfig/opencv.pc`
 else
 OPENCVDIR := /usr/local/
 INCDIR = `pkg-config --cflags opencv`
@@ -33,7 +34,7 @@ LDLIBSOPTIONS += -L/usr/local/share/OpenCV/3rdparty/lib
 endif
 
 #Header Files
-INCDIR+= -I./include
+INCDIR+= -I./$(PROJECT)/include
 
 .PHONY: all
 
@@ -42,7 +43,7 @@ info:
 	@echo "OpenCV Header Include Directory: " $(INCDIR) "\n"
 	@echo "OpenCV Linking: " $(LDLIBSOPTIONS) "\n"
 
-all: directories shared prog static
+all: directories prog shared static
 
 directories:
 	mkdir -p $(TARGET)/$(BIN)
