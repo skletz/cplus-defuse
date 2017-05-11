@@ -18,13 +18,13 @@ SRC= $(PROJECT)/src
 SOURCES= $(wildcard $(SRC)/*.cpp)
 OBJECTS= $(patsubst $(SRC)/%.cpp,$(TARGET)/$(EXT)/%.o,$(SOURCES))
 TARGETSHARED = $(PROJECT).so.1.0
-TARGETSTATIC = $(PROJECT)_$(VERSION).a
+TARGETSTATIC = $(PROJECT).$(VERSION).a
 
+#IF ANY Value of the VARIABLE is set /opt/local/ is used
 OPENCVDIR := $(OPENCV)
 ifdef OPENCVDIR
 OPENCVDIR := $(OPENCV)
 INCDIR = `pkg-config --cflags /opt/local/lib/pkgconfig/opencv.pc`
-#LDLIBSOPTIONS = -L$(OPENCV)/lib -lopencv_core -lopencv_highgui -lopencv_features2d -lopencv_imgproc
 LDLIBSOPTIONS =`pkg-config --libs /opt/local/lib/pkgconfig/opencv.pc`
 else
 OPENCVDIR := /usr/local/
@@ -51,19 +51,16 @@ directories:
 	mkdir -p $(TARGET)/$(EXT)
 
 prog: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)/$(BIN)/prog$(PROJECT)_$(VERSION) $(LDLIBSOPTIONS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)/$(BIN)/prog$(PROJECT).$(VERSION) $(LDLIBSOPTIONS)
 
 shared: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(LDLIBSOPTIONS) -Wall -shared -Wl,-soname, $(TARGET)/$(EXT)/*.o -o $(TARGET)/$(LIB)/lib$(PROJECT)_$(VERSION).so.1.0
+	$(CXX) $(CXXFLAGS) $(LDLIBSOPTIONS) -Wall -shared -Wl,-soname, $(TARGET)/$(EXT)/*.o -o $(TARGET)/$(LIB)/lib$(TARGETSHARED)
 
 $(TARGET)/$(EXT)/%.o: $(SRC)/%.cpp
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@ $(INCDIR)
 
 static: $(OBJECTS)
-	ar -rv $(TARGET)/$(LIB)/lib$(PROJECT)_$(VERSION).a $(OBJECTS)
-
-# shared: $(OBJECTS)
-# 	$(CXX) $(CXXFLAGS) $(LDLIBSOPTIONS) -shared -Wl,-soname,$(PROJECT)_$(VERSION).so -o $@ $^
+	ar -rv $(TARGET)/$(LIB)/lib$(TARGETSTATIC) $(OBJECTS)
 
 clean:
 	rm -rf build
