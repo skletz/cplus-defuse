@@ -70,7 +70,7 @@
 *	TYPE: 2 = Precision/Recall@k
 *	***********************************************************
 *	-argsLAST: k Value <INT> for Precision u. Recall default 3
-*	
+*
 * @author skletz
 * @version 2.0 13/03/17
 *
@@ -104,7 +104,7 @@ static std::string outputpath = "..\\data\\maps\\";
 
 static Directory* featuredir = nullptr;
 static Directory* outputdir = nullptr;
-static File* csvMAPValues = nullptr; 
+static File* csvMAPValues = nullptr;
 
 static std::string dataset = "data_test-v1_0";
 static std::string csvFileMAPPath = "";
@@ -143,6 +143,7 @@ int main(int argc, char **argv)
 	if (argc < 3)
 	{
 		LOG_ERROR("valuation: too few arguments!");
+		return EXIT_SUCCESS;
 	}
 	else
 	{
@@ -292,7 +293,7 @@ int main(int argc, char **argv)
 	dir << xtractsettings << "_" << std2 << "_" << evalsettings;
 	outputdir->addDirectory(dir.str());
 	LOG_DEBUG("Output Directory is initialized: " << dir.str());
-	
+
 	//Get the descriptor method for the exact position of the WEIGHTS
 	int skipDim = -1;
 	int idxWeight = -1;
@@ -348,12 +349,12 @@ int main(int argc, char **argv)
 		tmp << name << n << "_" << "Aps";
 		modelname += ("_" + n);
 	}
-	else 
+	else
 	{
 		tmp << name << "_" << dir.str() << "_" << "Aps";
 		modelname += ("_" + dir.str());
 	}
-	
+
 	apcsvfile = tmp.str();
 
 	//Init outputs
@@ -435,18 +436,19 @@ void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> gro
 	//evalaute the mean average precision value for each group
 	for (auto it = groups.begin(); it != groups.end(); ++it)
 	{
-		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
+		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group
 		std::vector<Features*> group = (*it).second;
 		float mapPerGroup = 0;
 		std::string name = "MAP ";
 		name += std::to_string(group.size());
 
-		
+
 		for (int iGroup = 0; iGroup < group.size(); iGroup++)
 		{
 			Features element = *group.at(iGroup);
-			pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
-
+			//TODO: Re-Implement future usage error: In file included from /usr/include/c++/4.8/future tIn instantiation of ‘struct std::_Bind_simple
+			//pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
+			compare(element, model, distance);
 		}
 
 		int currentGroup = (*it).first;
@@ -470,7 +472,7 @@ void evaluatePrecisionRecallAtK(int k, std::map<int, std::vector<Features*>> gro
 
 			int matches = 0;
 			relevantRetrievedperQuery = 0.0;
-			//get precision and recall at 
+			//get precision and recall at
 			for (int iResult = 0; iResult < k; iResult++)
 			{
 				if (results.first->mClazz == results.second.at(iResult)->mClazz)
@@ -517,14 +519,14 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 	std::vector<std::future<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>>> pendingFutures;
 
 	float computationTimes = 0.0;
-	
+
 	//Only used if randomization is true
 	std::vector<std::pair<EvaluatedQuery*, std::vector<ResultBase*>>> randomResults;
 
 	//evalaute the mean average precision value for each group
 	for (auto it = groups.begin(); it != groups.end(); ++it)
 	{
-		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group 
+		bool printexecutiontime = false; //multi-threaded, measure one value for the first entry of each group
 		std::vector<Features*> group = (*it).second;
 		float mapPerGroup = 0;
 		std::string name = "MAP ";
@@ -541,8 +543,9 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 			}
 			else
 			{
-				pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
-				//compare(element, model, distance, printexecutiontime);
+				//TODO: Re-Implement future usage error: In file included from /usr/include/c++/4.8/future tIn instantiation of ‘struct std::_Bind_simple
+				//pendingFutures.push_back(std::async(std::launch::async, &compare, element, model, distance));
+				compare(element, model, distance);
 			}
 
 		}
@@ -588,7 +591,7 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 				tmp->extendFileName("RS");
 				writeAverageResults(results, tmp);
 				delete tmp;
-				
+
 
 				std::unique_lock<std::mutex> guard(f());
 				cplusutil::Terminal::showProgress(name, i + 1, pendingFutures.size());
@@ -608,7 +611,7 @@ double evaluateMeanAveragePrecision(std::map<int, std::vector<Features*>> groups
 			tmp_values.push_back(std::make_pair(currentGroup, mapPerGroup));
 		}
 	}
-	
+
 	computationTimes /= float(groups.size());
 	LOG_PERFMON(PTIME, "Computation-Time: Searching (secs) \t" << model.size() << "\t" << xtractsettings << "\t" << evalsettings << "\t" << computationTimes);
 	//guard.unlock();
@@ -706,7 +709,7 @@ std::pair<EvaluatedQuery*, std::vector<ResultBase*>> compare(Features& _query, s
 		Features* element = _model.at(iElem);
 
 		size_t e1_start, e1_end;
-		
+
 		e1_start = double(cv::getTickCount());
 		//time(&t1_start);
 
@@ -949,7 +952,7 @@ Features* deserialize(std::string _file)
 	{
 		CNNFeatures* tmp = new CNNFeatures();
 		tmp->readFloatArray(_file);
-		
+
 		features = new CNNFeatures();
 		features->mVideoFileName = tmp->mVideoFileName;
 		features->mClazz = tmp->mClazz;

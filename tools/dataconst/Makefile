@@ -2,7 +2,7 @@
 # INPUT: path to opencv installation; DEFAULT /usr/local
 #
 
-PROJECT=valuation
+PROJECT=dataconst
 VERSION=1.0
 
 OS=Linux
