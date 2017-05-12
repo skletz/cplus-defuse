@@ -42,8 +42,8 @@ CVHISTLIB="../libs/opencv-histlib"
 UTIL="../libs/cplusutil"
 LOGGER="../libs/cpluslogger"
 
-LDLIBSOPTIONS += $(LOGGER)/build/lib/cpluslogger.1.0.a
-LDLIBSOPTIONS += $(UTIL)/build/lib/cplusutil.1.0.a
+LDLIBSOPTIONS += $(LOGGER)/build/lib/libcpluslogger.1.0.a
+LDLIBSOPTIONS += $(UTIL)/build/lib/libcplusutil.1.0.a
 LDLIBSOPTIONS += $(PCTSIGNATURES)/build/lib/libcvpctsig.1.0.a
 LDLIBSOPTIONS += $(TFSIGNATURES)/build/lib/libcvtfsig.1.0.a
 LDLIBSOPTIONS += $(PCTSIGNATURES)/build/lib/libcvpctsig.1.0.a
