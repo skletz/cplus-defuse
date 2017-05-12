@@ -14,6 +14,9 @@ CVHISTLIB="./libs/opencv-histlib"
 #Framework
 DEFUSEDIR="./defuse"
 XTRACTION="./tools/xtraction"
+VALUATION="./tools/valuation"
+DATAINFO="./tools/datainfo"
+DATACONST="./tools/dataconst"
 #.PHONY: all
 
 ARG1=OPENCV
@@ -30,7 +33,7 @@ info:
 	@echo "OpenCV Installation: " $(ARG1)=$(VALUE1) "\n"
 
 
-all: directories logger util pctsignatures tfsignatuers histlib defusefw xtraction
+all: directories logger util pctsignatures tfsignatuers histlib defusefw xtraction valuation datainfo dataconst
 
 directories:
 	mkdir -p $(BUILD)/$(BIN)
@@ -65,6 +68,18 @@ xtraction:
 	echo "DeXtraction: " $(XTRACTION)
 	$(MAKE) -C $(XTRACTION)/ $(ARG1)=$(VALUE1) all
 
+valuation:
+	echo "DeValuation: " $(VALUATION)
+	$(MAKE) -C $(VALUATION)/ $(ARG1)=$(VALUE1) all
+
+datainfo:
+	echo "DATAInfo: " $(DATAINFO)
+	$(MAKE) -C $(DATAINFO)/ $(ARG1)=$(VALUE1) all
+
+dataconst:
+	echo "DATAConstruction: " $(DATACONST)
+	$(MAKE) -C $(DATACONST)/ $(ARG1)=$(VALUE1) all
+
 clean:
 	$(MAKE) -C $(LOGGER)/ clean
 	$(MAKE) -C $(UTIL)/ clean
@@ -73,3 +88,6 @@ clean:
 	$(MAKE) -C $(CVHISTLIB)/ clean
 	$(MAKE) -C $(DEFUSEDIR)/ clean
 	$(MAKE) -C $(XTRACTION)/ clean
+	$(MAKE) -C $(VALUATION)/ clean
+	$(MAKE) -C $(DATAINFO)/ clean
+	$(MAKE) -C $(DATACONST)/ clean
