@@ -66,7 +66,7 @@ info:
 	@echo "OpenCV Header Include Directory: " $(INCDIR) "\n"
 	@echo "OpenCV Linking: " $(LDLIBSOPTIONS) "\n"
 
-all: clean directories prog static
+all: clean directories prog static shared
 
 directories:
 	mkdir -p $(TARGET)/$(BIN)

@@ -23,12 +23,12 @@ OPENCVDIR := $(OPENCV)
 ifdef OPENCVDIR
 OPENCVDIR := $(OPENCV)
 INCDIR = `pkg-config --cflags /opt/local/lib/pkgconfig/opencv.pc`
-LDLIBSOPTIONS =`pkg-config --libs /opt/local/lib/pkgconfig/opencv.pc`
+LDLIBSOPTIONS_POST =`pkg-config --libs /opt/local/lib/pkgconfig/opencv.pc`
 else
 OPENCVDIR := /usr/local/
 INCDIR = `pkg-config --cflags opencv`
-LDLIBSOPTIONS =`pkg-config --libs opencv`
-LDLIBSOPTIONS += -L/usr/local/share/OpenCV/3rdparty/lib
+LDLIBSOPTIONS_POST =`pkg-config --libs opencv`
+LDLIBSOPTIONS_POST += -L/usr/local/share/OpenCV/3rdparty/lib
 endif
 
 
@@ -43,22 +43,24 @@ LOGGER="../../libs/cpluslogger"
 #Framework
 DEFUSE="../../defuse"
 
-
-LDLIBSOPTIONS += $(LOGGER)/build/lib/cpluslogger.1.0.a
-LDLIBSOPTIONS += $(UTIL)/build/lib/cplusutil.1.0.a
+LDLIBSOPTIONS = $(LOGGER)/build/lib/libcpluslogger.1.0.a
 LDLIBSOPTIONS += $(DEFUSE)/build/lib/libdefuse.1.0.a
+LDLIBSOPTIONS += $(UTIL)/build/lib/libcplusutil.1.0.a
 LDLIBSOPTIONS += $(CVHISTLIB)/build/lib/libcvhistlib.1.0.a
 LDLIBSOPTIONS += $(TFSIGNATURES)/build/lib/libcvtfsig.1.0.a
 LDLIBSOPTIONS += $(PCTSIGNATURES)/build/lib/libcvpctsig.1.0.a
 
 LDLIBSOPTIONS += -lboost_filesystem -lboost_system
+#IMPORTANT: Link sequence! - OpenCV libraries have to added at the end
+LDLIBSOPTIONS += $(LDLIBSOPTIONS_POST)
 
+INCDIR+= -I/usr/local/include/opencv2
 INCDIR+= -I$(LOGGER)/cpluslogger/include
 INCDIR+= -I$(UTIL)/cplusutil/include
-INCDIR+= -I$(DEFUSE)/include
 INCDIR+= -I$(PCTSIGNATURES)/cvpctsig/include
 INCDIR+= -I$(TFSIGNATURES)/cvtfsig/include
 INCDIR+= -I$(CVHISTLIB)/include
+INCDIR+= -I$(DEFUSE)/include
 
 
 .PHONY: all
@@ -79,7 +81,7 @@ prog: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)/$(BIN)/prog$(PROJECT).$(VERSION) $(LDLIBSOPTIONS)
 
 $(TARGET)/$(EXT)/%.o: $(SRC)/%.cpp
-	   $(CXX) $(CXXFLAGS) -c $< -o $@ $(INCDIR)
+	   $(CXX) $(CXXFLAGS) -fPIC -c $< -o $@ $(INCDIR)
 
 clean:
 	rm -rf build
