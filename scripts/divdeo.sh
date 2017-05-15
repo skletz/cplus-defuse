@@ -10,9 +10,9 @@ USAGE="A tool for dividing a video into shots.
 Usage: `basename $0` [-video] [-csv]
     -h    Shows this help
     -v    Video File
-    -c    Csv File including shot boundaries: <start> <endframe>
+    -s    Csv File including shot boundaries: <start> <endframe>
  Examples:
-    `basename $0` -v \"./flowers.mp4\" -c \"./flowers.cvs\""
+    `basename $0` -v \"./flowers.mp4\" -s \"./flowers.cvs\""
 
 # parse command line
 if [ $# -eq 0 ]; then #  must be at least one arg
@@ -20,17 +20,17 @@ if [ $# -eq 0 ]; then #  must be at least one arg
     exit 1
 fi
 
-while getopts v:c:h OPT; do
+while getopts v:s:h OPT; do
     case $OPT in
     h)  echo "$USAGE"
         exit 0 ;;
     v)  VDO=$OPTARG ;;
-    c)  CSV=$OPTARG ;;
+    s)  CSV=$OPTARG ;;
     \?) # getopts issues an error message
         echo "$USAGE" >&2
         exit 1 ;;
     esac
 done
-shift $OPTIND-1 # shift input args
+shift `expr $OPTIND - 1` 
 
 echo "Video File: $VDO; CSV File: $CSV"

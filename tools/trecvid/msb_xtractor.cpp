@@ -29,8 +29,9 @@
 #include<boost/tokenizer.hpp>
 
 static std::string prog = "MBSXtraction";
-static std::string indexFile = "";
+static std::string collectionFile = "";
 static std::string msbDirectory = "";
+static std::string outputDirectory = "";
 using boost::property_tree::ptree;
 
 using namespace boost;
@@ -67,12 +68,13 @@ void processProgramOptions(const int argc, const char *const argv[])
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help,h", "Show brief usage message")
-		("index-file", po::value<std::string>(&indexFile), "index file (XML)")
+		("collection-file", po::value<std::string>(&collectionFile), "index file (XML)")
 		("msb-directory", po::value<std::string>(&msbDirectory), "directory containing master shot boundary files")
+		("output-directory", po::value<std::string>(&outputDirectory), "output directory")
 		;
 
 	po::positional_options_description p;
-	p.add("index-file", -1);
+	p.add("collection-file", -1);
 
 	if (argc < 2)
 	{
@@ -99,9 +101,9 @@ void processProgramOptions(const int argc, const char *const argv[])
 		showHelp(desc);
 	}
 
-	if (args.count("index-file"))
+	if (args.count("collection-file"))
 	{
-		LOG_INFO( "Index files is: " << args["index-file"].as< std::string >());
+		LOG_INFO( "Index files is: " << args["collection-file"].as< std::string >());
 	}
 
 
@@ -110,9 +112,14 @@ void processProgramOptions(const int argc, const char *const argv[])
 		LOG_INFO("MSB Directory is: " << args["msb-directory"].as< std::string >());
 	}
 
+	if (args.count("output-directory"))
+	{
+		LOG_INFO("Output Directory is: " << args["output-directory"].as< std::string >());
+	}
+
 }
 
-VideoFileList readIndex (std::istream &is)
+VideoFileList readCollection (std::istream &is)
 {
 	// populate tree structure pt
 	ptree pt;
@@ -177,20 +184,34 @@ MasterShotBoundaries readMSB(std::istream &is)
 	return shots;
 }
 
+void writeIndex(std::fstream &fs, VideoFile &videoFile)
+{
+	for (int iShot = 0; iShot < videoFile.msbs.size(); iShot++)
+	{
+		fs << videoFile.msbs.at(iShot).start;
+		fs << ",";
+		fs << videoFile.msbs.at(iShot).end;
+		fs << std::endl;
+	}
+
+	fs.flush();
+}
+
 int main(int argc, char const *argv[]) {
 
 	processProgramOptions(argc, argv);
 
-	File* index = new File(indexFile);
+	File* collection = new File(collectionFile);
 	Directory* msb = new Directory(msbDirectory);
+	Directory* index = new Directory(outputDirectory);
 
-	std::ifstream is(index->getFile());
+	std::ifstream is(collection->getFile());
 	if(!is.is_open())
 	{
 		exit(EXIT_FAILURE);
 	}
 
-	VideoFileList videolist = readIndex(is);
+	VideoFileList videolist = readCollection(is);
 	is.close();
 
 	int maxFiles = videolist.size();
@@ -215,11 +236,35 @@ int main(int argc, char const *argv[]) {
 		}
 		is.close();
 
-		cplusutil::Terminal::showProgress("Read in MSB Files: ", iFile, maxFiles);
+		cplusutil::Terminal::showProgress("Read MSB Files: ", iFile, maxFiles);
 	}
 	
+	std::string idxFileName = "";
+	std::fstream fs;
+	File* idxFile;
+	for (int iFile = 0; iFile < maxFiles; iFile++)
+	{
+		idxFileName = std::to_string(videolist.at(iFile).id) + ".csv";
+		idxFile = new File(idxFileName);
+		idxFile->setPath(index->getPath());
 
-	delete index;
+		fs.open(idxFile->getFile(), std::fstream::out);
+
+		if(!fs.is_open() )
+		{
+			LOG_ERROR("Index File for video : " << videolist.at(iFile).filename << " cannot be created with: " << idxFile->getFile());
+		}else
+		{
+			writeIndex(fs, videolist.at(iFile));
+		}
+
+		cplusutil::Terminal::showProgress("Write Index File: ", iFile, maxFiles);
+		fs.close();
+		delete idxFile;
+
+	}
+
+	delete collection;
 	delete msb;
 	return EXIT_SUCCESS;
 }

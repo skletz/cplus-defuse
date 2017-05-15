@@ -37,7 +37,7 @@ LOGGER="../../libs/cpluslogger"
 LDLIBSOPTIONS = $(LOGGER)/build/lib/libcpluslogger.1.0.a
 LDLIBSOPTIONS += $(UTIL)/build/lib/libcplusutil.1.0.a
 
-LDLIBSOPTIONS += -lboost_filesystem -lboost_system
+LDLIBSOPTIONS += -lboost_filesystem -lboost_system -lboost_program_options
 #IMPORTANT: Link sequence! - OpenCV libraries have to added at the end
 LDLIBSOPTIONS += $(LDLIBSOPTIONS_POST)
 
