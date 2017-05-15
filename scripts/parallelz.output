@@ -1,0 +1,19 @@
+bash parallel-test.sh -j 6 -r "converttt -scale 50% * small/small_*" *.jpg
+Using 6 parallel threads
+Running converttt -scale 50% Bright_red_tomato_and_cross_section02.jpg small/small_Bright_red_tomato_and_cross_section02.jpg
+Running converttt -scale 50% download.jpg small/small_download.jpg
+Running converttt -scale 50% tomato-hair-benefits1.jpg small/small_tomato-hair-benefits1.jpg
+parallel-test.sh: Zeile 79: converttt: Befehl nicht gefunden
+parallel-test.sh: Zeile 79: converttt: Befehl nicht gefunden
+parallel-test.sh: Zeile 79: converttt: Befehl nicht gefunden
+
+
+A simple wrapper for running processes in parallel.
+Usage: parallel-test.sh [-h] [-r] [-j nb_jobs] command arg_list
+    -h      Shows this help
+    -r      Replace asterix * in the command string with argument
+    -j nb_jobs  Set number of simultanious jobs [2]
+ Examples:
+    parallel-test.sh somecommand arg1 arg2 arg3
+    parallel-test.sh -j 3 "somecommand -r -p" arg1 arg2 arg3
+    parallel-test.sh -j 6 -r "convert -scale 50% * small/small_*" *.jpg
