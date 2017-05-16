@@ -26,13 +26,21 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
-#include<boost/tokenizer.hpp>
+#include <boost/tokenizer.hpp>
+#include <opencv2/opencv.hpp>
 
 static std::string prog = "MBSXtraction";
 static std::string collectionFile = "";
 static std::string msbDirectory = "";
 static std::string outputDirectory = "";
 using boost::property_tree::ptree;
+
+int countFive = 0;
+int countTen = 0;
+int countTwenty = 0;
+int countThirty = 0;
+int sumShots = 0;
+int counts[30] = { 0 };;
 
 using namespace boost;
 namespace po = program_options;
@@ -186,8 +194,24 @@ MasterShotBoundaries readMSB(std::istream &is)
 
 void writeIndex(std::fstream &fs, VideoFile &videoFile)
 {
+	//cv::VideoCapture video("");
+
 	for (int iShot = 0; iShot < videoFile.msbs.size(); iShot++)
 	{
+		int diff = videoFile.msbs.at(iShot).end - videoFile.msbs.at(iShot).start;
+	
+		if (diff < 30)
+		{
+			counts[diff]++;
+		}
+
+		if(diff == 0)
+		{
+			LOG_ERROR("Zero Shot: ID\t" << videoFile.id << "; Source\t" << videoFile.source << "Shot Start: \t" << videoFile.msbs.at(iShot).start);
+		}
+
+		sumShots++;
+
 		fs << videoFile.msbs.at(iShot).start;
 		fs << ",";
 		fs << videoFile.msbs.at(iShot).end;
@@ -197,16 +221,10 @@ void writeIndex(std::fstream &fs, VideoFile &videoFile)
 	fs.flush();
 }
 
-int main(int argc, char const *argv[]) {
-
-	processProgramOptions(argc, argv);
-
-	File* collection = new File(collectionFile);
-	Directory* msb = new Directory(msbDirectory);
-	Directory* index = new Directory(outputDirectory);
-
-	std::ifstream is(collection->getFile());
-	if(!is.is_open())
+VideoFileList processMSBoundaries(File* _collection, Directory* _msbs)
+{
+	std::ifstream is(_collection->getFile());
+	if (!is.is_open())
 	{
 		exit(EXIT_FAILURE);
 	}
@@ -215,20 +233,21 @@ int main(int argc, char const *argv[]) {
 	is.close();
 
 	int maxFiles = videolist.size();
-	for(int iFile = 0; iFile < maxFiles; iFile++)
+	for (int iFile = 0; iFile < maxFiles; iFile++)
 	{
 		File videomsb(videolist.at(iFile).filename);
-		videomsb.setPath(msb->getPath());
+		videomsb.setPath(_msbs->getPath());
 		videomsb.setFileExtension(".msb");
 
 		is.open(videomsb.getFile());
 		if (!is.is_open())
 		{
 			LOG_ERROR("MSB File for video : " << videolist.at(iFile).filename << " cannot be found with: " << videomsb.getFile());
-		}else
+		}
+		else
 		{
 			MasterShotBoundaries shots = readMSB(is);
-			if(shots.size() == 0)
+			if (shots.size() == 0)
 			{
 				LOG_INFO(videolist.at(iFile).filename << "has no shots");
 			}
@@ -238,24 +257,31 @@ int main(int argc, char const *argv[]) {
 
 		cplusutil::Terminal::showProgress("Read MSB Files: ", iFile, maxFiles);
 	}
-	
+	return videolist;
+}
+
+void processMSBIndex(VideoFileList& _videoFileList, Directory* _index)
+{
 	std::string idxFileName = "";
 	std::fstream fs;
 	File* idxFile;
+
+	int maxFiles = _videoFileList.size();
 	for (int iFile = 0; iFile < maxFiles; iFile++)
 	{
-		idxFileName = std::to_string(videolist.at(iFile).id) + ".csv";
+		idxFileName = std::to_string(_videoFileList.at(iFile).id) + ".csv";
 		idxFile = new File(idxFileName);
-		idxFile->setPath(index->getPath());
+		idxFile->setPath(_index->getPath());
 
 		fs.open(idxFile->getFile(), std::fstream::out);
 
-		if(!fs.is_open() )
+		if (!fs.is_open())
 		{
-			LOG_ERROR("Index File for video : " << videolist.at(iFile).filename << " cannot be created with: " << idxFile->getFile());
-		}else
+			LOG_ERROR("Index File for video : " << _videoFileList.at(iFile).filename << " cannot be created with: " << idxFile->getFile());
+		}
+		else
 		{
-			writeIndex(fs, videolist.at(iFile));
+			writeIndex(fs, _videoFileList.at(iFile));
 		}
 
 		cplusutil::Terminal::showProgress("Write Index File: ", iFile, maxFiles);
@@ -263,8 +289,37 @@ int main(int argc, char const *argv[]) {
 		delete idxFile;
 
 	}
+}
+
+int main(int argc, char const *argv[]) {
+
+	processProgramOptions(argc, argv);
+
+	std::stringstream logfile;
+	logfile  << argv[0] << ".log";
+	Directory workingdir(".");
+	File log(workingdir.getPath(), logfile.str());
+	cpluslogger::Logger::get()->logfile(log.getFile());
+	cpluslogger::Logger::get()->filelogging(true);
+
+	File* collection = new File(collectionFile);
+	Directory* msb = new Directory(msbDirectory);
+	Directory* index = new Directory(outputDirectory);
+
+
+	VideoFileList videoFileList = processMSBoundaries(collection, msb);
+	processMSBIndex(videoFileList, index);
+
 
 	delete collection;
 	delete msb;
+	float mult = 100.0f / float(sumShots);
+
+	LOG_INFO("In sum there are " << sumShots << " shots");
+	for(int iCount = 0; iCount < 30; iCount++)
+	{
+		LOG_ERROR("Frames:\t " << iCount+1 << "\t" << counts[iCount] << "\t" << counts[iCount]*mult << "% frames");
+	}
+
 	return EXIT_SUCCESS;
 }
