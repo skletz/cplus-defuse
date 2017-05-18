@@ -215,7 +215,7 @@ void writeIndex(std::fstream &fs, VideoFile &videoFile)
 		fs << videoFile.msbs.at(iShot).start;
 		fs << ",";
 		fs << videoFile.msbs.at(iShot).end;
-		fs << std::endl;
+		fs << '\n';
 	}
 
 	fs.flush();

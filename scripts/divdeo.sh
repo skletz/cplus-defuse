@@ -77,12 +77,17 @@ do
     echo "===>Less than 1 Second"
     DURATION=0$(echo "$DURATION")
     #VIDEO ID, SHOT ID = start frame number, end frame number
-    echo "${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-less-1sec.csv
+    echo "$VDO,$CSV,${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-less-1sec.csv
     continue
   fi
 
+  if (($(bc <<< "$TIMESTAMP < 1")))
+  then
+    TIMESTAMP=0$(echo "$TIMESTAMP")
+  fi
+
   OUTPUT=${FILENAME%.*}"_"$counter"_"$start-$end"_"$FPS"_"$WIDTH"x"$HEIGHT.mp4
-  echo "$OUTPUT,${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-shots.csv
+  echo "$VDO,$CSV,$OUTPUT,${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-shots.csv
 
   #DURATION=$(date -d@$DURATION -u +%H:%M:%S.%s)
 
