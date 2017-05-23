@@ -42,6 +42,8 @@ int countThirty = 0;
 int sumShots = 0;
 int counts[30] = { 0 };;
 
+
+
 using namespace boost;
 namespace po = program_options;
 
@@ -70,6 +72,9 @@ void showHelp(const po::options_description& desc)
 	LOG_INFO(desc);
 	exit(EXIT_SUCCESS);
 }
+
+
+MasterShotBoundaries completeShots;
 
 void processProgramOptions(const int argc, const char *const argv[])
 {
@@ -207,7 +212,7 @@ void writeIndex(std::fstream &fs, VideoFile &videoFile)
 
 		if(diff == 0)
 		{
-			LOG_ERROR("Zero Shot: ID\t" << videoFile.id << "; Source\t" << videoFile.source << "Shot Start: \t" << videoFile.msbs.at(iShot).start);
+			LOG_ERROR("One Frame Shot: ID\t" << videoFile.id << "; Source\t" << videoFile.source << "Shot Start: \t" << videoFile.msbs.at(iShot).start);
 		}
 
 		sumShots++;
@@ -223,7 +228,7 @@ void writeIndex(std::fstream &fs, VideoFile &videoFile)
 
 VideoFileList processMSBoundaries(File* _collection, Directory* _msbs)
 {
-	std::ifstream is(_collection->getFile());
+		std::ifstream is(_collection->getFile());
 	if (!is.is_open())
 	{
 		exit(EXIT_FAILURE);
@@ -251,6 +256,8 @@ VideoFileList processMSBoundaries(File* _collection, Directory* _msbs)
 			{
 				LOG_INFO(videolist.at(iFile).filename << "has no shots");
 			}
+
+			completeShots.insert(std::end(completeShots), std::begin(shots), std::end(shots));
 			videolist.at(iFile).msbs = shots;
 		}
 		is.close();
@@ -316,10 +323,15 @@ int main(int argc, char const *argv[]) {
 	float mult = 100.0f / float(sumShots);
 
 	LOG_INFO("In sum there are " << sumShots << " shots");
+	float lessThan30Frames = 0;
 	for(int iCount = 0; iCount < 30; iCount++)
 	{
-		LOG_ERROR("Frames:\t " << iCount+1 << "\t" << counts[iCount] << "\t" << counts[iCount]*mult << "% frames");
+		LOG_ERROR("Frames:\t " << iCount+1 << "\t" << counts[iCount] << "\t" << counts[iCount]*mult << "\t%frames");
+		lessThan30Frames += (counts[iCount] * mult);
 	}
+
+	LOG_ERROR("Sum of shots less than 30 frames per shot:\t" << lessThan30Frames << "\t%frames");
+	LOG_ERROR("Sum of shots:\t" << completeShots.size());
 
 	return EXIT_SUCCESS;
 }
