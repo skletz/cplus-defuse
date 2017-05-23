@@ -1,18 +1,24 @@
 #!/bin/bash
 
-# A script for dividing a video into shots
+# A script for dividing the videos of the TREVid dataset into the proposed master-shots
+# Requirements: avprobe, avconv
 # @author skletz
-# @version 1.0 15/05/07
+# @version 1.1 23/05/07
+# @making 15/05/07
 
-VDO=""
-CSV=""
-USAGE="A tool for dividing a video into shots.
-Usage: `basename $0` [-video] [-csv]
-    -h    Shows this help
-    -v    Video File
-    -s    Directory containig shot boundaries Csv-File: <start> <endframe>
+VDO_FILE=""
+MSB_DIR=""
+P_ID=""
+
+USAGE="A script for dividing the videos of the TREVid dataset into the proposed master-shots avprobe, avconv
+The output contains two further files: videos-msb-l1s.csv (shots that are less than 1 second), videos-msb.csv (all extracted shots)
+Usage: `basename $0` [-video] [-MSB]
+    -h    Shows help
+    -v    Video-File <.MP4>
+    -s    VDO_DIRectory that contain the master shot boundaries <Video-File.MSB>: <startframe>,<endframe>
+    -p    ID <p1,p2 ...> for the identificaiton of the output files
  Examples:
-    `basename $0` -v \"./flowers.mp4\" -s \"./flowers.cvs\""
+    bash `basename $0` -v ../data/trecvid/videos/35345.mp4 -s ../data/trecvid/msbs/ -p p1"
 
 # parse command line
 if [ $# -eq 0 ]; then #  must be at least one arg
@@ -20,12 +26,13 @@ if [ $# -eq 0 ]; then #  must be at least one arg
     exit 1
 fi
 
-while getopts v:s:h OPT; do
+while getopts v:s:p:h OPT; do
     case $OPT in
     h)  echo "$USAGE"
         exit 0 ;;
-    v)  VDO=$OPTARG ;;
-    s)  CSV=$OPTARG ;;
+    v)  VDO_FILE=$OPTARG ;;
+    s)  MSB_DIR=$OPTARG ;;
+    p)  P_ID=$OPTARG ;;
     \?) # getopts issues an error message
         echo "$USAGE" >&2
         exit 1 ;;
@@ -33,52 +40,80 @@ while getopts v:s:h OPT; do
 done
 shift `expr $OPTIND - 1`
 
+# show input
+echo "Video-File: $VDO_FILE; VDO_DIRectory of Master-Shot-Boundaries: $MSB_DIR"
 
+# prepare output
+VDO_FILENAME=$(basename "$VDO_FILE")
+VDO_DIR=$(dirname "$VDO_FILE")
+OUTPUTSHOT_DIR=$(dirname "$VDO_DIR")/shots
+OUTPUTFILES_DIR=$(dirname "$VDO_DIR")
+OUTPUFILE_MSB=$P_ID"_videos-msb.csv"
+#less than 1 second
+OUTPUFILE_L1S=$P_ID"_videos-msb-l1s.csv"
+#less than 5 frames
+OUTPUFILE_L5F=$P_ID"_videos-msb-l5f.csv"
+MSB_FILE=$MSB_DIR/${VDO_FILENAME%.*}.csv
 
-echo "Video File: $VDO; CSV File: $CSV"
-FILENAME=$(basename "$VDO")
+echo "MSB-File: $MSB_FILE; Outpu-Dir: $OUTPUTSHOT_DIR; Output-Files: $OUTPUTFILES_DIR/$OUTPUFILE_L1S, $OUTPUTFILES_DIR/$OUTPUFILE_MSB"
 
-DIR=$(dirname "$VDO")
-OUTPUTDIR=$(dirname "$DIR")/shots
-CSV=$CSV/${FILENAME%.*}.csv
-echo "Video File: $VDO; CSV File: $CSV"
+rm -rf $OUTPUTSHOT_DIR
+rm -rf $OUTPUTFILES_DIR/$OUTPUFILE_L1S
+rm -rf $OUTPUTFILES_DIR/$OUTPUFILE_L5F
+rm -rf $OUTPUTFILES_DIR/$OUTPUFILE_MSB
+mkdir -p "$OUTPUTSHOT_DIR"
+touch $OUTPUTFILES_DIR/$OUTPUFILE_L1S
+touch $OUTPUTFILES_DIR/$OUTPUFILE_L5F
+touch $OUTPUTFILES_DIR/$OUTPUFILE_MSB
 
-mkdir -p "$OUTPUTDIR"
-touch $(dirname "$DIR")/videos-less-1sec.csv
-touch $(dirname "$DIR")/videos-shots.csv
-
-INPUT=$CSV
-OLDIFS=$IFS
-FPS=$(avprobe -v error -show_format -show_streams ${VDO} | grep avg_frame_rate | head -n1 | cut -d '=' -f 2)
+# get video information
+FPS=$(avprobe -v error -show_format -show_streams ${VDO_FILE} | grep avg_frame_rate | head -n1 | cut -d '=' -f 2)
 FPS=$(echo "scale=2; ${FPS}" | bc -l)
-WIDTH=$(avprobe -v error -show_format -show_streams ${VDO} | grep width | cut -d '=' -f 2)
-HEIGHT=$(avprobe -v error -show_format -show_streams ${VDO} | grep height | cut -d '=' -f 2)
-echo "FPS: $FPS; WIDTH: $WIDTH; HEIGHT: $HEIGHT"
-#BITRATE=$(avprobe -v error -show_format -show_streams ${VDO} | grep -m2 bit_rate | tail -n1 | cut -d '=' -f 2)
+WIDTH=$(avprobe -v error -show_format -show_streams ${VDO_FILE} | grep width | cut -d '=' -f 2)
+HEIGHT=$(avprobe -v error -show_format -show_streams ${VDO_FILE} | grep height | cut -d '=' -f 2)
+echo "Video: $VDO_FILE; FPS: $FPS; WIDTH: $WIDTH; HEIGHT: $HEIGHT"
+#BITRATE=$(avprobe -v error -show_format -show_streams ${VDO_FILE} | grep -m2 bit_rate | tail -n1 | cut -d '=' -f 2)
 
-counter=0
+#input stream
+INPUT=$MSB_FILE
+OLDIFS=$IFS
+
+#line number is the shot id in msb files
+shotid=0
+
+#iterate throug csv file (msb file)
 IFS=","
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
 while read start end
 do
-  counter=$((counter+1))
-
-  #echo "Start: $start; End: $end"
+  #shot id starts with line 1
+  shotid=$((shotid+1))
   SECOND_START=$(echo "$start / $FPS" | bc -l);
-  #echo "Second_Start: $SECOND_START; FPS: $FPS"
   SECOND_END=$(echo $end / $FPS | bc -l);
   TIMESTAMP=$SECOND_START
+  echo "Start: $start; End: $end"
   #TIMESTAMP=$(date -d@$SECOND_START -u +%H:%M:%S.%s)
 
   DURATION=$(echo $SECOND_END - $SECOND_START | bc -l);
-  #echo "test"
+  #frames per segment
+  FRAMES_SEGMENT=$(echo "$end - $start" | bc -l);
+  echo "Frames per Segment: $FRAMES_SEGMENT"
+
   if (($(bc <<< "$DURATION < 1")))
   then
-    echo "===>Less than 1 Second"
+    echo "===> Shot has less than 1 second (duration)"
+    #ffmpeg, avprobe invalid input if the leading zero is missing
     DURATION=0$(echo "$DURATION")
     #VIDEO ID, SHOT ID = start frame number, end frame number
-    echo "$VDO,$CSV,${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-less-1sec.csv
-    continue
+    echo "$VDO_FILE,$MSB_FILE,${VDO_FILENAME%.*},$shotid,$start,$end,$FRAMES_SEGMENT,$DURATION,$FPS" >> $OUTPUTFILES_DIR/$OUTPUFILE_L1S
+    #continue
+  fi
+
+  if (($(bc <<< "$FRAMES_SEGMENT < 5")))
+  then
+    echo "===> Shot has less than 5 frames per segment"
+    #VIDEO ID, SHOT ID = start frame number, end frame number
+    echo "$VDO_FILE,$MSB_FILE,${VDO_FILENAME%.*},$shotid,$start,$end,$FRAMES_SEGMENT,$DURATION,$FPS" >> $OUTPUTFILES_DIR/$OUTPUFILE_L5F    #continue
   fi
 
   if (($(bc <<< "$TIMESTAMP < 1")))
@@ -86,8 +121,8 @@ do
     TIMESTAMP=0$(echo "$TIMESTAMP")
   fi
 
-  OUTPUT=${FILENAME%.*}"_"$counter"_"$start-$end"_"$FPS"_"$WIDTH"x"$HEIGHT.mp4
-  echo "$VDO,$CSV,$OUTPUT,${FILENAME%.*},$start,$end,$DURATION,$FPS" >> $(dirname "$DIR")/videos-shots.csv
+  OUTPUT=${VDO_FILENAME%.*}"_"$shotid"_"$start-$end"_"$FPS"_"$WIDTH"x"$HEIGHT.mp4
+  echo "$VDO_FILE,$MSB_FILE,${VDO_FILENAME%.*},$shotid,$start,$end,$FPSEGMENT,$DURATION,$FPS" >> $OUTPUTFILES_DIR/$OUTPUFILE_MSB
 
   #DURATION=$(date -d@$DURATION -u +%H:%M:%S.%s)
 
@@ -95,9 +130,9 @@ do
   echo "DURATION: $DURATION; SECOND: $SECOND_END; TMP: $(echo $SECOND_END - $SECOND_START | bc -l);"
 	echo "Shot: $start - $end"
 
-  echo "Output: $DIR/$OUTPUT"
-  echo "avconv -i $VDO -ss $TIMESTAMP -t $DURATION -c:v libx264 -an -sn $OUTPUTDIR/$OUTPUT"
-  avconv -y -i $VDO -ss $TIMESTAMP -t $DURATION -c:v libx264 -an -sn $OUTPUTDIR/$OUTPUT
+  echo "Output: $VDO_DIR/$OUTPUT"
+  echo "avconv -i $VDO_FILE -ss $TIMESTAMP -t $DURATION -c:v libx264 -an -sn $OUTPUTSHOT_DIR/$OUTPUT"
+  avconv -y -i $VDO_FILE -ss $TIMESTAMP -t $DURATION -c:v libx264 -an -sn $OUTPUTSHOT_DIR/$OUTPUT
 
 
 done < $INPUT

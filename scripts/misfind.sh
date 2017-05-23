@@ -37,6 +37,7 @@ echo "List of Shots: $I1; Directory of Shots: $I2"
 OUTPUTFILE=$(dirname "$I2")/missing-shots.csv
 touch $OUTPUTFILE
 INPUT=$I1
+OLDIFS=$IFS
 
 counter=0
 IFS=","

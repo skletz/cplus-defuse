@@ -1,0 +1,1 @@
+bash  mergecsv.sh -i /I/TRECVid/prep/d1_videos-less-1sec.csv -i /I/TRECVid/prep/d2_videos-less-1sec.csv -i /I/TRECVid/prep/d3_videos-less-1sec.csv -i /I/TRECVid/prep/d4_videos-less-1sec.csv -o /I/TRECVid/prep/merged_videos-less-1sec.csv
