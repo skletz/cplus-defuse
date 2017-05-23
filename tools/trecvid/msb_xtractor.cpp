@@ -73,9 +73,6 @@ void showHelp(const po::options_description& desc)
 	exit(EXIT_SUCCESS);
 }
 
-
-MasterShotBoundaries completeShots;
-
 void processProgramOptions(const int argc, const char *const argv[])
 {
 	po::options_description desc("Allowed options");
@@ -257,7 +254,6 @@ VideoFileList processMSBoundaries(File* _collection, Directory* _msbs)
 				LOG_INFO(videolist.at(iFile).filename << "has no shots");
 			}
 
-			completeShots.insert(std::end(completeShots), std::begin(shots), std::end(shots));
 			videolist.at(iFile).msbs = shots;
 		}
 		is.close();
@@ -322,16 +318,32 @@ int main(int argc, char const *argv[]) {
 	delete msb;
 	float mult = 100.0f / float(sumShots);
 
-	LOG_INFO("In sum there are " << sumShots << " shots");
 	float lessThan30Frames = 0;
+	int totalCounts = 0;
 	for(int iCount = 0; iCount < 30; iCount++)
 	{
-		LOG_ERROR("Frames:\t " << iCount+1 << "\t" << counts[iCount] << "\t" << counts[iCount]*mult << "\t%frames");
+		LOG_INFO("Average frames per shot:"
+			<< "\t" << iCount+1 
+			<< "\t" << "Frames"
+			<< "\t" << counts[iCount] 
+			<< "\t" << counts[iCount]*mult 
+			<< "\t" << "%");
 		lessThan30Frames += (counts[iCount] * mult);
+		totalCounts += counts[iCount];
 	}
 
-	LOG_ERROR("Sum of shots less than 30 frames per shot:\t" << lessThan30Frames << "\t%frames");
-	LOG_ERROR("Sum of shots:\t" << completeShots.size());
+	LOG_INFO("Average sum with less than 30 frames per shot:"
+		<< "\t" << "<=30"
+		<< "\t\t" << lessThan30Frames 
+		<< "\t" << "%");
+
+	LOG_INFO("Sum of shots less than 30 frames per shot:"
+		<< "\t" << "<=30"
+		<< "\t"
+		<< "\t" << totalCounts);
+	LOG_INFO("Total sum of shots:"
+		<< "\t\t"
+		<< "\t" << sumShots);
 
 	return EXIT_SUCCESS;
 }
