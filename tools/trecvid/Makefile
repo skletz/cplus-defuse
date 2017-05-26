@@ -2,7 +2,7 @@
 # INPUT: path to opencv installation; DEFAULT /usr/local
 #
 
-PROJECT=MSBXtraction
+PROJECT=MSBConverter
 VERSION=1.0
 
 OS=Linux
@@ -52,7 +52,7 @@ info:
 	@echo "Include Directory: " $(INCDIR) "\n"
 	@echo "Linking: " $(LDLIBSOPTIONS) "\n"
 
-all: directories prog
+all: directories dependecnies prog
 
 directories:
 	mkdir -p $(TARGET)/$(BIN)
@@ -64,6 +64,10 @@ prog: $(OBJECTS)
 
 $(TARGET)/$(EXT)/%.o: $(SRC)/%.cpp
 	   $(CXX) $(CXXFLAGS) -fPIC -c $< -o $@ $(INCDIR)
+
+dependecnies:
+	$(MAKE) -t -C $(LOGGER)
+	$(MAKE) -t -C $(UTIL)
 
 clean:
 	rm -rf build

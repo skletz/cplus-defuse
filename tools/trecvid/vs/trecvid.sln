@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpluslogger", "..\..\..\lib
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cplusutil", "..\..\..\libs\cplusutil\vs\cplusutil.vcxproj", "{006D52F0-0ECC-43BF-B5DA-E2B9A38D9727}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "defuse", "..\..\..\defuse\vs\defuse.vcxproj", "{7A073147-48A8-44DE-9997-9D049FE510FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{006D52F0-0ECC-43BF-B5DA-E2B9A38D9727}.Release|x64.Build.0 = Release|x64
 		{006D52F0-0ECC-43BF-B5DA-E2B9A38D9727}.Release|x86.ActiveCfg = Release|Win32
 		{006D52F0-0ECC-43BF-B5DA-E2B9A38D9727}.Release|x86.Build.0 = Release|Win32
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Debug|x64.ActiveCfg = Debug|x64
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Debug|x64.Build.0 = Debug|x64
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Debug|x86.ActiveCfg = Debug|Win32
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Debug|x86.Build.0 = Debug|Win32
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Release|x64.ActiveCfg = Release|x64
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Release|x64.Build.0 = Release|x64
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Release|x86.ActiveCfg = Release|Win32
+		{7A073147-48A8-44DE-9997-9D049FE510FD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

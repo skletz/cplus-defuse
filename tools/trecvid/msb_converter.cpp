@@ -29,7 +29,7 @@
 #include <boost/tokenizer.hpp>
 #include <opencv2/opencv.hpp>
 
-static std::string prog = "MBSXtraction";
+static std::string prog = "MSBConverter";
 static std::string collectionFile = "";
 static std::string msbDirectory = "";
 static std::string outputDirectory = "";
@@ -153,7 +153,7 @@ VideoFileList readCollection (std::istream &is)
 
 		counter++;
 		cplusutil::Terminal::showProgress("Read in Video Files: ", counter, max);
-		
+
 	}
 	return ans;
 }
@@ -201,7 +201,7 @@ void writeIndex(std::fstream &fs, VideoFile &videoFile)
 	for (int iShot = 0; iShot < videoFile.msbs.size(); iShot++)
 	{
 		int diff = videoFile.msbs.at(iShot).end - videoFile.msbs.at(iShot).start;
-	
+
 		if (diff < 30)
 		{
 			counts[diff]++;
@@ -323,10 +323,10 @@ int main(int argc, char const *argv[]) {
 	for(int iCount = 0; iCount < 30; iCount++)
 	{
 		LOG_INFO("Average frames per shot:"
-			<< "\t" << iCount+1 
+			<< "\t" << iCount+1
 			<< "\t" << "Frames"
-			<< "\t" << counts[iCount] 
-			<< "\t" << counts[iCount]*mult 
+			<< "\t" << counts[iCount]
+			<< "\t" << counts[iCount]*mult
 			<< "\t" << "%");
 		lessThan30Frames += (counts[iCount] * mult);
 		totalCounts += counts[iCount];
@@ -334,7 +334,7 @@ int main(int argc, char const *argv[]) {
 
 	LOG_INFO("Average sum with less than 30 frames per shot:"
 		<< "\t" << "<=30"
-		<< "\t\t" << lessThan30Frames 
+		<< "\t\t" << lessThan30Frames
 		<< "\t" << "%");
 
 	LOG_INFO("Sum of shots less than 30 frames per shot:"
