@@ -1,7 +1,5 @@
 #ifndef _DEFUSE_FEATURES_HPP_
 #define _DEFUSE_FEATURES_HPP_
-#ifdef __cplusplus
-
 #include <cpluslogger.hpp>
 #include <vector>
 #include <opencv2/core/core.hpp>
@@ -12,33 +10,29 @@ namespace defuse {
 	{
 	public:
 
+		Features();
+
+		Features(std::string _filename);
+
+		Features(std::string _filename, cv::Mat _features);
+
+		~Features() {};
+
 		std::string mVideoFileName;
-
-		int mVideoID;
-
-		int mClazz;
-
-		std::vector<int> mFeatureFrameNrs;
-
-		int mStartFrameNr;
-
-		int mFrameCount;
 
 		cv::Mat mVectors;
 
 		float mExtractionTime;
 
 		void write(cv::FileStorage& fs) const;
+
 		void read(const cv::FileNode& node);
-		//virtual void readFloatArray(const std::string file) = 0;
 
-		Features() {};
-		~Features() {};
+		void writeBinary(std::string _file) const;
 
-		Features(std::string mVideoFileName, int _videoID, int _clazz, int _startFrameNr, int _frameCount);
+		void readBinary(std::string _file);
+
 	};
-
-
 
 	static void write(cv::FileStorage& fs, const std::string&, const std::vector<Features>& x)
 	{
@@ -65,5 +59,5 @@ namespace defuse {
 
 	
 }
-#endif
-#endif
+
+#endif //_DEFUSE_FEATURES_HPP_

@@ -1,6 +1,5 @@
 #ifndef _DEFUSE_VIDEOBASE_HPP_
 #define _DEFUSE_VIDEOBASE_HPP_
-#ifdef __cplusplus
 
 #include <cplusutil.hpp>
 
@@ -9,7 +8,22 @@ namespace defuse {
 	class VideoBase
 	{
 	public:
+
+		/**
+		 * \brief 
+		 */
 		File* mFile = nullptr;
+
+		/**
+		* \brief
+		*/
+		VideoBase(File* _file);
+
+		/**
+		* \brief
+		*/
+		~VideoBase() {};
+
 
 		std::string mVideoFileName;
 
@@ -19,7 +33,7 @@ namespace defuse {
 
 		int mClazz;
 
-	
+
 		VideoBase(File* _file, int _videoID, int _startFrameNumber, int _clazz)
 			: mFile(_file)
 		{
@@ -29,9 +43,6 @@ namespace defuse {
 			mClazz = _clazz;
 		}
 
-		~VideoBase();
 	};
-
 }
-#endif
-#endif
+#endif //_DEFUSE_VIDEOBASE_HPP_

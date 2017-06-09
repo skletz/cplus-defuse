@@ -1,93 +1,116 @@
-# Makefile
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#	Makefile for defuse (Dynamic Features)
+# @author skletz
+# @version 2.0, 08/06/17 change it to a content feature library
+# @version 1.0 01/05/17
+# -----------------------------------------------------------------------------
+# CMD Arguments:	os=win,linux (sets the operating system, default=linux)
+#									opencv=usr,opt (usr=/user/local/, opt=/opt/local/; default=usr)
+# -----------------------------------------------------------------------------
+# @TODO: Make for Windows (currently the option is only considered)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-TARGET=build
-BIN=bin
-LIB=lib
-#OpenCV, Boost Cplusutil, Cplulogger Directory, Header Files, Libraries
-LOGGER="./libs/cpluslogger"
-UTIL="./libs/cplusutil"
-#Staic Feature Signatures
-PCTSIGNATURES="./libs/opencv-pctsig"
-#Track-based Feature Signatures
-TFSIGNATURES="./libs/opencv-tfsig"
-CVHISTLIB="./libs/opencv-histlib"
-#Framework
-DEFUSEDIR="./defuse"
-XTRACTION="./tools/xtraction"
-VALUATION="./tools/valuation"
-DATAINFO="./tools/datainfo"
-DATACONST="./tools/dataconst"
-#.PHONY: all
+# Default command line arguments
+os = linux
+opencv = usr
 
-ARG1=OPENCV
-TEST := $(OPENCV)
-ifdef TEST
-TEST := $(OPENCV)
-VALUE1 = 1
-else
-TEST := /usr/local/
-VALUE1 = ``
+# Compiler, flags
+CXX=g++
+CXXFLAGS=-std=c++11 -m64
+
+# Output directory
+BUILD=builds
+BIN =	linux/bin
+LIB =	linux/lib
+EXT =	linux/ext
+
+# Project settings
+PROJECT=defuse
+VERSION=2.0
+
+SRC= $(PROJECT)/src
+SOURCES= $(wildcard $(SRC)/*.cpp)
+OBJECTS= $(patsubst $(SRC)/%.cpp,$(BUILD)/$(EXT)/%.o,$(SOURCES))
+
+TARGETSHARED = $(PROJECT).so.$(VERSION)
+TARGETSTATIC = $(PROJECT).$(VERSION).a
+
+# Default settings for opencv installation directory
+OPENCVDIR := /usr/local/
+INCDIR = `pkg-config --cflags opencv`
+LDLIBSOPTIONS_POST =`pkg-config --libs opencv`
+LDLIBSOPTIONS_POST += -L/usr/local/share/OpenCV/3rdparty/lib
+
+
+# operating system can be changed via command line argument
+ifeq ($(os),win)
+	BIN := win/bin
+	LIB := win/lib
+	EXT := win/ext
 endif
 
-info:
-	@echo "OpenCV Installation: " $(ARG1)=$(VALUE1) "\n"
+# opencv installation dir can be changed via command line argument
+ifeq ($(opencv),opt)
+	OPENCVDIR := /opt/local/
+	INCDIR = `pkg-config --cflags /opt/local/lib/pkgconfig/opencv.pc`
+	LDLIBSOPTIONS_POST =`pkg-config --libs /opt/local/lib/pkgconfig/opencv.pc`
+endif
 
+# OpenCV, Boost Cplusutil, Cplulogger Directory, Header Files, Libraries
+# Staic Feature Signatures
+PCTSIGNATURES="../opencv-pctsig"
+# Track-based Feature Signatures
+TFSIGNATURES="../opencv-tfsig"
+# Visualization of motion histogram
+CVHISTLIB="../opencv-histlib"
+UTIL="../cplusutil"
+LOGGER="../cpluslogger"
 
-all: directories logger util pctsignatures tfsignatuers histlib defusefw xtraction valuation datainfo dataconst
+LIBS="../../$(BUILD)/$(LIB)"
+
+LDLIBSOPTIONS += $(LIBS)/libcpluslogger.1.0.a
+LDLIBSOPTIONS += $(LIBS)/libcplusutil.1.0.a
+LDLIBSOPTIONS += $(LIBS)/libcvpctsig.1.0.a
+LDLIBSOPTIONS += $(LIBS)/libcvtfsig.1.0.a
+LDLIBSOPTIONS += $(LIBS)/libcvpctsig.1.0.a
+LDLIBSOPTIONS += $(LIBS)/libcvhistlib.1.0.a
+
+LDLIBSOPTIONS += -lboost_filesystem -lboost_system -lboost_serialization
+#IMPORTANT: Link sequence! - OpenCV libraries have to be added at the end
+LDLIBSOPTIONS += $(LDLIBSOPTIONS_POST)
+
+INCDIR+= -I./include
+INCDIR+= -I$(LOGGER)/cpluslogger/include
+INCDIR+= -I$(UTIL)/cplusutil/include
+INCDIR+= -I$(PCTSIGNATURES)/cvpctsig/include
+INCDIR+= -I$(TFSIGNATURES)/cvtfsig/include
+INCDIR+= -I$(CVHISTLIB)/include
+
+.PHONY: all
+
+all: directories prog static shared
 
 directories:
 	mkdir -p $(BUILD)/$(BIN)
 	mkdir -p $(BUILD)/$(LIB)
 	mkdir -p $(BUILD)/$(EXT)
 
-logger:
-	echo "CPLUSLogger: " $(LOGGER)
-	$(MAKE) -C $(LOGGER)/ all
+prog: $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(BUILD)/$(BIN)/prog$(PROJECT).$(VERSION) $(LDLIBSOPTIONS)
 
-util:
-	echo "CPLUSUtil: " $(UTIL)
-	$(MAKE) -C $(UTIL)/ all
+shared: $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(LDLIBSOPTIONS) -Wall -shared -Wl,-soname, $(BUILD)/$(EXT)/*.o -o $(BUILD)/$(LIB)/lib$(TARGETSHARED)
 
-pctsignatures:
-	echo "Position-Color-Texture Signatures: " $(PCTSIGNATURES)
-	$(MAKE) -C $(PCTSIGNATURES)/ $(ARG1)=$(VALUE1) all
+$(BUILD)/$(EXT)/%.o: $(SRC)/%.cpp
+	   $(CXX) $(CXXFLAGS) -fPIC -c $< -o $@ $(INCDIR)
 
-tfsignatuers:
-	echo "Track-based Signatures: " $(TFSIGNATURES)
-	$(MAKE) -C $(TFSIGNATURES)/ $(ARG1)=$(VALUE1) all
-
-histlib:
-	echo "OpenCV-HistLib: " $(CVHISTLIB)
-	$(MAKE) -C $(CVHISTLIB)/ $(ARG1)=$(VALUE1) all
-
-defusefw:
-	echo "DeFUSE: " $(DEFUSE)
-	$(MAKE) -C $(DEFUSEDIR)/ $(ARG1)=$(VALUE1) all
-
-xtraction:
-	echo "DeXtraction: " $(XTRACTION)
-	$(MAKE) -C $(XTRACTION)/ $(ARG1)=$(VALUE1) all
-
-valuation:
-	echo "DeValuation: " $(VALUATION)
-	$(MAKE) -C $(VALUATION)/ $(ARG1)=$(VALUE1) all
-
-datainfo:
-	echo "DATAInfo: " $(DATAINFO)
-	$(MAKE) -C $(DATAINFO)/ $(ARG1)=$(VALUE1) all
-
-dataconst:
-	echo "DATAConstruction: " $(DATACONST)
-	$(MAKE) -C $(DATACONST)/ $(ARG1)=$(VALUE1) all
+static: $(OBJECTS)
+	ar -rv $(BUILD)/$(LIB)/lib$(TARGETSTATIC) $(OBJECTS)
 
 clean:
-	$(MAKE) -C $(LOGGER)/ clean
-	$(MAKE) -C $(UTIL)/ clean
-	$(MAKE) -C $(PCTSIGNATURES)/ clean
-	$(MAKE) -C $(TFSIGNATURES)/ clean
-	$(MAKE) -C $(CVHISTLIB)/ clean
-	$(MAKE) -C $(DEFUSEDIR)/ clean
-	$(MAKE) -C $(XTRACTION)/ clean
-	$(MAKE) -C $(VALUATION)/ clean
-	$(MAKE) -C $(DATAINFO)/ clean
-	$(MAKE) -C $(DATACONST)/ clean
+	rm -rf $(BUILD)
+
+info:
+	@echo "OpenCV Installation: " $(OPENCVDIR) "\n"
+	@echo "OpenCV Header Include Directory: " $(INCDIR) "\n"
+	@echo "OpenCV Linking: " $(LDLIBSOPTIONS) "\n"
