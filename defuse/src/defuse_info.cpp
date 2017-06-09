@@ -9,7 +9,7 @@
 #include "dfs1xtractor.hpp"
 #include "dfs1parameter.hpp"
 
-// DeFUSE (Version 1.0) *******************************
+// DeFUSE (Version 2.0) *******************************
 // ****************************************************
 //        _    _      ()_()
 //       | |  | |    |(o o)
@@ -19,12 +19,12 @@
 //   |___/_|\_\_|\___|\__/___|
 //
 // ****************************************************
-
+// DeFUSE (Dynamic Features) is a library for
+// content-based video retrieval evaluation
+// ****************************************************
 
 using namespace std;
 using namespace defuse;
-static int descriptortype = 0;
-static Parameter* paramter = new DFS1Parameter();
 
 int main(int argc, char* argv[])
 {
@@ -33,24 +33,10 @@ int main(int argc, char* argv[])
 	LOG_INFO("cpluslogger rocks ...");
 	std::cout << "cplusutil toString(100) =" << cplusutil::String::toStirng(100) << "rocks ..." << std::endl;
 	std::cout << "Using Boost "
-		<< BOOST_VERSION / 100000 << "."  // major version
+		<< BOOST_VERSION / 100000 << "."			// major version
 		<< BOOST_VERSION / 100 % 1000 << "."  // minor version
 		<< BOOST_VERSION % 100                // patch level
 		<< std::endl;
 	std::cout << "The OpenCV Version is " << CV_VERSION << std::endl;
-
-
-  Xtractor* xtractor = nullptr;
-
-	if (descriptortype == 0)
-	{
-		xtractor = new DFS1Xtractor(paramter);
-
-	}
-	else
-	{
-		LOG_FATAL("Extraction Method not implemented " << descriptortype);
-	}
-
 	return 0;
 }

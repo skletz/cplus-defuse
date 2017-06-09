@@ -29,7 +29,7 @@ namespace defuse {
 
 	public:
 
-		SamplePoints(int samplesCnt = 10);
+		SamplePoints(int _samplesCnt = 10, Distribution _distribution = RANDOM);
 
 		void initSamplePoints(Distribution distribution, int samplesCnt);
 

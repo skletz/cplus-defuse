@@ -1,8 +1,6 @@
 #ifndef _DEFUSE_FEATURESIGNATURES_HPP_
 #define _DEFUSE_FEATURESIGNATURES_HPP_
 
-#ifdef __cplusplus
-
 #include <cplusutil.hpp>
 #include <cpluslogger.hpp>
 #include <opencv2/opencv.hpp>
@@ -16,35 +14,39 @@ namespace defuse {
 	public:
 
 		/**
-		*	cv::Mat featureData of FeatureSignatures inheritent from AbstractFeature
-		*
-		*	| X       	| Y       	| L       	| A       	| B       	| CONTRAST 	| ENTROPY 	| WEIGHT  	|
-		*	|---------	|---------	|---------	|---------	|---------	|----------	|---------	|---------	|
-		*	| 0.0-1.0 	| 0.0-1.0 	| 0.0-1.0 	| 0.0-1.0 	| 0.0-1.0 	| 0.0-1.0  	| 0.0-1.0 	| 0.0-1.0 	|
-		*
-		*/
+		 * \brief Default Constructor
+		 */
+		FeatureSignatures();
 
-		enum IDX_BASE { X, Y, L, A, B, CONTRAST, ENTROPY, WEIGHT };
 
-		std::string mVideoFileName;
+		/**
+		 * \brief 
+		 * \param _filename 
+		 */
+		FeatureSignatures(std::string _filename);
 
-		int mVideoID;
+		/**
+		 * \brief 
+		 * \param _filename 
+		 * \param _features 
+		 */
+		FeatureSignatures(std::string _filename, cv::Mat _features);
 
-		int mClazz; //Need for evaluations, is the same clazz like in segments
-
-		unsigned int mStartFrameNr;
-
-		unsigned int mFrameCount;
-
-		cv::Mat mVectors;
-
-		FeatureSignatures(std::string mVideoFileName, int _videoID, int _clazz, unsigned int _startFrameNr, unsigned int _frameCount);
-
-		FeatureSignatures() {};
-
+		/**
+		 * \brief 
+		 */
 		~FeatureSignatures() {};
 
+		/**
+		 * \brief 
+		 * \param fs 
+		 */
 		void write(cv::FileStorage& fs) const;
+
+		/**
+		 * \brief 
+		 * \param node 
+		 */
 		void read(const cv::FileNode& node);
 	};
 
@@ -72,5 +74,4 @@ namespace defuse {
 		x.read(node);
 	}
 }
-#endif
 #endif

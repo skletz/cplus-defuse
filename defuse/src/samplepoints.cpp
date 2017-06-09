@@ -2,10 +2,10 @@
 
 #include <cpluslogger.hpp>
 
-defuse::SamplePoints::SamplePoints(int samplesCnt)
+defuse::SamplePoints::SamplePoints(int _samplesCnt, Distribution _distribution)
 {
-	mSampleCnt = samplesCnt;
-	initSamplePoints(RANDOM, mSampleCnt);
+	mSampleCnt = _samplesCnt;
+	initSamplePoints(_distribution, mSampleCnt);
 	//std::stringstream ss;
 	//ss << "samplepoints_" << distributionToString.at(mDistribution) << "_" << mSampleCnt << ".yml";
 	mSamplePointDirPath = cplusutil::FileIO::getCurrentWorkingDirectory();

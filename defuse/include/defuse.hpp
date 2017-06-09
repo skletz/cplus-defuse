@@ -1,6 +1,5 @@
 #ifndef _DEFUSE_DEFUSE_HPP_
 #define _DEFUSE_DEFUSE_HPP_
-#ifdef __cplusplus
 
 #include "../src/videobase.hpp"
 #include "../src/features.hpp"
@@ -13,6 +12,7 @@
 #include "../src/sfs1xtractor.hpp"
 #include "../src/dfs1xtractor.hpp"
 #include "../src/dfs2xtractor.hpp"
+#include "../src/dysigxtractor.hpp"
 #include "../src/mohist1xtractor.hpp"
 #include "../src/featuresignatures.hpp"
 #include "../src/motionhistogram.hpp"
@@ -28,6 +28,6 @@
 #include "../src/mahalanobis1.hpp"
 #include "../src/mahalanobis1parameter.hpp"
 #include "../src/cnnfeatures.hpp"
+#include "../src/samplepoints.hpp"
 
-#endif
 #endif
