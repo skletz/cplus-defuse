@@ -1,4 +1,4 @@
-#include "DYSIGXtractor.hpp"
+#include "dysigxtractor.hpp"
 #include <cpluslogger.hpp>
 #include <cvpctsig.h>
 
