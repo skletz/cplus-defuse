@@ -107,7 +107,7 @@ std::string defuse::DYSIGXtractor::get() const
 {
 	std::stringstream st;
 
-	st << "Dynamic Signatures\n";
+	st << "xtractor: dynamic signatures, \n";
 	st << "frameSelection: ";
 
 	if (mFrameSelection == FrameSelection::FramesPerVideo)
@@ -119,23 +119,23 @@ std::string defuse::DYSIGXtractor::get() const
 		st << "FramesPerSecond";
 	}
 
-	st << "; ";
+	st << ", \n";
 	st << "maxFrames: ";
-	st << mMaxFrames << "; ";
+	st << mMaxFrames << ", \n";
 	st << "resetTracking: ";
-	st << mResetTracking << "; ";
+	st << mResetTracking << ", \n";
 	st << "initSeeds: ";
-	st << mInitSeeds << "; ";
+	st << mInitSeeds << ", \n";
 	st << "initialCentroids: ";
-	st << mMaxClusters << "; ";
+	st << mMaxClusters << ", \n";
 	st << "iterations: ";
-	st << mIterations << "; ";
+	st << mIterations << ", \n";
 	st << "minClusterSize: ";
-	st << mMinimalClusterSize << "; ";
+	st << mMinimalClusterSize << ", \n";
 	st << "minDistance: ";
-	st << mMinimalDistance << "; ";
+	st << mMinimalDistance << ", \n";
 	st << "dropThreshold: ";
-	st << mClusterDropThreshold << "; ";
+	st << mClusterDropThreshold << ", \n";
 	st << "distribution: ";
 
 	if (mDistribution == SamplePoints::Distribution::RANDOM)
@@ -146,9 +146,9 @@ std::string defuse::DYSIGXtractor::get() const
 	{
 		st << "regular";
 	}
-	st << "; ";
+	st << ", \n";
 	st << "grayscaleBits: ";
-	st << mGrayscaleBits << "; ";
+	st << mGrayscaleBits << ", \n";
 	st << "windowRadius: ";
 	st << mWindowRadius;
 
@@ -518,8 +518,6 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 		}
 		for (int iFrame = 0; iFrame < limit; iFrame = iFrame + interval)
 		{
-			cplusutil::Terminal::showProgress("DySig Extraction", iFrame + 1, limit);
-
 			//Vectors of samplepoints
 			cv::Mat samples;
 			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
@@ -638,6 +636,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			prevGrayFrame = grayFrame.clone();
 			prevPoints = std::vector<cv::Point2f>(initPoints);
 
+			cplusutil::Terminal::showProgress("Dynamic Signature Xtraction", iFrame, numframes);
 		}
 
 		getTemporalSamples(tsamples, signatures);
