@@ -518,6 +518,8 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 		}
 		for (int iFrame = 0; iFrame < limit; iFrame = iFrame + interval)
 		{
+			
+
 			//Vectors of samplepoints
 			cv::Mat samples;
 			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
@@ -528,6 +530,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			_video.retrieve(frame);
 
 			if (frame.empty()) continue;
+			cplusutil::Terminal::showProgress("Dynamic Signature Xtraction", iFrame + 1, numframes);
 
 			//convert the frame to grayscale
 			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
@@ -636,7 +639,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			prevGrayFrame = grayFrame.clone();
 			prevPoints = std::vector<cv::Point2f>(initPoints);
 
-			cplusutil::Terminal::showProgress("Dynamic Signature Xtraction", iFrame, numframes);
+			
 		}
 
 		getTemporalSamples(tsamples, signatures);
