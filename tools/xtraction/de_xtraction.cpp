@@ -14,8 +14,8 @@
  *	-arg2: Type of Input
  *		0 = Path to a specific video file
  *		1 = Path to a directory of video files*
- *	-arg3: Path to the output directory ..\\data\\features
-  *	-arg2: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4
+ *	-arg3: Path to a directory of video segments ..\\data\\segments OR to a specific video file ..\\data\\segments\\1\\test.mp4
+ *	-arg4: Path to the output directory ..\\data\\features
  *	-arg5: Type of Descriptor <INT>
  *		0 = static feature signatures (variant 1)
  *		1 = dynamic feature signatures (variant 1) //trajectories

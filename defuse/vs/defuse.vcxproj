@@ -122,6 +122,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\libs\opencv-histlib\vs\cvhistlib.vcxproj">
+      <Project>{9458fec4-63d2-463b-9d58-1e2a47a03c2d}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\libs\opencv-pctsig\vs\cvpctsig.vcxproj">
       <Project>{8605a2f8-7ac4-4610-9f44-66e40e60e9f0}</Project>
     </ProjectReference>
