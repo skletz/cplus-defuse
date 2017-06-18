@@ -2,7 +2,6 @@
 #define _DEFUSE_DYSIGXTRACTOR_HPP_
 
 #include "features.hpp"
-#include "parameter.hpp"
 #include "videobase.hpp"
 #include "xtractor.hpp"
 #include "samplepoints.hpp"
@@ -14,6 +13,8 @@ namespace defuse {
 	class DYSIGXtractor : public Xtractor
 	{
 	public:
+
+		std::string mName = "Dynamic Signature Xtractor";
 
 		enum  class IDX { X = 0, Y, L, A, B, C, E, MD, WEIGHT, DIMS };
 		
@@ -105,9 +106,24 @@ namespace defuse {
 		 */
 		Features* xtract(VideoBase* _videobase) override;
 
-		std::string get() const;
+		/**
+		 * \brief 
+		 * \return 
+		 */
+		std::string toString() const;
 
-		std::string getFilename() const;
+		/**
+		 * \brief 
+		 * \return 
+		 */
+		std::string getXtractorID() const;
+
+		/**
+		 * \brief 
+		 * \param _step 
+		 * \param _total 
+		 */
+		void showProgress(int _step, int _total) const;
 		
 
 	private:

@@ -86,7 +86,7 @@ defuse::Features* defuse::DYSIGXtractor::xtract(VideoBase* _videobase)
 
 	if (!stream.isOpened())
 	{
-		LOG_FATAL("Fatal error: Video File does not exists." << _videobase->mFile->getFile());
+		LOG_FATAL("Error: Video Stream cannot be opened: " << _videobase->mFile->getFile());
 	}
 
 	cv::Mat vectors;
@@ -103,11 +103,11 @@ defuse::Features* defuse::DYSIGXtractor::xtract(VideoBase* _videobase)
 	return features;
 }
 
-std::string defuse::DYSIGXtractor::get() const
+std::string defuse::DYSIGXtractor::toString() const
 {
 	std::stringstream st;
 
-	st << "xtractor: dynamic signatures, \n";
+	st << "xtractor: dynamic signatures, ";
 	st << "frameSelection: ";
 
 	if (mFrameSelection == FrameSelection::FramesPerVideo)
@@ -119,23 +119,23 @@ std::string defuse::DYSIGXtractor::get() const
 		st << "FramesPerSecond";
 	}
 
-	st << ", \n";
+	st << ", ";
 	st << "maxFrames: ";
-	st << mMaxFrames << ", \n";
+	st << mMaxFrames << ", ";
 	st << "resetTracking: ";
-	st << mResetTracking << ", \n";
+	st << mResetTracking << ", ";
 	st << "initSeeds: ";
-	st << mInitSeeds << ", \n";
+	st << mInitSeeds << ", ";
 	st << "initialCentroids: ";
-	st << mMaxClusters << ", \n";
+	st << mMaxClusters << ", ";
 	st << "iterations: ";
-	st << mIterations << ", \n";
+	st << mIterations << ", ";
 	st << "minClusterSize: ";
-	st << mMinimalClusterSize << ", \n";
+	st << mMinimalClusterSize << ", ";
 	st << "minDistance: ";
-	st << mMinimalDistance << ", \n";
+	st << mMinimalDistance << ", ";
 	st << "dropThreshold: ";
-	st << mClusterDropThreshold << ", \n";
+	st << mClusterDropThreshold << ", ";
 	st << "distribution: ";
 
 	if (mDistribution == SamplePoints::Distribution::RANDOM)
@@ -146,16 +146,16 @@ std::string defuse::DYSIGXtractor::get() const
 	{
 		st << "regular";
 	}
-	st << ", \n";
+	st << ", ";
 	st << "grayscaleBits: ";
-	st << mGrayscaleBits << ", \n";
+	st << mGrayscaleBits << ", ";
 	st << "windowRadius: ";
 	st << mWindowRadius;
 
 	return st.str();
 }
 
-std::string defuse::DYSIGXtractor::getFilename() const
+std::string defuse::DYSIGXtractor::getXtractorID() const
 {
 	std::stringstream st;
 
@@ -175,7 +175,7 @@ std::string defuse::DYSIGXtractor::getFilename() const
 
 
 	st << "_";
-	if (mResetTracking == 1)
+	if (mResetTracking)
 	{
 		st << "true";
 	}
@@ -213,6 +213,11 @@ std::string defuse::DYSIGXtractor::getFilename() const
 	st << mWindowRadius;
 
 	return st.str();
+}
+
+void defuse::DYSIGXtractor::showProgress(int _step, int _total) const
+{
+	cplusutil::Terminal::showProgress(mName + " ", _step + 1, _total);
 }
 
 void defuse::DYSIGXtractor::getSamples(cv::Mat& frame, std::vector<cv::Point2f> points, cv::Mat& out) const
@@ -469,7 +474,6 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 {
 	cv::Mat signatures;
 	int numframes = static_cast<int>(_video.get(CV_CAP_PROP_FRAME_COUNT));
-
 	int numberOfFramesPerShot = mMaxFrames;
 
 	//the shot has fewer frames than should be used
@@ -518,8 +522,6 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 		}
 		for (int iFrame = 0; iFrame < limit; iFrame = iFrame + interval)
 		{
-			
-
 			//Vectors of samplepoints
 			cv::Mat samples;
 			samples.create(mSamplepoints->getSampleCnt(), as_integer(IDX::DIMS), CV_32F);
@@ -530,12 +532,11 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			_video.retrieve(frame);
 
 			if (frame.empty()) continue;
-			cplusutil::Terminal::showProgress("Dynamic Signature Xtraction", iFrame + 1, numframes);
 
 			//convert the frame to grayscale
 			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-			if (mResetTracking)
+			if (!mResetTracking)
 			{
 				if (prevPoints.size() != currPoints.size())
 					prevPoints = currPoints;
@@ -639,7 +640,6 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			prevGrayFrame = grayFrame.clone();
 			prevPoints = std::vector<cv::Point2f>(initPoints);
 
-			
 		}
 
 		getTemporalSamples(tsamples, signatures);
@@ -685,7 +685,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			//convert the frame to grayscale
 			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-			if (mResetTracking)
+			if (!mResetTracking)
 			{
 				if (prevPoints.size() != currPoints.size())
 					prevPoints = currPoints;
@@ -812,7 +812,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 			//convert the frame to grayscale
 			cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-			if (mResetTracking)
+			if (!mResetTracking)
 			{
 				if (prevPoints.size() != currPoints.size())
 					prevPoints = currPoints;
@@ -829,7 +829,7 @@ void defuse::DYSIGXtractor::computeSignatures(cv::VideoCapture& _video, cv::Outp
 				//Indicates wheter the flow for the corresponding features has been found
 				std::vector<uchar> statusVector;
 				statusVector.resize(currPoints.size());
-				//IndimVariantcates the error for the corresponding feature
+				//Indicates the error for the corresponding feature
 				std::vector<float> errorVector;
 				errorVector.resize(currPoints.size());
 
