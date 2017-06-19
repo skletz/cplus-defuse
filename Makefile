@@ -58,21 +58,20 @@ endif
 
 # OpenCV, Boost Cplusutil, Cplulogger Directory, Header Files, Libraries
 # Staic Feature Signatures
-PCTSIGNATURES="../opencv-pctsig"
+PCTSIGNATURES=../opencv-pctsig
 # Track-based Feature Signatures
-TFSIGNATURES="../opencv-tfsig"
+TFSIGNATURES=../opencv-tfsig
 # Visualization of motion histogram
 CVHISTLIB="../opencv-histlib"
-UTIL="../cplusutil"
-LOGGER="../cpluslogger"
+UTIL=../cplusutil
+LOGGER=../cpluslogger
 
-LIBS="../../$(BUILD)/$(LIB)"
+LIBS=../../$(BUILD)/$(LIB)
 
 LDLIBSOPTIONS += $(LIBS)/libcpluslogger.1.0.a
 LDLIBSOPTIONS += $(LIBS)/libcplusutil.1.0.a
 LDLIBSOPTIONS += $(LIBS)/libcvpctsig.1.0.a
 LDLIBSOPTIONS += $(LIBS)/libcvtfsig.1.0.a
-LDLIBSOPTIONS += $(LIBS)/libcvpctsig.1.0.a
 LDLIBSOPTIONS += $(LIBS)/libcvhistlib.1.0.a
 
 LDLIBSOPTIONS += -lboost_filesystem -lboost_system -lboost_serialization
