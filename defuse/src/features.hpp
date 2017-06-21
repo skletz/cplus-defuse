@@ -34,6 +34,10 @@ namespace defuse {
 
 		void readBinary(std::string _file);
 
+		void writeText(std::string _file) const;
+
+		void readText(std::string _file);
+
 	};
 
 	static void write(cv::FileStorage& fs, const std::string&, const std::vector<Features>& x)

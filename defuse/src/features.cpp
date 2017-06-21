@@ -2,6 +2,8 @@
 #include <fstream>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 defuse::Features::Features(std::string _filename)
 {
@@ -77,6 +79,54 @@ void defuse::Features::readBinary(std::string _file)
 	std::ifstream instream(_file, std::ios::binary | std::ios::in);
 
 	boost::archive::binary_iarchive ia(instream);
+
+	cv::Mat vectors;
+	int cols, rows, type;
+	bool continuous;
+
+	ia & cols & rows & type & continuous;
+
+	vectors.create(rows, cols, type);
+
+	const unsigned int row_size = cols*vectors.elemSize();
+	for (int i = 0; i < rows; i++) {
+		ia & boost::serialization::make_array(vectors.ptr(i), row_size);
+	}
+
+	mVectors = vectors;
+}
+
+void defuse::Features::writeText(std::string _file) const
+{
+	std::ofstream outstream(_file, std::ios_base::out);
+	outstream.close();
+	outstream.open(_file, std::ios::out);
+
+	boost::archive::text_oarchive oa(outstream);
+
+	int cols, rows, type;
+	cols = mVectors.cols; rows = mVectors.rows; type = mVectors.type();
+	bool continuous = mVectors.isContinuous();
+
+	oa & cols & rows & type & continuous;
+
+	if (continuous) {
+		const unsigned int data_size = rows * cols * mVectors.elemSize();
+		oa & boost::serialization::make_array(mVectors.ptr(), data_size);
+	}
+	else {
+		const unsigned int row_size = cols*mVectors.elemSize();
+		for (int i = 0; i < rows; i++) {
+			oa & boost::serialization::make_array(mVectors.ptr(i), row_size);
+		}
+	}
+}
+
+void defuse::Features::readText(std::string _file)
+{
+	std::ifstream instream(_file, std::ios::in);
+
+	boost::archive::text_iarchive ia(instream);
 
 	cv::Mat vectors;
 	int cols, rows, type;
