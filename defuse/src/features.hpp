@@ -16,6 +16,8 @@ namespace defuse {
 
 		Features(std::string _filename, cv::Mat _features);
 
+		Features(cv::Mat _features);
+
 		~Features() {};
 
 		std::string mVideoFileName;

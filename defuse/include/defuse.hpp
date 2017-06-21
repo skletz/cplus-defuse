@@ -29,5 +29,4 @@
 #include "../src/mahalanobis1parameter.hpp"
 #include "../src/cnnfeatures.hpp"
 #include "../src/samplepoints.hpp"
-
 #endif

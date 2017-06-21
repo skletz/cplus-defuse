@@ -16,8 +16,19 @@ defuse::Features::Features(std::string _filename, cv::Mat _features)
 	mExtractionTime = 0.0;
 }
 
+defuse::Features::Features(cv::Mat _features)
+{
+	mVideoFileName = "";
+	mVectors = _features;
+	mExtractionTime = 0.0;
+}
+
 defuse::Features::Features()
 {
+	mVideoFileName = "";
+
+	mVectors = cv::Mat();
+
 	mExtractionTime = 0.0;
 }
 

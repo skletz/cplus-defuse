@@ -15,15 +15,14 @@ namespace defuse {
 
 		int mVideoID;
 
-		int mClazz;
+		int mQueryID;
 
-		unsigned int mStartFrameNumber;
-
-		unsigned int mFrameCount;
+		int mShotID;
 
 		float mAPValue;
 
-		float mSearchtime;
+		float mAvgSearchtime;
+
 		EvaluatedQuery() {};
 	};
 }

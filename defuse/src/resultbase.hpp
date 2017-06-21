@@ -13,13 +13,13 @@ namespace defuse {
 
 		int mVideoID;
 
-		int mClazz;
+		int mQueryID;
 
-		unsigned int mStartFrameNumber;
-
-		unsigned int mFrameCount;
+		int mShotID;
 
 		float mDistance;
+
+		double mSearchTime;
 
 		float mPrecision;
 
