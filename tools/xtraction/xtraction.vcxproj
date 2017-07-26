@@ -109,7 +109,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\defuse\libs\opencv-histlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -126,10 +125,10 @@
     <ProjectReference Include="..\..\defuse\defuse.vcxproj">
       <Project>{7a073147-48a8-44de-9997-9d049fe510fd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\cpluslogger\cpluslogger.vcxproj">
+    <ProjectReference Include="..\..\libs\cpluslogger\vs\cpluslogger.vcxproj">
       <Project>{8da23bf9-79ea-47f0-92b8-6538241ef7e8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\cplusutil\cplusutil.vcxproj">
+    <ProjectReference Include="..\..\libs\cplusutil\vs\cplusutil.vcxproj">
       <Project>{006d52f0-0ecc-43bf-b5da-e2b9a38d9727}</Project>
     </ProjectReference>
   </ItemGroup>

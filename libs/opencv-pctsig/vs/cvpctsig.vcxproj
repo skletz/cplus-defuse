@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B55BBFF9-D992-4F4A-AF6C-766BC1559E62}</ProjectGuid>
-    <RootNamespace>valuation</RootNamespace>
+    <ProjectGuid>{8605A2F8-7AC4-4610-9F44-66E40E60E9F0}</ProjectGuid>
+    <RootNamespace>cvpctsig</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -63,11 +63,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\defuse_ocv31_x64_d.props" />
+    <Import Project="..\..\libs_x64.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\defuse_ocv31_x64.props" />
+    <Import Project="..\..\libs_x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -83,7 +83,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\libs\opencv-histlib\include;..\..\defuse\include;..\..\libs\cplusutil\build\include;..\..\libs\cpluslogger\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,18 +112,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\defuse\defuse.vcxproj">
-      <Project>{7a073147-48a8-44de-9997-9d049fe510fd}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\libs\cpluslogger\vs\cpluslogger.vcxproj">
-      <Project>{8da23bf9-79ea-47f0-92b8-6538241ef7e8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\libs\cplusutil\vs\cplusutil.vcxproj">
-      <Project>{006d52f0-0ecc-43bf-b5da-e2b9a38d9727}</Project>
-    </ProjectReference>
+    <ClInclude Include="..\cvpctsig\include\cvpctsig.h" />
+    <ClInclude Include="..\cvpctsig\include\signatures.h" />
+    <ClInclude Include="..\cvpctsig\src\constants.hpp" />
+    <ClInclude Include="..\cvpctsig\src\distance.hpp" />
+    <ClInclude Include="..\cvpctsig\src\grayscale_bitmap.hpp" />
+    <ClInclude Include="..\cvpctsig\src\pct_clusterizer.hpp" />
+    <ClInclude Include="..\cvpctsig\src\pct_sampler.hpp" />
+    <ClInclude Include="..\cvpctsig\src\pct_signatures.hpp" />
+    <ClInclude Include="..\cvpctsig\src\similarity.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="de_valuation.cpp" />
+    <ClCompile Include="..\cvpctsig\src\grayscale_bitmap.cpp" />
+    <ClCompile Include="..\cvpctsig\src\main.cpp" />
+    <ClCompile Include="..\cvpctsig\src\pct_clusterizer.cpp" />
+    <ClCompile Include="..\cvpctsig\src\pct_sampler.cpp" />
+    <ClCompile Include="..\cvpctsig\src\pct_signatures.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
